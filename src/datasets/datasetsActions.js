@@ -1,8 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { merge } from 'lodash';
-import { 
-  fetchUsafactsCountiesDataset,
-} from './datasetsUtils';
+import { fetchUsafactsCountiesDataset } from './datasetsUtils';
 
 // action for fetching usafacts county-level data
 // note these are two files that need to be merged
@@ -31,7 +29,7 @@ const fetchUsafactsCounties = createAsyncThunk(
 // action for fetching all datasets
 const fetchDatasets = createAsyncThunk(
   'datasets/fetchDatasets',
-  async (arg, thunkApi) => {
+  async (_, thunkApi) => {
     return Promise.all([
       thunkApi.dispatch(fetchUsafactsCounties()),
     ]);
