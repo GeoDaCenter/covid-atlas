@@ -1,6 +1,8 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { updateSelectedCounty } from './appSlice';
 import styles from './MapPanel.module.css';
 
 // xun's account
@@ -34,6 +36,15 @@ class MapPanel extends React.Component {
         'fill-outline-color': '#333',
       },
     });
+
+    map.on('click', 'counties', (e) => {
+      const [ feature ] = e.features;
+
+      // get the county's "geoid" (concatenation of state fips and county fips)
+      const countyId = feature.properties.GEOID;
+
+      this.props.updateSelectedCounty(countyId);
+    });
   }
 
   componentDidMount() {
@@ -56,4 +67,11 @@ class MapPanel extends React.Component {
   }
 }
 
-export default MapPanel;
+const mapDispatchToProps = {
+  updateSelectedCounty,
+};
+
+export default connect(
+  null, 
+  mapDispatchToProps,
+)(MapPanel);
