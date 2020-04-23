@@ -26,31 +26,44 @@ export async function fetchUsafactsCountiesDataset(options) {
  *  }
  * }
 */
-export function tidyUsafactsCounties(counties, countType) {
+export function tidyUsafactsCounties(counties = [], countType) {
   const countiesTidied = {};
 
-  counties.forEach((county) => {
-    const {
-      // these aren't used, just assigned to plucked off the snapshots spread
-      'County Name': countyName,
-      State,
-      stateFIPS,
-      // these are used
-      countyFIPS: fips,
-      ...caseSnapshots
-    } = county;
-    const snapshots = {};
+  // make sure we have at least one county
+  if (counties.length === 0) {
+    return countiesTidied;
+  }
 
-    // convert dates (m-d-yy) to iso dates
-    Object.keys(caseSnapshots).forEach((caseSnapshotDateStr) => {
-      const caseSnapshotDate = new Date(Date.parse(caseSnapshotDateStr));
-      const caseSnapshotDateIso = caseSnapshotDate.toISOString();
-      snapshots[caseSnapshotDateIso] = {
-        [countType]: caseSnapshots[caseSnapshotDateStr],
+  // cache dates
+  const firstCounty = counties[0];
+  const countyKeys = Object.keys(firstCounty);
+  const snapshotDates = countyKeys.filter((countyKey) => {
+    return countyKey.match(/\d+\/\d+\/\d+/);
+  });
+
+  // cache a map of dates => iso dates
+  const snapshotDatesIso = snapshotDates.reduce((acc, snapshotDate) => {
+    const snapshotDateObj = new Date(Date.parse(snapshotDate));
+    const snapshotDateIso = snapshotDateObj.toISOString();
+    acc[snapshotDate] = snapshotDateIso;
+    
+    return acc;
+  }, {});
+
+  counties.forEach((county) => {
+    const fips = county.countyFIPS;
+
+    const snapshotsTidied = {};
+
+    snapshotDates.forEach((snapshotDate) => {
+      const snapshotDateIso = snapshotDatesIso[snapshotDate];
+
+      snapshotsTidied[snapshotDateIso] = {
+        [countType]: county[snapshotDate],
       };
     });
 
-    countiesTidied[fips] = snapshots;
+    countiesTidied[fips] = snapshotsTidied;
   });
 
   return countiesTidied;
