@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './DataPanel.module.css';
 
-export function DataPanel() {
+const DataPanel = (props) => {
   return (
     <div className={styles.panel}>
       <header className={styles.header}>
@@ -13,3 +13,4 @@ export function DataPanel() {
     </div>
   );
 }
+export default DataPanel;

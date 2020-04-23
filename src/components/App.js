@@ -1,7 +1,7 @@
 import React from 'react';
-import { ControlPanel } from './ControlPanel';
-import { MapPanel } from './MapPanel';
-import { DataPanel } from './DataPanel';
+import ControlPanel from './ControlPanel';
+import MapPanel from './MapPanel';
+import DataPanel from './DataPanel';
 import './App.css';
 
 function App() {

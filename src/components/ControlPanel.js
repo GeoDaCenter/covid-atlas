@@ -4,7 +4,7 @@ import { faChevronLeft, faShieldVirus } from '@fortawesome/free-solid-svg-icons'
 import styles from './ControlPanel.module.css';
 import { Form } from 'react-bootstrap'
 
-export function ControlPanel() {
+export default function ControlPanel() {
   return (
     <div className={styles.panel}>
       <div className={styles.minimizeButtonContainer}>

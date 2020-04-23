@@ -56,4 +56,4 @@ class MapPanel extends React.Component {
   }
 }
 
-export { MapPanel };
+export default MapPanel;
