@@ -1,10 +1,28 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { merge } from 'lodash';
-import { fetchUsafactsCountiesDataset } from './datasetsUtils';
+import {
+  fetchUsafactsCountiesDataset,
+  tidyStatesAndCounties,
+} from './datasetsUtils';
+
+export const fetchStatesAndCounties = createAsyncThunk(
+  'datasets/fetchStatesAndCounties',
+  async () => {
+    // fetch
+    const url = 'https://geodacenter.github.io/covid/county_usfacts.geojson';
+    const response = await fetch(url);
+    const data = await response.json();
+
+    // "tidy" (this is really a bigger operation of normalizing and indexing)
+    const statesAndCountiesTidied = tidyStatesAndCounties(data);
+
+    return statesAndCountiesTidied;
+  },
+);
 
 // action for fetching usafacts county-level data
 // note these are two files that need to be merged
-const fetchUsafactsCounties = createAsyncThunk(
+export const fetchUsafactsCounties = createAsyncThunk(
   'datasets/fetchUsafactsCounties',
   async () => {
     // fetch and tidy cases and deaths in parallel
@@ -27,16 +45,17 @@ const fetchUsafactsCounties = createAsyncThunk(
 );
 
 // action for fetching all datasets
-const fetchDatasets = createAsyncThunk(
+export const fetchDatasets = createAsyncThunk(
   'datasets/fetchDatasets',
   async (_, thunkApi) => {
-    return Promise.all([
-      thunkApi.dispatch(fetchUsafactsCounties()),
-    ]);
+    const actionCreators = [
+      fetchStatesAndCounties,
+      fetchUsafactsCounties,
+    ];
+    const dispatches = actionCreators.map((actionCreator) => {
+      return thunkApi.dispatch(actionCreator());
+    });
+
+    return Promise.all(dispatches);
   },
 );
-
-export {
-  fetchUsafactsCounties,
-  fetchDatasets,
-};

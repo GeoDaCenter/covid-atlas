@@ -1,5 +1,44 @@
 import papaparse from 'papaparse';
 
+// util to normalize and index states and counties data
+// TODO use normalizr?
+export function tidyStatesAndCounties(data) {
+  const { features } = data;
+
+  // normalize
+  const states = {};
+  const counties = {};
+
+  features.forEach((feature) => {
+    const { properties } = feature;
+
+    // handle state
+    const stateId = properties.STATEFP;
+
+    if (!states.hasOwnProperty(stateId)) {
+      states[stateId] = {
+        id: stateId,
+        name: properties.state_name,
+        abbrevation: properties.state_abbr,
+      }
+    }
+
+    // handle county
+    const countyId = properties.GEOID;
+
+    counties[countyId] = {
+      id: countyId,
+      fips: properties.COUNTYFP,
+      name: properties.NAME,
+      stateId: properties.STATEFP,
+      population: properties.population,
+      beds: properties.beds,
+    };
+  });
+
+  return { states, counties };
+}
+
 export async function fetchUsafactsCountiesDataset(options) {
   const { url, countType } = options;
 
