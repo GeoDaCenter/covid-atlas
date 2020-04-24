@@ -19,7 +19,9 @@ const DataPanel = (props) => {
         </p>
       </header>
 
-      <p>Data goes here</p>
+      <p><b>Population:</b> {props.population}<br />
+      <b>Hospital Beds:</b> {props.beds}</p>
+
     </div>
   );
 };
@@ -29,14 +31,18 @@ const mapStateToProps = (state) => {
 
   let stateName;
   let countyName;
+  let population; 
+  let beds;
 
   if (selectedCounty) {
     // get state name
     const { states, counties } = state.datasets['states-and-counties'].data;
+    const selectedCountySnapshots = state.datasets['usafacts-counties'].data[parseInt(selectedCounty)];
     const selectedCountyAttrs = counties[selectedCounty];
     const { stateId } = selectedCountyAttrs;
     stateName = states[stateId].name;
-
+    population = selectedCountyAttrs.population;
+    beds = selectedCountyAttrs.beds;
     // get county name
     countyName = selectedCountyAttrs.name;
   }
@@ -44,7 +50,9 @@ const mapStateToProps = (state) => {
   return {
     selectedCounty,
     countyName,
-    stateName
+    stateName,
+    population,
+    beds
   };
 };
 
