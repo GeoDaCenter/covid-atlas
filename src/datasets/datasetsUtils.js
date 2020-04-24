@@ -83,6 +83,8 @@ export function tidyUsafactsCounties(counties = [], countType) {
   // cache a map of dates => iso dates
   const snapshotDatesIso = snapshotDates.reduce((acc, snapshotDate) => {
     const snapshotDateObj = new Date(Date.parse(snapshotDate));
+    // clear out time zone
+    snapshotDateObj.setUTCHours(0, 0, 0, 0);
     const snapshotDateIso = snapshotDateObj.toISOString();
     acc[snapshotDate] = snapshotDateIso;
     

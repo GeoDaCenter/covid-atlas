@@ -99,7 +99,7 @@ const mapStateToProps = (state) => {
     // get county name
     countyName = selectedCountyAttrs.name;
     // date hardcoded for now until we add slider
-    const recentSnapshot = selectedCountySnapshots['2020-04-22T07:00:00.000Z'];
+    const recentSnapshot = selectedCountySnapshots['2020-04-22T00:00:00.000Z'];
     totalDeaths = recentSnapshot.deaths;
     totalCases = recentSnapshot.cases;
   }
