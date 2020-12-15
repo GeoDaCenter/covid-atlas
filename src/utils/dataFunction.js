@@ -41,11 +41,29 @@ const dataFn = (numeratorData, denominatorData, dataParams)  => {
   const { 
     nProperty, nIndex, nRange,
     dProperty, dIndex, dRange, 
+    nType, dType,
     scale
   } = dataParams;
 
   if (numeratorData === undefined) {
     return 0;
+  } else if (nType ==='time-series' && dType === 'time-series') {
+    if (nRange === null & dRange === null) {
+      return (
+        (numeratorData[nIndex])
+        /
+        (denominatorData[dIndex])
+        *scale   
+      )
+
+    } else {
+      return (
+        ((numeratorData[nIndex]-numeratorData[nIndex-nRange])/nRange)
+        /
+        ((denominatorData[dIndex]-denominatorData[dIndex-dRange])/dRange)
+        *scale   
+      )
+    }
   } else if (dProperty===null&&nRange===null){ // whole count or number -- no range, no normalization
     return (numeratorData[nProperty]||numeratorData[nIndex])*scale
   } else if (dProperty===null&&nRange!==null){ // range number, daily or weekly count -- no normalization
@@ -56,12 +74,13 @@ const dataFn = (numeratorData, denominatorData, dataParams)  => {
     return (
       (numeratorData[nIndex]-numeratorData[nIndex-nRange])/nRange)/(denominatorData[dProperty]||denominatorData[dIndex]
         )*scale
-  } else if (dProperty!==null&&nRange!==null&&dRange!==null){ // range number, daily or weekly count, normalized to a range number, daily or weekly count
-    return (
-      (numeratorData[nIndex]-numeratorData[nIndex-nRange])/nRange)
-      /
-      ((denominatorData[dIndex]-denominatorData[dIndex-nRange])/nRange)
-      *scale
+  // } else if (dProperty!==null&&nRange!==null&&dRange!==null){ // range number, daily or weekly count, normalized to a range number, daily or weekly count
+  //   console.log('getting the right col')
+  //   return (
+  //     (numeratorData[nIndex]-numeratorData[nIndex-nRange])/nRange)
+  //     /
+  //     ((denominatorData[dIndex]-denominatorData[dIndex-dIndex])/dIndex)
+  //     *scale
   } else {      
     return 0;
   }

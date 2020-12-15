@@ -2,6 +2,7 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import BinsList from './binsList';
 import { setMapParams } from '../actions';
 
 const LegendContainer = styled.div`
@@ -68,17 +69,6 @@ const Legend =  () => {
     const dataParams = useSelector(state => state.dataParams)
     const title = useSelector(state => state.currentVariable)
 
-    const cleanBins = (bins) => {
-        if (bins === undefined) {
-            return;
-        } else if (bins.slice(-1,)[0] !==`>${bins.slice(-2,-1)[0]}`) {
-            return bins
-        }
-        bins.splice(0, 1, `<${bins[0]}`)
-        bins.splice(-2, 1)
-        return bins
-    }
-
     return (
         <LegendContainer>
             <Grid container spacing={2} id='legend-bins-container'>
@@ -99,8 +89,9 @@ const Legend =  () => {
 
                         {
                             mapParams.bins.bins !== undefined && 
-                            cleanBins(mapParams.bins.bins).map(label => <div className="bin label" key={label}>{label}</div>)
+                            <BinsList data={mapParams.bins.bins} />
                         }
+                        
                     </BinLabels>
                 </Grid>
             </Grid>

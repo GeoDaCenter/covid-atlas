@@ -1,6 +1,6 @@
 body {
-  background:none;
-    font-family: 'Lato', sans-serif;
+  background:rgb(20,20,20);
+  font-family: 'Lato', sans-serif;
 }
 
 div#view-default-view, div#view-MapView {
@@ -114,4 +114,7 @@ body {
 
 .mapboxgl-ctrl-top-right .mapboxgl-ctrl {
   margin:7px 7px 0 0;
+}
+.mapboxgl-ctrl-top-right {
+  position: fixed !important;
 }

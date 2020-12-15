@@ -204,7 +204,7 @@ const VariablePanel = (props) => {
 
   const dispatch = useDispatch();    
 
-  const { cols, currentData, currentVariable,
+  const { cols, currentData, currentVariable, dataParams,
     mapParams, panelState, urlParams, storedMobilityData } = useSelector(state => state);
 
   const PresetVariables = {
@@ -214,7 +214,7 @@ const VariablePanel = (props) => {
         nType: 'time-series',
         nProperty: null,
         denominator: 'properties',
-        dType: 'none',
+        dType: null,
         dProperty: null,
         dRange:null,
         dIndex:null,
@@ -251,7 +251,7 @@ const VariablePanel = (props) => {
       nType: 'time-series',
       nProperty: null,
       denominator: 'properties',
-      dType: 'none',
+      dType: null,
       dProperty: null,
       dRange:null,
       dIndex:null,
@@ -289,7 +289,7 @@ const VariablePanel = (props) => {
       nProperty: colLookup(cols, currentData, 'chr_health_factors', 'UnInPrc'),
       nRange: null,
       denominator: 'properties',
-      dType: 'none',
+      dType: null,
       dProperty: null,
       dRange:null,
       dIndex:null,
@@ -304,7 +304,7 @@ const VariablePanel = (props) => {
       nProperty: colLookup(cols, currentData, 'chr_health_context', 'Over65YearsPrc'),
       nRange: null,
       denominator: 'properties',
-      dType: 'none',
+      dType: null,
       dProperty: null,
       dRange:null,
       dIndex:null,
@@ -318,7 +318,7 @@ const VariablePanel = (props) => {
       nProperty: colLookup(cols, currentData, 'chr_life', 'LfExpRt'),
       nRange: null,
       denominator: 'properties',
-      dType: 'none',
+      dType: null,
       dProperty: null,
       dRange:null,
       dIndex:null,
@@ -336,7 +336,7 @@ const VariablePanel = (props) => {
       nProperty: colLookup(cols, currentData, 'predictions', 'severity_index'),
       nRange: null,
       denominator: 'properties',
-      dType: 'none',
+      dType: null,
       dProperty: null,
       dRange:null,
       dIndex:null,
@@ -351,11 +351,11 @@ const VariablePanel = (props) => {
     "HEADER:testing":{},
     "7 Day Testing Positivity Rate %": {
       numerator: 'testing_wk_pos',
-      nType: 'time-series',
+      nType: 'characteristic',
       nProperty: null,
       nRange: null,
       denominator: 'properties',
-      dType: 'none',
+      dType: null,
       dProperty: null,
       dRange:null,
       dIndex:null,
@@ -366,11 +366,11 @@ const VariablePanel = (props) => {
     },
     "7 Day Testing Capacity": {
       numerator: 'testing_tcap',
-      nType: 'time-series',
+      nType: 'characteristic',
       nProperty: null,
       nRange: null,
       denominator: 'properties',
-      dType: 'none',
+      dType: null,
       dProperty: null,
       dRange:null,
       dIndex:null,
@@ -381,11 +381,11 @@ const VariablePanel = (props) => {
     }, 
     "7 Day Confirmed Cases per Testing %":{
       numerator: 'testing_ccpt',
-      nType: 'time-series',
+      nType: 'characteristic',
       nProperty: null,
       nRange: null,
       denominator: 'properties',
-      dType: 'none',
+      dType: null,
       dProperty: null,
       dRange:null,
       dIndex:null,
@@ -402,15 +402,15 @@ const VariablePanel = (props) => {
       }}})
   },[])
 
-  // useEffect(() => {
-  //   if (mapParams.overlay === "mobility-county" && storedMobilityData === {}) {
-  //     getGzipAndCentroids(
-  //       `${process.env.PUBLIC_URL}/gz/county_lex_2020-11-28.csv.gz`,
-  //       `${process.env.PUBLIC_URL}/csv/county_centroids.csv`
-  //     )
-  //     console.log('loaded mobility data')
-  //   }
-  // },[mapParams.overlay])
+  useEffect(() => {
+    if (mapParams.overlay === "mobility-county" && storedMobilityData === {}) {
+      getGzipAndCentroids(
+        `${process.env.PUBLIC_URL}/gz/county_lex_2020-11-28.csv.gz`,
+        `${process.env.PUBLIC_URL}/csv/county_centroids.csv`
+      )
+      console.log('loaded mobility data')
+    }
+  },[mapParams.overlay])
 
   const handleVariable = (event) => {
     let variable = event.target.value;
@@ -426,6 +426,8 @@ const VariablePanel = (props) => {
     //     ...tempParams
     //   }
     // }))
+    if (dataParams.nType === 'characteristic' && tempParams.nType === 'time-series') tempParams.nRange = 7;
+
     dispatch(setVariableName(variable))
     dispatch(setMapParams({customScale: tempParams.colorScale || '', fixedScale: tempParams.fixedScale || null}))
     dispatch(setVariableParams({...tempParams}))

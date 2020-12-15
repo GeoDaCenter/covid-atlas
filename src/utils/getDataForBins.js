@@ -1,36 +1,7 @@
+import dataFn from './dataFunction';
 // this function loops through the current data set and provides data for GeodaJS to create custom breaks 
 const getDataForBins = (tableData, dataParams) => {
 
-    const dataFn = (numeratorData, denominatorData, dataParams)  => {
-        const { 
-          nProperty, nIndex, nRange,
-          dProperty, dIndex, dRange, 
-          scale
-        } = dataParams;
-      
-        if (numeratorData === undefined) {
-          return 0;
-        } else if (dProperty===null&&nRange===null){ // whole count or number -- no range, no normalization
-          return (numeratorData[nProperty]||numeratorData[nIndex])*scale
-        } else if (dProperty===null&&nRange!==null){ // range number, daily or weekly count -- no normalization
-          return (numeratorData[nIndex]-numeratorData[nIndex-nRange])/nRange*scale
-        } else if (dProperty!==null&&nRange===null){ // whole count or number normalized -- no range
-          return (numeratorData[nProperty]||numeratorData[nIndex])/(denominatorData[dProperty]||denominatorData[dIndex])*scale
-        } else if (dProperty!==null&&nRange!==null&&dRange===null){ // range number, daily or weekly count, normalized to a single value
-          return (
-            (numeratorData[nIndex]-numeratorData[nIndex-nRange])/nRange)/(denominatorData[dProperty]||denominatorData[dIndex]
-              )*scale
-        } else if (dProperty!==null&&nRange!==null&&dRange!==null){ // range number, daily or weekly count, normalized to a range number, daily or weekly count
-          return (
-            (numeratorData[nIndex]-numeratorData[nIndex-nRange])/nRange)
-            /
-            ((denominatorData[dIndex]-denominatorData[dIndex-nRange])/nRange)
-            *scale
-        } else {      
-          return 0;
-        }
-    }
-      
     const { numerator, nType, nProperty, nIndex, nRange, denominator, dType, 
         dProperty, dIndex, dRange, scale} = dataParams;
 

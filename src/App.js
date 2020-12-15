@@ -40,10 +40,10 @@ import { colorScales, fixedScales, dataPresets,
 
 function App() {
   // static variables for floating panel sizing
-  let [ defaultX, defaultY, defaultWidth, defaultHeight,
+  let [ defaultX, defaultY, defaultWidth, defaultWidthLong, defaultHeight,
     minHeight, minWidth] = window.innerWidth <= 1024 ? 
-    [window.innerWidth*.05, window.innerHeight*.35, window.innerWidth*.8, window.innerHeight*.4, window.innerHeight*.2, window.innerWidth*.5] : 
-    [window.innerWidth-400, window.innerHeight-400, 300, 300, 300, 300]
+    [window.innerWidth*.05, window.innerHeight*.35, window.innerWidth*.8, window.innerWidth*.8, window.innerHeight*.4, window.innerHeight*.2, window.innerWidth*.5] : 
+    [window.innerWidth-100, window.innerHeight-100, 300, 450, 300, 300, 300]
 
 
   // These selectors access different pieces of the store. While App mainly
@@ -347,8 +347,8 @@ function App() {
         <NotificationBox />
         
         <Draggable 
-          defaultX={defaultX}
-          defaultY={defaultY}
+          defaultX={defaultX-defaultWidth}
+          defaultY={defaultY-defaultHeight}
           title="tutorial"
           content={
           <Scaleable 
@@ -363,8 +363,8 @@ function App() {
             minWidth={minWidth} />
         }/>
         <Draggable 
-          defaultX={defaultX}
-          defaultY={defaultY}
+          defaultX={defaultX-defaultWidthLong}
+          defaultY={defaultY-defaultHeight}
           title="lineChart"
           content={
           <Scaleable 
@@ -372,7 +372,7 @@ function App() {
               <MainLineChart />
             } 
             title="lineChart"
-            defaultWidth={defaultWidth}
+            defaultWidth={defaultWidthLong}
             defaultHeight={defaultHeight}
             minHeight={minHeight}
             minWidth={minWidth} />

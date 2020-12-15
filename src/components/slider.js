@@ -198,13 +198,14 @@ const EndDate = styled(InitialDate)`
 `
 const DateSlider = () => {
     const dispatch = useDispatch();  
-    
+
     const currentData = useSelector(state => state.currentData);
     const dates = useSelector(state => state.dates);
     const currDate = useSelector(state => state.currDate);
     const dataParams = useSelector(state => state.dataParams);
     const startDateIndex = useSelector(state => state.startDateIndex);
-    const mapParams = useSelector(state => state.mapParams)
+    const mapParams = useSelector(state => state.mapParams);
+    const currentVariable = useSelector(state => state.currentVariable);
     
     const [timerId, setTimerId] = useState(null);
     const [customRange, setCustomRange] = useState(false);
@@ -217,7 +218,9 @@ const DateSlider = () => {
             dispatch(setVariableParams({nIndex: newValue}))
         } else if (dataParams.dType === "time-series") {
             dispatch(setVariableParams({dIndex: newValue}))
-        } 
+        } else if (currentVariable.includes('Testing')){
+            dispatch(setVariableParams({nIndex: newValue}))
+        }
         dispatch(setDate(dates[currentData][newValue]));
     };
 
@@ -304,8 +307,8 @@ const DateSlider = () => {
 
     if (dates[currentData] !== undefined) {
         return (
-            <SliderContainer style={{display: (dataParams.nType === 'time-series' ? 'initial' : 'none')}}>
-                <Grid container spacing={2} style={{display:'flex'}}>
+            <SliderContainer style={{display: ((dataParams.nType === 'time-series' || currentVariable.includes('Testing')) ? 'initial' : 'none')}}>
+                <Grid container spacing={2} style={{display:'flex', padding: currentVariable.includes('Testing') ? '0 0 20px 0' : '0'}}>
                     {!customRange && <DateTitle>{formatDate(dates[currentData][dataParams.nIndex-startDateIndex])}</DateTitle>}
                     <Grid item xs={1}>
                         <PlayPauseButton id="playPause" onClick={() => handlePlayPause(timerId, 1, 100)}>
@@ -369,34 +372,39 @@ const DateSlider = () => {
                             max={startDateIndex+dates[currentData].length-1}
                         />}
                     </Grid>
-                    <Grid item xs={6} id="dateRangeSelector" style={{transform:'translateX(25%)'}}>
-                        <StyledDropDownNoLabel>
-                            <InputLabel htmlFor="date-select">Date Range</InputLabel>
-                            <Select  
-                                id="date-select"
-                                value={rangeSelectVal}
-                                onChange={handleRangeButton}
-                                displayEmpty
-                                inputProps={{ 'aria-label': 'Without label' }}
-                            >
-                                <MenuItem value={null} key={'cumulative'}>Cumulative</MenuItem>
-                                <MenuItem value={1} key={'daily'}>New Daily</MenuItem>
-                                <MenuItem value={7} key={'weekly'}>Weekly Average</MenuItem>
-                                <MenuItem value={'custom'} key={'customRange'}>Custom Range</MenuItem>
-                            </Select>
-                        </StyledDropDownNoLabel>
-                    </Grid>
-                    <SwitchContainer item xs={6} 
-                        style={{display: (dataParams.nType === 'time-series' ? 'initial' : 'none'), float:'right', transform:'translate(25%, 5px)'}}
-                        id="binModeSwitch"
-                    >
-                        <Switch
-                            checked={mapParams.binMode === 'dynamic'}
-                            onChange={handleSwitch}
-                            name="bin chart switch"
-                        />
-                        <p>{mapParams.binMode === 'dynamic' ? 'Dynamic Bins' : 'Fixed Bins'}</p>
-                    </SwitchContainer>
+                    {dataParams.nType !== 'characteristic' &&
+                        <Grid item xs={6} id="dateRangeSelector" style={{transform:'translateX(25%)'}}>
+                            <StyledDropDownNoLabel>
+                                <InputLabel htmlFor="date-select">Date Range</InputLabel>
+                                <Select  
+                                    id="date-select"
+                                    value={rangeSelectVal}
+                                    onChange={handleRangeButton}
+                                    displayEmpty
+                                    inputProps={{ 'aria-label': 'Without label' }}
+                                >
+                                    <MenuItem value={null} key={'cumulative'}>Cumulative</MenuItem>
+                                    <MenuItem value={1} key={'daily'}>New Daily</MenuItem>
+                                    <MenuItem value={7} key={'weekly'}>Weekly Average</MenuItem>
+                                    <MenuItem value={'custom'} key={'customRange'}>Custom Range</MenuItem>
+                                </Select>
+                            </StyledDropDownNoLabel>
+                        </Grid>
+                    }
+                    
+                    {dataParams.nType !== 'characteristic' &&
+                        <SwitchContainer item xs={6} 
+                            style={{float:'right', transform:'translate(25%, 5px)'}}
+                            id="binModeSwitch"
+                        >
+                            <Switch
+                                checked={mapParams.binMode === 'dynamic'}
+                                onChange={handleSwitch}
+                                name="bin chart switch"
+                            />
+                            <p>{mapParams.binMode === 'dynamic' ? 'Dynamic Bins' : 'Fixed Bins'}</p>
+                        </SwitchContainer>
+                    }
                     {!customRange && <InitialDate>{dates[currentData][0]}</InitialDate>}
                     {!customRange && <EndDate>{dates[currentData][dates[currentData].length-1]}</EndDate>}
                 </Grid>

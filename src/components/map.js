@@ -8,8 +8,8 @@ import DeckGL from '@deck.gl/react';
 import {MapView, _GlobeView as GlobeView, FlyToInterpolator} from '@deck.gl/core';
 import { GeoJsonLayer, PolygonLayer, ScatterplotLayer,  IconLayer, TextLayer, LineLayer } from '@deck.gl/layers';
 import {fitBounds} from '@math.gl/web-mercator';
-// import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-// import {IcoSphereGeometry} from '@luma.gl/engine';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {IcoSphereGeometry} from '@luma.gl/engine';
 
 import ReactMapGL, {NavigationControl, GeolocateControl } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder'
@@ -20,9 +20,9 @@ import { setDataSidebar, setMapParams, setMapLoaded, setPanelState, setChartData
 import { mapFn, dataFn, getVarId, getCSV, getCartogramCenter, getDataForCharts, parseMobilityData, getURLParams } from '../utils';
 import MAP_STYLE from '../config/style.json';
 
-// const cartoGeom = new IcoSphereGeometry({
-//   iterations: 1
-// });
+const cartoGeom = new IcoSphereGeometry({
+  iterations: 1
+});
 const bounds = fitBounds({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -39,11 +39,11 @@ const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoibGl4dW45MTAiLCJhIjoiY2locXMxcWFqMDAwenQ0
 const defaultMapStyle = fromJS(MAP_STYLE);
 
 const MapContainer = styled.div`
-    position:fixed;
+    position:absolute;
     left:0;
     top:0;
     width:100%;
-    height:100%;
+    height:calc(100% - 50px);
     background:#1a1a1a;
     @media (max-width:600px) {
         div.mapboxgl-ctrl-geocoder {
@@ -418,10 +418,11 @@ const Map = () => {
             pickable: false,
             stroked: true,
             filled:false,
-            getLineColor: f => (highlightGeog === f.properties.GEOID ? [255,255,255] : [255,255,255,0]), 
-            lineWidthScale: 10,
-            getLineWidth: 1,
-            lineWidthMinPixels: 2,
+            getLineColor: f => (highlightGeog === f.properties.GEOID ? [20,20,20] : [20,20,20,0]), 
+            lineWidthScale: 500,
+            getLineWidth: 5,
+            lineWidthMinPixels: 3,
+            lineWidthMaxPixels: 10,
             updateTriggers: {
                 data: currentData,
                 getLineColor: highlightGeog,
@@ -508,56 +509,56 @@ const Map = () => {
                 visible: mapParams.vizType
             }
         }),
-        new ScatterplotLayer({
-            id: 'cartogram layer',
-            data: cartogramData,
-            pickable:true,
-            visible: mapParams.vizType === 'cartogram',
-            getPosition: f => {
-                try {
-                    return storedCartogramData[currVarId][f.id].position;
-                } catch {
-                    return [0,0];
-                }
-            },
-            getFillColor: f => {
-                try {
-                    return getCartogramFillColor(storedCartogramData[currVarId][f.id].value, f.id, mapParams.bins, mapParams.mapType);
-                } catch {
-                    return [0,0,0];
-                }
-            },
-            getRadius: f => {
-                try {
-                    return storedCartogramData[currVarId][f.id].radius*10;
-                } catch {
-                    return 0;
-                }
-            },
-            // transitions: {
-            //     getPosition: 1,
-            //     getFillColor: 1,
-            //     getRadius: 1
-            // },   
-            onHover: f => {
-                try {
-                    setHoverInfo(
-                        {
-                            ...f,
-                            object: find(storedData[currentData], o => o.properties.GEOID === storedGeojson[currentData]['indexOrder'][f.object?.id]),
-                        }
-                    )
-                } catch {
-                    setHoverInfo(null)
-                }
-            },
-            updateTriggers: {
-                getPosition: [cartogramData, mapParams, dataParams, currVarId],
-                getFillColor: [cartogramData, mapParams, dataParams, currVarId],
-                getRadius: [cartogramData, mapParams, dataParams, currVarId],
-                visible: [cartogramData, mapParams, dataParams, currVarId]
-            }
-          }),
+        // new ScatterplotLayer({
+        //     id: 'cartogram layer',
+        //     data: cartogramData,
+        //     pickable:true,
+        //     visible: mapParams.vizType === 'cartogram',
+        //     getPosition: f => {
+        //         try {
+        //             return storedCartogramData[currVarId][f.id].position;
+        //         } catch {
+        //             return [0,0];
+        //         }
+        //     },
+        //     getFillColor: f => {
+        //         try {
+        //             return getCartogramFillColor(storedCartogramData[currVarId][f.id].value, f.id, mapParams.bins, mapParams.mapType);
+        //         } catch {
+        //             return [0,0,0];
+        //         }
+        //     },
+        //     getRadius: f => {
+        //         try {
+        //             return storedCartogramData[currVarId][f.id].radius*10;
+        //         } catch {
+        //             return 0;
+        //         }
+        //     },
+        //     // transitions: {
+        //     //     getPosition: 1,
+        //     //     getFillColor: 1,
+        //     //     getRadius: 1
+        //     // },   
+        //     onHover: f => {
+        //         try {
+        //             setHoverInfo(
+        //                 {
+        //                     ...f,
+        //                     object: find(storedData[currentData], o => o.properties.GEOID === storedGeojson[currentData]['indexOrder'][f.object?.id]),
+        //                 }
+        //             )
+        //         } catch {
+        //             setHoverInfo(null)
+        //         }
+        //     },
+        //     updateTriggers: {
+        //         getPosition: [cartogramData, mapParams, dataParams, currVarId],
+        //         getFillColor: [cartogramData, mapParams, dataParams, currVarId],
+        //         getRadius: [cartogramData, mapParams, dataParams, currVarId],
+        //         visible: [cartogramData, mapParams, dataParams, currVarId]
+        //     }
+        //   }),
           new TextLayer({
             id: 'cartogram text layer',
             data: cartogramData,
@@ -599,30 +600,36 @@ const Map = () => {
                 visible: [cartogramData, mapParams, dataParams, currVarId]
             }
           }),
-        // new SimpleMeshLayer({
-        //     id: 'cartogram layer',
-        //     data: cartogramData,
-        //     // texture: 'texture.png',
-        //     sizeScale:10,
-        //     visible: mapParams.vizType === 'cartogram',
-        //     mesh: cartoGeom,
-        //     getPosition:f => getCartogramPosition(storedCartogramData[currVarId][f.id]),
-        //     getColor: f => getCartogramFillColor(storedCartogramData[currVarId][f.id].value, mapParams.bins, mapParams.mapType),
-        //     getScale: f => getCartogramScale(storedCartogramData[currVarId][f.id]),
-        //     // getTranslation: f => getCartogramTranslation(storedCartogramData[currVarId][f.id]),
-        //     transitions: {
-        //         getPosition: 150,
-        //         getColor: 150,
-        //         getScale: 150,
-        //         getTranslation: 150
-        //     },   
-        //     updateTriggers: {
-        //         getPosition: [mapParams, dataParams, currVarId],
-        //         getColor: [mapParams, dataParams, currVarId],
-        //         getScale: [mapParams, dataParams, currVarId],
-        //         getTranslation: [mapParams, dataParams, currVarId]
-        //     }
-        //   })
+        new SimpleMeshLayer({
+            id: 'cartogram layer',
+            data: cartogramData,
+            // texture: 'texture.png',
+            sizeScale:10,
+            visible: mapParams.vizType === 'cartogram',
+            mesh: cartoGeom,
+            getPosition: f => {
+                try {
+                    return storedCartogramData[currVarId][f.id].position;
+                } catch {
+                    return [0,0];
+                }
+            },
+            getColor: f => getCartogramFillColor(storedCartogramData[currVarId][f.id].value, mapParams.bins, mapParams.mapType),
+            getScale: f => 500,
+            // getTranslation: f => getCartogramTranslation(storedCartogramData[currVarId][f.id]),
+            transitions: {
+                getPosition: 150,
+                getColor: 150,
+                getScale: 150,
+                getTranslation: 150
+            },   
+            updateTriggers: {
+                getPosition: [mapParams, dataParams, currVarId],
+                getColor: [mapParams, dataParams, currVarId],
+                getScale: [mapParams, dataParams, currVarId],
+                getTranslation: [mapParams, dataParams, currVarId]
+            }
+          })
     ]
 
     const handlePanelButton = (panel) => panelState[panel] ? dispatch(setPanelState({[panel]: false})) : dispatch(setPanelState({[panel]: true}))
@@ -675,9 +682,8 @@ const Map = () => {
                     mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
                     position="top-right"
                     id="mapGeocoder"
-                    style={{transform:'translateY(-5px)'}}
+                    style={{position: 'fixed', top:'5px', right:'5px'}}
                     />
-                    <NavBarBacking />
                         
                     <MapButtonContainer infoPanel={panelState.info}>
                         {/* <NavInlineButton
