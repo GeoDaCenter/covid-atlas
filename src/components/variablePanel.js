@@ -538,7 +538,7 @@ const VariablePanel = (props) => {
             <MenuItem value={'county_1p3a.geojson'} key={'county_1p3a.geojson'}>1point3acres (County)</MenuItem>
           <ListSubheader disabled>state data</ListSubheader>
             <MenuItem value={'state_usafacts.geojson'} key={'state_usafacts.geojson'}>USA Facts (State)</MenuItem>
-            <MenuItem value={'state_nyt.geojson'} key={'state_nyt.geojson'} disabled>New York Times (State)</MenuItem>
+            <MenuItem value={'state_nyt.geojson'} key={'state_nyt.geojson'}>New York Times (State)</MenuItem>
           </Select>
         </StyledDropDown>
         <br />

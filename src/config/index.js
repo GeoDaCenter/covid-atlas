@@ -146,6 +146,14 @@ export const dataPresets = {
         joinCols: ['GEOID', ['FIPS','fips','stateFIPS']], 
         tableNames: ['cases', 'deaths', 'chr_health_context', 'chr_life', 'chr_health_factors', 'testing', 'testing_wk_pos', 'testing_tcap', 'testing_ccpt'],
         accumulate: []
+    },
+    'state_nyt.geojson': {
+        plainName: 'New York Times State',
+        geojson: 'state_nyt.geojson', 
+        csvs: ['covid_confirmed_nyt_state','covid_deaths_nyt_state', 'chr_health_context_state', 'chr_life_state', 'chr_health_factors_state', 'covid_testing_usafacts_state', 'covid_wk_pos_usafacts_state', 'covid_tcap_usafacts_state', 'covid_ccpt_usafacts_state'], 
+        joinCols: ['GEOID', ['FIPS','fips','countyFIPS']], 
+        tableNames: ['cases', 'deaths', 'chr_health_context', 'chr_life', 'chr_health_factors', 'testing', 'testing_wk_pos', 'testing_tcap', 'testing_ccpt'],
+        accumulate: []
     } 
 }
 
