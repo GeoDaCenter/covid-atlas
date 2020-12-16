@@ -41,35 +41,32 @@ const VariablePanelContainer = styled.div`
     width:100%;
     display: ${props => props.otherPanels ? 'none' : 'initial'};
   }
-  p.note {
+  div.noteContainer {
     position: absolute;
-    top:73vh;
-    left:0px;
+    bottom:0;
+    left:0;
     padding:20px;
     box-sizing:border-box;
     background:#2b2b2b;
     width:calc(100%);
+    box-shadow: 0px -5px 10px rgba(0,0,0,0.25);
+    a {  
+      color: #FFCE00;
+      -webkit-text-decoration: none;
+      text-decoration: none;
+      }
+    }
+  }
+  p.note {
     font-family: 'Lato', sans-serif;
     font-weight:300;
     font-size:90%;
-    box-shadow: 0px -5px 10px rgba(0,0,0,0.25);
-    a {
-      color:#FFCE00;
-      text-decoration: none;
-    }
-    @media (max-height:900px){
-      bottom:20px;
-    }
   }
   div.poweredByGeoda {
-    position: absolute;
-    bottom: 20px;
     color:white;
     width:100%;
     text-align:center;
     @media (max-height:900px){
-      bottom:10px;
-      right:10px;
     }
     a {
       color:white;
@@ -172,17 +169,18 @@ const TwoUp = styled.div`
 
 const ControlsContainer = styled.div`
   max-height:74vh;
-  padding:20px;
   overflow-y:visible;
   box-sizing:border-box;
-  @media (max-height:1080px){
+  padding:20px;
+
+  @media (max-height:1079px){
     overflow-y:scroll;
-    padding-bottom:40px;
+    padding:20px 20px 25vh 20px;
   }
   
   @media (max-width:600px) {
     width:100%;
-    padding:0 10px;
+    padding:0 10px 25vh 10px;
   }
 `
 
@@ -539,6 +537,9 @@ const VariablePanel = (props) => {
           <ListSubheader disabled>state data</ListSubheader>
             <MenuItem value={'state_usafacts.geojson'} key={'state_usafacts.geojson'}>USA Facts (State)</MenuItem>
             <MenuItem value={'state_nyt.geojson'} key={'state_nyt.geojson'}>New York Times (State)</MenuItem>
+          {/* <ListSubheader disabled>global data</ListSubheader>
+            <MenuItem value={'global_jhu.geojson'} key={'global_jhu.geojson'}>John Hopkins University (Global)</MenuItem> */}
+            
           </Select>
         </StyledDropDown>
         <br />
@@ -651,18 +652,26 @@ const VariablePanel = (props) => {
           </StyledDropDown>
         </TwoUp>        
       </ControlsContainer>
-      <p className="note">
-        Data is updated with freshest available data at 3pm CST daily, at minimum. 
-        In case of data discrepancy, local health departments are considered most accurate as per CDC recommendations. 
-        More information on <a href="data.html">data</a>, <a href="methods.html">methods</a>, 
-        and <a href="FAQ.html">FAQ</a> at main site.
-      </p>
-      <div className="poweredByGeoda">
+      <div className="noteContainer">
+        <h2>Help us improve the Atlas!</h2>
+        <h3>
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSf0KdYeVyvwnz0RLnZijY3kdyFe1SwXukPc--a1HFPE1NRxyw/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer">Take the Atlas v2 survey here </a>
+          or share your thoughts at <a href="mailto:contact@theuscovidatlas.org" target="_blank" rel="noopener noreferrer">contact@theuscovidatlas.org.</a>
+        </h3>
+        <hr></hr>
+        <p className="note">
+          Data is updated with freshest available data at 3pm CST daily, at minimum. 
+          In case of data discrepancy, local health departments are considered most accurate as per CDC recommendations. 
+          More information on <a href="data.html">data</a>, <a href="methods.html">methods</a>, 
+          and <a href="FAQ.html">FAQ</a> at main site.
+        </p>
+        <div className="poweredByGeoda">
             <a href="https://geodacenter.github.io" target="_blank" rel="noopener noreferrer">
               <img src={`${process.env.PUBLIC_URL}/assets/img/geoda-logo.png`} />
               POWERED BY GEODA
             </a>
-        </div>
+        </div> 
+      </div>
       <button onClick={handleOpenClose} id="showHideLeft" className={panelState.variables ? 'active' : 'hidden'}>
         {/* <svg version="1.1" x="0px" y="0px" viewBox="0 0 100 100">
           <g transform="translate(50 50) scale(0.69 0.69) rotate(0) translate(-50 -50)">

@@ -6,10 +6,10 @@ import {find} from 'lodash';
 
 import DeckGL from '@deck.gl/react';
 import {MapView, _GlobeView as GlobeView, FlyToInterpolator} from '@deck.gl/core';
-import { GeoJsonLayer, PolygonLayer, ScatterplotLayer,  IconLayer, TextLayer, LineLayer } from '@deck.gl/layers';
+import { GeoJsonLayer, PolygonLayer, ScatterplotLayer, SolidPolygonLayer,  IconLayer, TextLayer, LineLayer } from '@deck.gl/layers';
 import {fitBounds} from '@math.gl/web-mercator';
-import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {IcoSphereGeometry} from '@luma.gl/engine';
+// import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+// import {IcoSphereGeometry} from '@luma.gl/engine';
 
 import ReactMapGL, {NavigationControl, GeolocateControl } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder'
@@ -20,9 +20,9 @@ import { setDataSidebar, setMapParams, setMapLoaded, setPanelState, setChartData
 import { mapFn, dataFn, getVarId, getCSV, getCartogramCenter, getDataForCharts, parseMobilityData, getURLParams } from '../utils';
 import MAP_STYLE from '../config/style.json';
 
-const cartoGeom = new IcoSphereGeometry({
-  iterations: 1
-});
+// const cartoGeom = new IcoSphereGeometry({
+//   iterations: 1
+// });
 const bounds = fitBounds({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -234,7 +234,7 @@ const Map = () => {
         const defaultLayers = defaultMapStyle.get('layers');
         let tempLayers;
 
-        if (mapParams.vizType === 'cartogram') {
+        if (mapParams.vizType === 'cartogram' || globalMap) {
             tempLayers = defaultLayers.map(layer => {
                 return layer.setIn(['layout', 'visibility'], 'none');
             });
@@ -357,6 +357,20 @@ const Map = () => {
         }
     }
     const Layers = [
+        // new SolidPolygonLayer({
+        //     id: 'background',
+        //     data: [
+        //       [[-180, 90], [0, 90], [180, 90], [180, -90], [0, -90], [-180, -90]]
+        //     ],
+        //     getPolygon: d => d,
+        //     stroked: false,
+        //     filled: true,
+        //     visible: globalMap,
+        //     updateTriggers: {
+        //         visible: globalMap
+        //     },
+        //     getFillColor: [40, 40, 40]
+        //   }),
         new GeoJsonLayer({
             id: 'choropleth',
             data: {
@@ -506,7 +520,7 @@ const Map = () => {
             visible: mapParams.vizType === 'cartogram',
             getFillColor: [10,10,10],
             updateTriggers: {
-                visible: mapParams.vizType
+                visible: mapParams.vizType,
             }
         }),
         // new ScatterplotLayer({
@@ -600,36 +614,36 @@ const Map = () => {
                 visible: [cartogramData, mapParams, dataParams, currVarId]
             }
           }),
-        new SimpleMeshLayer({
-            id: 'cartogram layer',
-            data: cartogramData,
-            // texture: 'texture.png',
-            sizeScale:10,
-            visible: mapParams.vizType === 'cartogram',
-            mesh: cartoGeom,
-            getPosition: f => {
-                try {
-                    return storedCartogramData[currVarId][f.id].position;
-                } catch {
-                    return [0,0];
-                }
-            },
-            getColor: f => getCartogramFillColor(storedCartogramData[currVarId][f.id].value, mapParams.bins, mapParams.mapType),
-            getScale: f => 500,
-            // getTranslation: f => getCartogramTranslation(storedCartogramData[currVarId][f.id]),
-            transitions: {
-                getPosition: 150,
-                getColor: 150,
-                getScale: 150,
-                getTranslation: 150
-            },   
-            updateTriggers: {
-                getPosition: [mapParams, dataParams, currVarId],
-                getColor: [mapParams, dataParams, currVarId],
-                getScale: [mapParams, dataParams, currVarId],
-                getTranslation: [mapParams, dataParams, currVarId]
-            }
-          })
+        // new SimpleMeshLayer({
+        //     id: 'cartogram layer',
+        //     data: cartogramData,
+        //     // texture: 'texture.png',
+        //     sizeScale:10,
+        //     visible: mapParams.vizType === 'cartogram',
+        //     mesh: cartoGeom,
+        //     getPosition: f => {
+        //         try {
+        //             return storedCartogramData[currVarId][f.id].position;
+        //         } catch {
+        //             return [0,0];
+        //         }
+        //     },
+        //     getColor: f => getCartogramFillColor(storedCartogramData[currVarId][f.id].value, mapParams.bins, mapParams.mapType),
+        //     getScale: f => 500,
+        //     // getTranslation: f => getCartogramTranslation(storedCartogramData[currVarId][f.id]),
+        //     transitions: {
+        //         getPosition: 150,
+        //         getColor: 150,
+        //         getScale: 150,
+        //         getTranslation: 150
+        //     },   
+        //     updateTriggers: {
+        //         getPosition: [mapParams, dataParams, currVarId],
+        //         getColor: [mapParams, dataParams, currVarId],
+        //         getScale: [mapParams, dataParams, currVarId],
+        //         getTranslation: [mapParams, dataParams, currVarId]
+        //     }
+        //   })
     ]
 
     const handlePanelButton = (panel) => panelState[panel] ? dispatch(setPanelState({[panel]: false})) : dispatch(setPanelState({[panel]: true}))
