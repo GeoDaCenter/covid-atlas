@@ -1,9 +1,8 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import BinsList from './binsList';
-import { setMapParams } from '../actions';
 
 const LegendContainer = styled.div`
     width:100%;
@@ -63,10 +62,8 @@ const BinBars = styled.div`
 
 
 const Legend =  () => {
-    const dispatch = useDispatch();
     
     const mapParams = useSelector(state => state.mapParams)
-    const dataParams = useSelector(state => state.dataParams)
     const title = useSelector(state => state.currentVariable)
 
     return (

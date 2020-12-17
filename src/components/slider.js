@@ -20,35 +20,6 @@ const SliderContainer = styled.div`
     width:100%;
 `
 
-const DateButton = styled(Button)`
-    color:rgb(200,200,200) !important;
-    background: none;
-    transition: 250ms all;
-    border:none !important;
-    font-size: 75% !important;
-    transition:250ms all;
-    &:hover {
-        color:white;
-        border:none !important;
-    }
-    &.active {
-        cursor: initial;
-        font-size: 75%;
-        color:black !important;
-        background: white !important;
-        transition: 250ms all;
-        border:none !important;
-    }
-    .MuiButtonGroup-vertical {
-        border:none !important;
-    }
-    .MuiButton-label {
-        justify-content: left !important;
-        text-transform:none;
-        font-family:'Lato', sans-serif;
-        font-weight:bold;
-    }
-`
 const PlayPauseButton = styled(Button)`
     background:none;
     padding:0;
@@ -137,45 +108,6 @@ const RangeSlider = styled(Slider)`
     }
 `
 
-const BinSlider = styled(LineSlider)`
-    span.MuiSlider-rail,span.MuiSlider-track {
-        display:none;
-    }
-    
-    span.MuiSlider-thumb {
-        color:white;
-        background:none;
-        &:before{
-            content:'△';
-            color:white;
-            opacity:0.5;
-            position:relative;
-            left:0;
-            right:0;
-        }
-        overflow: visible;
-        border-radius:0;
-        .MuiSlider-valueLabel {
-            opacity:0;
-            transition:250ms all;
-            transform:translate(-100%, 24px);
-            pointer-events:none;
-            span {
-                background: none;
-                width:200px;
-                text-align:right;
-            }
-        }
-    }
-    &:hover { 
-        span.MuiSlider-thumb {
-            .MuiSlider-valueLabel {
-                opacity:1;
-            }
-        }
-    }
-`
-
 const DateTitle = styled.h3`
     width:100%;
     position:absolute;
@@ -202,7 +134,6 @@ const DateSlider = () => {
 
     const currentData = useSelector(state => state.currentData);
     const dates = useSelector(state => state.dates);
-    const currDate = useSelector(state => state.currDate);
     const dataParams = useSelector(state => state.dataParams);
     const startDateIndex = useSelector(state => state.startDateIndex);
     const mapParams = useSelector(state => state.mapParams);

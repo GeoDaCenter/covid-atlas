@@ -6,7 +6,7 @@ import {find} from 'lodash';
 
 import DeckGL from '@deck.gl/react';
 import {MapView, _GlobeView as GlobeView, FlyToInterpolator} from '@deck.gl/core';
-import { GeoJsonLayer, PolygonLayer, ScatterplotLayer, SolidPolygonLayer,  IconLayer, TextLayer, LineLayer } from '@deck.gl/layers';
+import { GeoJsonLayer, PolygonLayer, ScatterplotLayer, IconLayer, TextLayer } from '@deck.gl/layers';
 import {fitBounds} from '@math.gl/web-mercator';
 // import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 // import {IcoSphereGeometry} from '@luma.gl/engine';
@@ -15,11 +15,10 @@ import ReactMapGL, {NavigationControl, GeolocateControl } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder'
 
 import { MapTooltipContent } from '../components';
-import { setDataSidebar, setMapParams, setMapLoaded, setPanelState, setChartData } from '../actions';
-import { mapFn, dataFn, getVarId, getCSV, getCartogramCenter, getDataForCharts, parseMobilityData, getURLParams } from '../utils';
+import { setDataSidebar, setMapLoaded, setPanelState, setChartData } from '../actions';
+import { mapFn, dataFn, getVarId, getCSV, getCartogramCenter, getDataForCharts, getURLParams } from '../utils';
 import { colors, colorScales } from '../config';
 import MAP_STYLE from '../config/style.json';
-import {info, chart} from '../config/svg';
 
 // const cartoGeom = new IcoSphereGeometry({
 //   iterations: 1
@@ -132,12 +131,13 @@ const view = new MapView({repeat: true});
 const Map = () => { 
 
     const { storedData, storedGeojson, currentData, storedLisaData,
-        storedCartogramData, storedMobilityData, panelState, dates, dataParams, mapParams,
+        storedCartogramData, panelState, dates, dataParams, mapParams,
         currentVariable, startDateIndex, urlParams } = useSelector(state => state);
 
     const [hoverInfo, setHoverInfo] = useState(false);
     const [highlightGeog, setHighlightGeog] = useState(false);
-    const [globalMap, setGlobalMap] = useState(false);
+    // const [globalMap, setGlobalMap] = useState(false);
+    const globalMap = false;
     const [mapStyle, setMapStyle] = useState(defaultMapStyle);
     const [currLisaData, setCurrLisaData] = useState({})
     const [viewState, setViewState] = useState({
@@ -565,7 +565,7 @@ const Map = () => {
             },
             getText: f => {
                 try {
-                    if (currentData.includes('state')) return find(storedData[currentData], o => +o.properties.GEOID == storedGeojson[currentData].indexOrder[f.id]).properties.NAME;
+                    if (currentData.includes('state')) return find(storedData[currentData], o => +o.properties.GEOID === storedGeojson[currentData].indexOrder[f.id]).properties.NAME;
                     return '';
                 } catch {
                     return '';
@@ -610,8 +610,6 @@ const Map = () => {
         //     }
         //   })
     ]
-
-    const handlePanelButton = (panel) => panelState[panel] ? dispatch(setPanelState({[panel]: false})) : dispatch(setPanelState({[panel]: true}))
 
     const handleShare = async (params) => {
         const shareData = {

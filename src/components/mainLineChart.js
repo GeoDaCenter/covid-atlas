@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   LineChart, Line, XAxis, YAxis, ReferenceArea, 
-  ReferenceLine, Tooltip, Label, ResponsiveContainer
+  Tooltip, Label, ResponsiveContainer
 } from 'recharts';
 
 import Switch from '@material-ui/core/Switch';
@@ -49,10 +49,10 @@ const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "S
 
 const millionFormatter = val => { return `${val/1000000}M` };
 const thousandFormatter = val => { return `${val/1000}K` };
-const dateFormatter = val => { 
-    let tempDate = new Date(val).getMonth();
-    return `${monthNames[tempDate]}`
-};
+// const dateFormatter = val => { 
+//     let tempDate = new Date(val).getMonth();
+//     return `${monthNames[tempDate]}`
+// };
 
 const CustomTick = props => {
     return <text {...props}>{props.labelFormatter(props.payload.value)}</text>

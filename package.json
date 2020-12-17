@@ -6,19 +6,16 @@
   "dependencies": {
     "@deck.gl/core": "^8.3.6",
     "@deck.gl/layers": "^8.3.6",
-    "@deck.gl/mesh-layers": "^8.3.9",
     "@deck.gl/react": "^8.3.6",
-    "@luma.gl/engine": "^8.3.1",
     "@material-ui/core": "^4.11.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "d3": "^6.3.0",
+    "d3-scale": "^6.3.0",
     "d3-dsv": "^2.0.0",
     "immutable": "^4.0.0-rc.12",
     "jsgeoda": "^0.1.6",
     "lodash": "^4.17.20",
-    "pako": "^2.0.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-map-gl": "^5.2.10",
@@ -26,11 +23,9 @@
     "react-redux": "^7.2.2",
     "react-scripts": "4.0.0",
     "recharts": "^1.8.5",
-    "redux": "^4.0.5",
     "styled-components": "^5.2.1",
     "web-vitals": "^0.2.4",
-    "webfontloader": "^1.6.28",
-    "zlib": "^1.0.5"
+    "webfontloader": "^1.6.28"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -1,6 +1,5 @@
 // this components houses the slider, legend, and bottom dock chart
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React from 'react';
 
 import styled from 'styled-components';
 

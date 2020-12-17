@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { colors } from '../config';
@@ -124,21 +124,7 @@ const Arrow = styled.svg`
     }
 `
 
-const CloseTutorial = styled.button`
-    position: absolute;
-    top: 12px;
-    right: 10px;
-    font-size: 200%;
-    cursor: pointer;
-    padding:0;
-    background:none;
-    outline:none;
-    border:none;
-    color:white;
-`
-
 const InfoBox = () => {
-    const dispatch = useDispatch();
     const panelOpen = useSelector(state => state.panelState.tutorial)
 
     const [panelPosition, setPanelPosition] = useState(0);

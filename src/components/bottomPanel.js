@@ -1,10 +1,10 @@
 // this components houses the slider, legend, and bottom dock chart
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
 
-import { Legend, DateSlider, MainLineChart } from '../components';
+import { Legend } from '../components';
 import { setPanelState } from '../actions';
 import { colors } from '../config';
 
@@ -58,53 +58,6 @@ const BottomDrawer = styled.div`
         // bottom all the way down for landscape phone
     }
 `
-const OpenCloseButton = styled.button`
-    background: none;
-    position:absolute;
-    right:5px;
-    bottom:${props => props.bottom}px;
-    width:40px;
-    height:40px;
-    padding:0;
-    transform:${props => props.bottom===5?'rotate(180deg)':'rotate(0deg)'};
-    border:none;
-    outline:none;
-    transition:250ms all;
-    svg {
-        fill:white;
-        width:
-    }
-    &.hidden {
-        bottom:;
-        transform:;
-    }
-    @media (max-width:1024px) {
-        position:absolute;
-        top:-20px;
-        left:50%;
-        transform:${props => props.bottom===5?'rotate(270deg)':'rotate(90deg)'} translateX(-50%)
-        width:40px;
-        height:40px;
-        padding:0;
-        margin:0;
-        background-color: ${colors.gray};
-        box-shadow: 0px 0px 6px rgba(0,0,0,1);
-        outline:none;
-        border:none;
-        cursor: pointer;
-        transition:500ms all;
-        svg {
-            padding:0;
-            margin:0;
-            fill:white;
-            transition:500ms all;
-        }
-    }
-    @media (max-width:600px){
-        width:30px;
-        height:30px;
-    }
-`
 
 const BottomPanel = () => {
 
@@ -115,17 +68,7 @@ const BottomPanel = () => {
     // offset for the bottom panel based on the chart height, 
     // managed through props via styled-components
     const [bottomMargin, setBottomMargin] = useState(0);
-    const handleBottomOpen = () => {
-        if (panelState.chart) {
-            setBottomMargin(getChartHeight())
-            dispatch(setPanelState({chart:false}))
-        } else {
-            setBottomMargin(getChartHeight())
-            dispatch(setPanelState({chart:true}))
 
-        }
-    }
-    
     const handleResize = () => setBottomMargin(getChartHeight())
     window.addEventListener("resize", handleResize);
     

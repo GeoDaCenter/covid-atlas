@@ -4,8 +4,7 @@ import dataFn from './dataFunction';
 const getDataForLisa = (tableData, dataParams, order) => {
     let t0 = performance.now() // logging performance
     
-    const { numerator, nType, nProperty, nIndex, nRange, denominator, dType, 
-        dProperty, dIndex, dRange, scale} = dataParams;
+    const { numerator, nProperty, nIndex, denominator, dType, dIndex} = dataParams;
 
     // declare empty array for return variables
     let tempDict = {};

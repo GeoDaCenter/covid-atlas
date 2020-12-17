@@ -4,9 +4,7 @@ const mergeData = (featureCollection, featureCollectionJoinCol, joinData, joinDa
     // declare parent dictionaries
     let features = {}
     let dataDict = {}
-
-    let baseColumnLength = Object.keys(featureCollection.features[0]).length;
-
+    
     // declare and prep feature collection object
     let i = featureCollection.features.length;
     let colNumCheck = parseInt(featureCollection.features[0].properties[featureCollectionJoinCol])

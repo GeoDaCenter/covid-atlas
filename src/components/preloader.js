@@ -30,11 +30,6 @@ const PreloaderContainer = styled.div`
     }
 `;
 
-const fixedPoints = {
-    topRight: {
-        y: 13.2
-    }
-}
 const Preloader = ( props ) => {
     const [isHidden, setIsHidden] = useState(false);
 
@@ -47,15 +42,6 @@ const Preloader = ( props ) => {
     return (
         <PreloaderContainer className={props.loaded ? 'fadeOut' : ''} style={{display: (isHidden ? 'none' : 'initial')}} id="preloaderContainer">
             <img src={`${process.env.PUBLIC_URL}/assets/img/preloader.gif`} alt="Preloader" />
-            {/* <svg version="1.1" x="0px" y="0px" viewBox="0 0 54.5 50">
-                <g>
-                    <rect id="topLeft" y="5.5" width="23.4" height="23.4" rx="1"/>
-                    <rect id="bottomRight" x="27.3" y="17.1" width="27.3" height="19.5" rx="1"/>
-                    <rect id="bottomLeft" x="7.8" y="32.8" width="15.6" height="15.6" rx="1"/>
-                    <rect id="topRight" x="27.3" y="1.5" width="11.7" height="11.7" rx="1"/>
-                </g>
-            </svg> */}
-
         </PreloaderContainer>
     );
 };

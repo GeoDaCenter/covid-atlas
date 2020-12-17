@@ -12,9 +12,6 @@ const LineContainer = styled.div`
     align-self:flex-start;
 `
 
-const Arrow = styled.p`
-    float:right;
-`
 const CustomizedDot = (props) => {
     const {
       cx, cy, index, color, angle

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import Switch from '@material-ui/core/Switch';
+
 import styled from 'styled-components';
 import { chart, info } from '../config/svg';
 import { colors } from '../config';

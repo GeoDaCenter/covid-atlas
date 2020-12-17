@@ -4,7 +4,7 @@ const getLisaValues = (gda_proxy, dataset, data, geoids) => {
   let w = getCurrentWuuid(gda_proxy, dataset);
   let all_zeros = true;
   for (let i=0; i<data.length; ++i) { 
-    if (data[i] != 0)
+    if (data[i] !== 0)
       all_zeros = false;
   }
   let clusters = [];
