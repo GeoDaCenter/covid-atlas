@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Switch from '@material-ui/core/Switch';
 import styled from 'styled-components';
 import { chart, info } from '../config/svg';
+import { colors } from '../config';
 
 import { setPanelState } from '../actions';
 
@@ -21,7 +22,7 @@ const DockContainer = styled.div`
 `
 
 const DockButton = styled.button`
-    background:${props => props.isActive ? '#d8d8d8' : '#333333'};
+    background:${props => props.isActive ? colors.lightgray : colors.gray};
     border:none;
     outline:none;
     padding:10px;
@@ -38,12 +39,12 @@ const DockButton = styled.button`
     svg {
         width:20px;
         height:20px;
-        fill:${props => props.isActive ? '#2e2e2e' : 'white'};
+        fill:${props => props.isActive ? colors.darkgray : colors.white};
     }
     &:hover {
-        background:#333333;
+        background:${props => props.isActive ? colors.white : colors.darkgray};
         svg {
-            fill:#d8d8d8;
+            fill:${props => props.isActive ? colors.darkgray : colors.lightgray};
         }
     }
     @media (max-width:1024px) {
@@ -52,12 +53,6 @@ const DockButton = styled.button`
         margin-top:10px;
         display:block;
         border-radius:0;
-        &:hover {
-            background:${props => props.isActive ? '#d8d8d8' : '#333333'};
-            svg {
-                fill:${props => props.isActive ? '#2e2e2e' : 'white'};
-            }
-        }
     }
     
     @media (max-width:600px) {

@@ -112,6 +112,17 @@ export const fixedScales = {
     }
 }
 
+export const colors = {
+    white: '#ffffff',
+    black: '#00000',
+    darkgray:'#1a1a1a',
+    gray:'#2b2b2b',
+    buttongray: '#f5f5f5',
+    lightgray: '#d8d8d8',
+    yellow: '#FFCE00',
+    lightblue: '#A1E1E3',
+}
+
 export const defaultData = 'county_usfacts.geojson';
 
 export const dataPresets = {
@@ -282,3 +293,4 @@ export const legacySourceOrder = [
     'county_1p3a.geojson', 
     'state_usafacts.geojson'
 ]
+

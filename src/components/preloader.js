@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import styled from 'styled-components';
+import { colors } from '../config';
 
 const PreloaderContainer = styled.div`
     position:fixed;
@@ -8,7 +9,7 @@ const PreloaderContainer = styled.div`
     z-index:500;
     top:0;
     left:0;
-    background:#2b2b2b;
+    background:${colors.gray};
     transition: 500ms opacity;
     img {
         width:100px;
@@ -17,29 +18,6 @@ const PreloaderContainer = styled.div`
         left:50%;
         top:50%;
         transform:translate(-50%, -50%);
-    }
-    svg {
-        width:40vw;
-        height:40vh;
-        position:fixed;
-        left:50%;
-        top:50%;
-        transform:translate(-50%, -50%);
-        g {
-            rect {
-                fill:#EC1E24;
-                animation: fade 1s infinite ease-in-out;
-            }
-            #topLeft {
-                animation-delay:0.25s;
-            }
-            #bottomRight {
-                animation-delay:0.5s;
-            }
-            #bottomLeft {
-                animation-delay:0.75s;
-            }
-        }
     }
     @keyframes fade {
         0% {fill-opacity:1};

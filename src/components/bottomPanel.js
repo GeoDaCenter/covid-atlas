@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import { Legend, DateSlider, MainLineChart } from '../components';
 import { setPanelState } from '../actions';
+import { colors } from '../config';
 
 // helper function to get dock offset
 const getChartHeight = () => { try { return document.querySelector('#main-chart-container').offsetHeight} catch { return 0} }
@@ -15,7 +16,7 @@ const BottomDrawer = styled.div`
     position: fixed;
     bottom:0;
     left:50%;
-    background:#2b2b2b;
+    background:${colors.gray};
     transform:translateX(-50%);
     width:90vw;
     max-width: 500px;
@@ -86,7 +87,7 @@ const OpenCloseButton = styled.button`
         height:40px;
         padding:0;
         margin:0;
-        background-color: #2b2b2b;
+        background-color: ${colors.gray};
         box-shadow: 0px 0px 6px rgba(0,0,0,1);
         outline:none;
         border:none;

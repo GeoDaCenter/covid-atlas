@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import Popper from '@material-ui/core/Popper';
 
-import { tooltipInfo } from '../config';
+import { tooltipInfo, colors } from '../config';
 import { setAnchorEl } from '../actions';
 
 const TooltipContentDiv = styled(Popper)`
@@ -24,7 +24,7 @@ const TooltipContentDiv = styled(Popper)`
         box-shadow: 0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12);
         pointer-events: all;
         a {
-            color: #FFCE00;
+            color: ${colors.yellow};
             text-decoration:none;
         }
     }

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components'
+
+import { colors } from '../config';
 import { setPanelState } from '../actions';
 
 const DragContainer = styled.div`
     position:fixed;
     overflow:hidden;
-    background:#2b2b2b;
+    background:${colors.gray};
     padding:20px 20px 0 20px;
     box-sizing: border-box;
     box-shadow: 0px 0px 5px rgba(0,0,0,0.7);

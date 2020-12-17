@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { setNotification } from '../actions'
+import { colors } from '../config'
 
 const Notification = styled.div`
     width: 300px;
@@ -11,8 +12,8 @@ const Notification = styled.div`
     left: 50%;
     top: 50%;
     z-index: 15;
-    background: #2b2b2b;
-    color: #fff;
+    background: ${colors.gray};
+    color: ${colors.white};
     padding: 0;
     overflow: hidden;
     border-radius: 4px;

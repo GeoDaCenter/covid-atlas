@@ -1,12 +1,16 @@
 import React, {useState} from 'react';
-import Grid from '@material-ui/core/Grid';
+import { useSelector, useDispatch } from 'react-redux';
+
 import {
-  LineChart, Line, XAxis, YAxis, ReferenceArea, ReferenceLine, Tooltip, Label, ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, ReferenceArea, 
+  ReferenceLine, Tooltip, Label, ResponsiveContainer
 } from 'recharts';
-import { useSelector } from 'react-redux';
+
 import Switch from '@material-ui/core/Switch';
-// import { SwitchContainer } from '../styled_components';
+
 import styled from 'styled-components';
+import { colors } from '../config';
+import { setVariableParams, setDate } from '../actions';
 
 const ChartContainer = styled.span`
     background:red;
@@ -19,16 +23,16 @@ const StyledSwitch = styled.div`
         display:inline;
     }
     span.MuiSwitch-track {
-        background-color:#ddd;
+        background-color:${colors.lightgray};
     }
     .MuiSwitch-colorSecondary.Mui-checked {
-        color:#A1E1E3;
+        color:${colors.lightblue};
     }
     .MuiSwitch-colorSecondary.Mui-checked + .MuiSwitch-track {
-        background-color: #A1E1E3;
+        background-color: ${colors.lightblue};
     }
     .MuiSwitch-colorSecondary:hover {
-        background-color:#A1E1E355;
+        background-color:${colors.lightblue}55;
     }
 `
 
@@ -84,7 +88,7 @@ const CustomTooltip = props => {
         return (
             <div 
                 style={{
-                    background:'#1a1a1a',
+                    background:colors.darkgray,
                     padding:'1px 10px',
                     borderRadius:'4px',
                     boxShadow: '0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)'
@@ -92,7 +96,7 @@ const CustomTooltip = props => {
             }}> 
             <p style={{color:'white', padding:0,}}>{data[0].payload.date}</p>
                 {data.map(data => 
-                    <p style={{color: data.color, textShadow: '2px 2px 4px #2e2e2e', fontWeight:600}}>{data.name}: {Number.isInteger(Math.floor(data.payload[data.dataKey])) ? 
+                    <p style={{color: data.color, textShadow: `2px 2px 4px ${colors.black}`, fontWeight:600}}>{data.name}: {Number.isInteger(Math.floor(data.payload[data.dataKey])) ? 
                         Math.floor(data.payload[data.dataKey]).toLocaleString('en') 
                         : data.payload[data.dataKey]}
                     </p>
@@ -108,15 +112,37 @@ const MainLineChart = () => {
     
     const chartData = useSelector(state => state.chartData);
     const dataParams = useSelector(state => state.dataParams);
+    const currentVariable = useSelector(state => state.currentVariable);
+    const dates = useSelector(state => state.dates);
+    const currentData = useSelector(state => state.currentData);
     const startDateIndex = useSelector(state => state.startDateIndex);
     const sidebarData = useSelector(state => state.sidebarData);
     const [logChart, setLogChart] = useState(false)
     const { properties
        } = useSelector(state => state.sidebarData);
 
+    const dispatch = useDispatch();
+
     const handleSwitch = () => {
         setLogChart(prev => !prev);
     }
+
+    const chartSetDate = (e) => {
+        if (e.activeTooltipIndex !== undefined) handleChange(e.activeTooltipIndex+startDateIndex)
+    }    
+
+    const handleChange = (newValue) => {
+        if (dataParams.nType === "time-series" && dataParams.dType === "time-series") {
+            dispatch(setVariableParams({nIndex: newValue, dIndex: newValue}))
+        } else if (dataParams.nType === "time-series") {
+            dispatch(setVariableParams({nIndex: newValue}))
+        } else if (dataParams.dType === "time-series") {
+            dispatch(setVariableParams({dIndex: newValue}))
+        } else if (currentVariable.includes('Testing')){
+            dispatch(setVariableParams({nIndex: newValue}))
+        }
+        dispatch(setDate(dates[currentData][newValue]));
+    };
 
     return (
         <ChartContainer>
@@ -127,29 +153,30 @@ const MainLineChart = () => {
                     margin={{
                         top: 0, right: 10, left: 10, bottom: 0,
                     }}
+                    onClick={chartSetDate}
                 >
                     <XAxis 
                         dataKey="date"
                         tick={
                             <CustomTick
                             style={{
-                                fill: "#FFFFFF99",
+                                fill: `${colors.white}88`,
                                 fontSize: "10px",
                                 fontFamily: "Lato",
                                 fontWeight: 600,
                                 transform:'translateY(10px)'
                             }}
-                            labelFormatter={dateFormatter}
+                            labelFormatter={chartSetDate}
                             />
                         }
                     />
                     {/* <YAxis type="number" /> */}
                     <YAxis yAxisId="left" type="number" dataKey="count"  scale={logChart ? "log" : "linear"} domain={[0.01, 'dataMax']} allowDataOverflow 
-                        ticks={Object.keys(sidebarData).length === 0 ? [2000000,4000000,6000000,8000000,10000000] : []} 
+                        ticks={Object.keys(sidebarData).length === 0 ? [2000000,4000000,6000000,8000000,10000000,12000000,14000000] : []} 
                         tick={
                             <CustomTick
                             style={{
-                                fill: "#D8D8D8",
+                                fill: colors.lightgray,
                                 fontSize: "10px",
                                 fontFamily: "Lato",
                                 fontWeight: 600
@@ -158,14 +185,14 @@ const MainLineChart = () => {
                             />
                         }
                         >
-                        <Label value="Total Cases" position='insideLeft' style={{marginTop:10, fill:'#D8D8D8', fontFamily: 'Lato', fontWeight: 600}} angle={-90}  />
+                        <Label value="Total Cases" position='insideLeft' style={{marginTop:10, fill:colors.lightgray, fontFamily: 'Lato', fontWeight: 600}} angle={-90}  />
                     </YAxis>
                     <YAxis yAxisId="right" orientation="right" dataKey="dailyNew" scale={logChart ? "log" : "linear"} domain={[0.01, 'dataMax']} allowDataOverflow 
                         // ticks={[20000,40000,60000,80000,100000, 120000, 140000]} 
                         tick={
                             <CustomTick
                                 style={{
-                                    fill: "#FFCE00",
+                                    fill: colors.lightgray,
                                     fontSize: "10px",
                                     fontFamily: "Lato",
                                     fontWeight: 600,
@@ -174,7 +201,7 @@ const MainLineChart = () => {
                             />
                         }
                         >
-                        <Label value="7-Day Average New Cases" position='insideTopRight' style={{marginTop:10, fill:'#FFCE00', fontFamily: 'Lato', fontWeight: 600}} angle={-90}  />
+                        <Label value="7-Day Average New Cases" position='insideTopRight' style={{marginTop:10, fill:colors.yellow, fontFamily: 'Lato', fontWeight: 600}} angle={-90}  />
                     </YAxis>
                     <Tooltip
                         content={CustomTooltip}
@@ -187,9 +214,9 @@ const MainLineChart = () => {
                         fillOpacity={0.15}
                         isAnimationActive={false}
                     />
-                    <Line type="monotone" yAxisId="left" dataKey="count" name="Total Cases" stroke="#D8D8D8" dot={false} />
-                    <Line type="monotone" yAxisId="right" dataKey="dailyNew" name="7-Day Average New Cases" stroke="#FFCE00" dot={false} />
-                    <Line type="monotone" yAxisId="right" dataKey="selectedGeog" name="Selected Geography Count" stroke="#FFF" dot={false} />
+                    <Line type="monotone" yAxisId="left" dataKey="count" name="Total Cases" stroke={colors.lightgray} dot={false} />
+                    <Line type="monotone" yAxisId="right" dataKey="dailyNew" name="7-Day Average New Cases" stroke={colors.yellow} dot={false} />
+                    <Line type="monotone" yAxisId="right" dataKey="selectedGeog" name="Selected Geography Count" stroke={colors.white} dot={false} />
                 </LineChart>
             </ResponsiveContainer>
             <StyledSwitch>

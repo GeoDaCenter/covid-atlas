@@ -13,6 +13,7 @@ import Tooltip from './tooltip';
 import TwoWeekChart from './twoWeekLineChart';
 import { setPanelState } from '../actions';
 import {dataFn, colLookup} from '../utils';
+import { colors } from '../config';
 import { compact, expand, report, verticalGrip} from '../config/svg';
 
 // Styled components CSS
@@ -22,7 +23,7 @@ const DataPanelContainer = styled.div`
   top:50px;
   overflow-x:visible;
   height:calc(100vh - 50px);
-  background-color: #2b2b2bfa;
+  background-color: ${colors.gray}fa;
   box-shadow: -2px 0px 5px rgba(0,0,0,0.7);
   padding:20px;
   box-sizing: border-box;
@@ -57,7 +58,7 @@ const DataPanelContainer = styled.div`
     height:40px;
     padding:0;
     margin:0;
-    background-color: #2b2b2b;
+    background-color: ${colors.gray};
     box-shadow: 0px 0px 6px rgba(0,0,0,1);
     outline:none;
     border:none;
@@ -138,7 +139,7 @@ const DataPanelContainer = styled.div`
     padding:0 0 15px 0;
     margin:0;
     a {
-      color:#FFCE00;
+      color:${colors.yellow};
       text-decoration:none;
     }
   }
@@ -192,11 +193,11 @@ const ExpandButtons = styled(ButtonGroup)`
   right:20px;
   top:15px;
   svg {
-    fill:#ffffff44;
+    fill:${colors.white}44;
     transition:250ms all;
     height:15px;
     &:hover {
-      fill:#ffffff77;
+      fill:${colors.white}77;
     }
   }
   .MuiButton-root {

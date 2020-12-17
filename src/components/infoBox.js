@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { setPanelState } from '../actions';
+
+import { colors } from '../config';
 
 const InfoContainer = styled.div`
-    background: #2b2b2b;
-    color: #fff;
+    background: ${colors.gray};
+    color: ${colors.white};
     padding: 0;
     overflow: hidden;
     display: ${props => props.active ? 'initial' : 'none'};
@@ -23,13 +24,13 @@ const InfoContainer = styled.div`
         width: 10px;
         height: 10px;
         padding: 5px;
-        fill: #fff;
+        fill: ${colors.white};
         display: inline;
         transition: 250ms all;
         cursor: pointer;
     }
     a {
-       color: #FFCE00; 
+       color: ${colors.yellow}; 
        text-decoration:none;
     }
     @media (max-width:1024px) {

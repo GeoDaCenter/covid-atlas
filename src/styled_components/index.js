@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
+import { colors } from '../config';
 
 export const StyledDropDown = styled(FormControl)`
   padding:0 0 ${props => props.component === 'radios' ? '20' : '40'}px 0!important;
@@ -79,15 +80,15 @@ export const SwitchContainer = styled(Grid)`
     transform:translateY(5px);
   }
   span.MuiSwitch-track {
-      background-color:#ddd;
+      background-color:${colors.buttongray};
   }
   .MuiSwitch-colorSecondary.Mui-checked {
-      color:#A1E1E3;
+      color:${colors.lightblue};
   }
   .MuiSwitch-colorSecondary.Mui-checked + .MuiSwitch-track {
-      background-color: #A1E1E3;
+      background-color: ${colors.lightblue};
   }
   .MuiSwitch-colorSecondary:hover {
-      background-color:#A1E1E355;
+      background-color:${colors.lightblue}55;
   }
 `

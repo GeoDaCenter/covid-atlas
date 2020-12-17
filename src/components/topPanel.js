@@ -5,13 +5,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { DateSlider } from '../components';
+import { colors } from '../config';
 
 // Styled components
 const TopDrawer = styled.div`
     position: fixed;
     top:50px;
     left:calc(50% - 25px);
-    background:#2b2b2b;
+    background:${colors.gray};
     transform:translateX(-50%);
     width:90vw;
     max-width: 500px;
@@ -26,22 +27,6 @@ const TopDrawer = styled.div`
     }
     div.MuiGrid-item {
         padding:0;
-    }
-    @media (max-width:1024px){
-        // div {
-        //     padding-bottom:0;
-        // }
-        // #binModeSwitch {
-        //     position:absolute !important;
-        //     right: 10px !important;
-        //     top: 10px !important;
-        // }
-        // #dateRangeSelector {
-        //     position:absolute !important;
-        //     left: 66% !important;
-        //     transform:translateX(-50%) !important;
-        //     top: 10px !important;
-        // }
     }
     
     @media (max-width:768px){

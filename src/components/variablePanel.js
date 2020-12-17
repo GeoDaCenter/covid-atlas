@@ -17,7 +17,7 @@ import { colLookup, getArrayCSV, getGzipData } from '../utils';
 import Tooltip from './tooltip';
 import { StyledDropDown } from '../styled_components';
 import { setVariableParams, setVariableName, setMapParams, setCurrentData, setPanelState, setNotification, storeMobilityData } from '../actions';
-import { fixedScales, colorScales, dataPresets, legacyVariableOrder } from '../config';
+import { fixedScales, colorScales, dataPresets, legacyVariableOrder, colors } from '../config';
 import { settings } from '../config/svg';
 
 const VariablePanelContainer = styled.div`
@@ -27,7 +27,7 @@ const VariablePanelContainer = styled.div`
   height:auto;
   min-height:calc(100vh - 50px);
   min-width:200px;
-  background-color: #2b2b2bfa;
+  background-color: ${colors.gray}fa;
   box-shadow: 2px 0px 5px rgba(0,0,0,0.7);
   padding:0;
   box-sizing: border-box;
@@ -48,11 +48,11 @@ const VariablePanelContainer = styled.div`
     left:0;
     padding:20px;
     box-sizing:border-box;
-    background:#2b2b2b;
+    background:${colors.gray};
     width:calc(100%);
     box-shadow: 0px -5px 10px rgba(0,0,0,0.25);
     a {  
-      color: #FFCE00;
+      color: ${colors.yellow};
       -webkit-text-decoration: none;
       text-decoration: none;
       }
@@ -91,7 +91,7 @@ const VariablePanelContainer = styled.div`
     box-sizing:border-box;
     padding:0;
     margin:0;
-    background-color: #2b2b2b;
+    background-color: ${colors.gray};
     box-shadow: 0px 0px 6px rgba(0,0,0,1);
     outline:none;
     border:none;
@@ -153,13 +153,13 @@ const StyledButtonGroup = styled(ButtonGroup)`
   padding-bottom:20px;
   .MuiButtonGroup-grouped {
     color:white;
-    border-color:#ffffff77;
+    border-color:${colors.white}77;
     &:hover {
       border-color:white;
     }
     &.active {
       background:white;
-      color:#2e2e2e;
+      color:${colors.gray};
     }
   }
 `
