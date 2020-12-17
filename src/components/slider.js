@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { setDate, setVariableParams, incrementDate, setMapParams } from '../actions';
 import Switch from '@material-ui/core/Switch';
 import { StyledDropDownNoLabel, SwitchContainer } from '../styled_components';
+import { Dock } from '../components';
 // import { getParseCSV, getJson, mergeData, colIndex, getDataForBins } from './utils';
 
 const SliderContainer = styled.div`
@@ -408,6 +409,8 @@ const DateSlider = () => {
                     {!customRange && <InitialDate>{dates[currentData][0]}</InitialDate>}
                     {!customRange && <EndDate>{dates[currentData][dates[currentData].length-1]}</EndDate>}
                 </Grid>
+                
+                <Dock />
             </SliderContainer>
         );
     } else {

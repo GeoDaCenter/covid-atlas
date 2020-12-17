@@ -15,9 +15,10 @@ import styled from 'styled-components';
 
 import { colLookup, getArrayCSV, getGzipData } from '../utils';
 import Tooltip from './tooltip';
-import { fixedScales, colorScales, dataPresets, legacyVariableOrder } from '../config';
 import { StyledDropDown } from '../styled_components';
 import { setVariableParams, setVariableName, setMapParams, setCurrentData, setPanelState, setNotification, storeMobilityData } from '../actions';
+import { fixedScales, colorScales, dataPresets, legacyVariableOrder } from '../config';
+import { settings } from '../config/svg';
 
 const VariablePanelContainer = styled.div`
   position:fixed;
@@ -97,9 +98,9 @@ const VariablePanelContainer = styled.div`
     cursor: pointer;
     transition:500ms all;
     svg { 
-      width:30px;
-      height:30px;
-      margin:5px 0 0 0;
+      width:20px;
+      height:20px;
+      margin:10px 0 0 0;
       @media (max-width:600px){
         width:20px;
         height:20px;
@@ -108,6 +109,11 @@ const VariablePanelContainer = styled.div`
       fill:white;
       transform:rotate(0deg);
       transition:500ms all;
+      .cls-1 {
+        fill:none;
+        stroke-width:6px;
+        stroke:white;
+      }
     }
     :after {
       opacity:0;
@@ -116,7 +122,7 @@ const VariablePanelContainer = styled.div`
       color:white;
       position: relative;
       right:-50px;
-      top:-27px;
+      top:-22px;
       transition:500ms all;
       z-index:4;
     }
@@ -672,15 +678,7 @@ const VariablePanel = (props) => {
             </a>
         </div> 
       </div>
-      <button onClick={handleOpenClose} id="showHideLeft" className={panelState.variables ? 'active' : 'hidden'}>
-        {/* <svg version="1.1" x="0px" y="0px" viewBox="0 0 100 100">
-          <g transform="translate(50 50) scale(0.69 0.69) rotate(0) translate(-50 -50)">
-            <path d="M38,33.8L23.9,47.9c-1.2,1.2-1.2,3.1,0,4.2L38,66.2l4.2-4.2l-9-9H71v17c0,0.6-0.4,1-1,1H59v6h11
-              c3.9,0,7-3.1,7-7V30c0-3.9-3.1-7-7-7H59v6h11c0.6,0,1,0.4,1,1v17H33.2l9-9L38,33.8z"/>
-          </g>
-        </svg> */}
-        <svg viewBox="0 0 100 100" x="0px" y="0px"><g><path d="M46,44.8V89.5h8V44.8a12,12,0,0,0,0-22.6V10.5H46V22.2a12,12,0,0,0,0,22.6Zm4-15.3a4,4,0,1,1-4,4A4,4,0,0,1,50,29.5Z"></path><path d="M81.5,55.2V10.5h-8V55.2a12,12,0,0,0,0,22.6V89.5h8V77.8a12,12,0,0,0,0-22.6Zm-4,15.3a4,4,0,1,1,4-4A4,4,0,0,1,77.5,70.5Z"></path><path d="M18.5,77.8V89.5h8V77.8a12,12,0,0,0,0-22.6V10.5h-8V55.2a12,12,0,0,0,0,22.6Zm4-15.3a4,4,0,1,1-4,4A4,4,0,0,1,22.5,62.5Z"></path></g></svg>
-      </button>
+      <button onClick={handleOpenClose} id="showHideLeft" className={panelState.variables ? 'active' : 'hidden'}>{settings}</button>
 
     </VariablePanelContainer>
   );

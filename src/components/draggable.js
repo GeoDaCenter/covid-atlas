@@ -69,8 +69,8 @@ const Draggable = (props) => {
     }
 
     const touchListener = (e) => {
-        setX(e?.targetTouches[0]?.clientX)
-        setY(e?.targetTouches[0]?.clientY)
+        setX(e?.targetTouches[0]?.clientX-15)
+        setY(e?.targetTouches[0]?.clientY-15)
     }
 
     const removeListener = () => {
@@ -103,7 +103,7 @@ const Draggable = (props) => {
     },[open, props.defaultX, props.defaultY])
 
     return (
-        <DragContainer style={{left:`${X}px`, top: `${Y}px`}} className={open ? '' : 'collapsed'} isDragging={isDragging}>
+        <DragContainer style={{left:`${X}px`, top: `${Y}px`, zIndex: props.z || 1}} className={open ? '' : 'collapsed'} isDragging={isDragging}>
             {props.content}
             <DragButton 
                 id="resize"

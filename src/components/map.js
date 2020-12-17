@@ -15,10 +15,11 @@ import ReactMapGL, {NavigationControl, GeolocateControl } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder'
 
 import { MapTooltipContent } from '../components';
-import { colorScales } from '../config';
 import { setDataSidebar, setMapParams, setMapLoaded, setPanelState, setChartData } from '../actions';
 import { mapFn, dataFn, getVarId, getCSV, getCartogramCenter, getDataForCharts, parseMobilityData, getURLParams } from '../utils';
+import { colorScales } from '../config';
 import MAP_STYLE from '../config/style.json';
+import {info, chart} from '../config/svg';
 
 // const cartoGeom = new IcoSphereGeometry({
 //   iterations: 1
@@ -676,7 +677,8 @@ const Map = () => {
                 initialViewState={viewState}
                 controller={true}
                 layers={Layers}
-                views={globalMap ? viewGlobe : view} //enable this for globe view
+                views={globalMap ? viewGlobe : view} //enable this for globe view 
+                onViewPortChange={() => console.log('moved')}
             >
                 <ReactMapGL
                     reuseMaps
@@ -684,6 +686,7 @@ const Map = () => {
                     mapStyle={mapStyle} //{globalMap || mapParams.vizType === 'cartogram' ? 'mapbox://styles/lixun910/ckhtcdx4b0xyc19qzlt4b5c0d' : 'mapbox://styles/lixun910/ckhkoo8ix29s119ruodgwfxec'}
                     preventStyleDiffing={true}
                     mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
+                    onViewportChange={() => setHoverInfo(false)}
                     // onViewportChange={viewState  => console.log(mapRef.current.props.viewState)} 
                     onLoad={() => {
                         dispatch(setMapLoaded(true))
@@ -735,33 +738,20 @@ const Map = () => {
                                 </g>
                             </svg>
                         </NavInlineButton> */}
-                        <NavInlineButton
+                        {/* <NavInlineButton
                             title="Show Line Chart"
                             isActive={panelState.lineChart}
                             onClick={() => handlePanelButton('lineChart')}
                         >
-                            <svg x="0px" y="0px" viewBox="0 0 100 100">
-                                <g>
-                                    <path d="M52.5,21.4c-1.9,0-3.6,1.3-4.1,3.1L37.9,63.7l-6.4-11.1c-1.2-2-3.7-2.7-5.7-1.5c-0.3,0.2-0.6,0.4-0.9,0.7
-                                        L10.1,66.6c-1.7,1.6-1.7,4.2-0.2,5.9c1.6,1.7,4.2,1.7,5.9,0.2c0.1,0,0.1-0.1,0.1-0.1L27,61.5l8.7,15.1c1.2,2,3.7,2.7,5.7,1.5
-                                        c0.9-0.6,1.6-1.5,1.9-2.5l9.1-33.9l4.6,17.2c0.6,2.2,2.9,3.5,5.1,2.9c1.1-0.3,2-1,2.5-1.9l10.4-18l8.9,9.4c1.6,1.7,4.2,1.8,5.9,0.3
-                                        s1.8-4.2,0.3-5.9c0,0-0.1-0.1-0.1-0.1L77.3,32.1c-1.6-1.7-4.2-1.8-5.9-0.2c-0.3,0.3-0.6,0.6-0.8,1L62.5,47l-6-22.5
-                                        C56,22.7,54.4,21.4,52.5,21.4L52.5,21.4z"/>
-                                </g>
-                            </svg>
+                            {chart}
                         </NavInlineButton>
                         <NavInlineButton
                             title="Show Tutorial"
                             isActive={panelState.tutorial}
                             onClick={() => handlePanelButton('tutorial')}
                         >
-                            <svg viewBox="0 0 100 100" x="0px" y="0px">
-                                <g>
-                                    <path d="M 62.0763 27.4552 C 64.0258 25.642 65 23.4406 65 20.8589 C 65 18.2815 64.0258 16.0809 62.0763 14.2511 C 60.1273 12.4207 57.7859 11.5 55.0413 11.5 C 52.3076 11.5 49.9438 12.4207 47.9833 14.2511 C 46.0343 16.0809 45.0487 18.2815 45.0487 20.8589 C 45.0487 23.4406 46.0343 25.642 47.9833 27.4552 C 49.9438 29.2682 52.3076 30.178 55.0413 30.178 C 57.7859 30.178 60.1273 29.2682 62.0763 27.4552 ZM 57.5841 88.0802 C 61.1017 86.4348 62.9616 83.3419 61.1353 81.9274 C 60.0823 81.1132 58.7041 82.4604 57.6963 82.4604 C 55.5343 82.4604 54.0103 82.1065 53.1367 81.3939 C 52.2518 80.6754 51.8261 79.3446 51.8261 77.3796 C 51.8261 76.5942 51.9493 75.4433 52.2182 73.9213 C 52.487 72.395 52.8007 71.0302 53.1367 69.8404 L 57.3153 55.0418 C 57.7073 53.683 57.9988 52.1893 58.1554 50.5672 C 58.301 48.9276 58.3798 47.7935 58.3798 47.1533 C 58.3798 44.0378 57.2817 41.5004 55.0971 39.5465 C 52.9237 37.5991 49.8094 36.6159 45.7765 36.6159 C 43.5361 36.6159 41.1501 36.9472 38.652 37.8117 C 33.7564 39.5293 34.8432 43.7968 35.9296 43.7968 C 38.1364 43.7968 39.6152 44.1722 40.3995 44.9193 C 41.1837 45.6604 41.5868 46.9796 41.5868 48.8828 C 41.5868 49.9269 41.4413 51.1007 41.1947 52.3689 C 40.9369 53.6381 40.635 54.9909 40.2541 56.4111 L 36.053 71.2659 C 35.6947 72.8267 35.4253 74.2246 35.2463 75.4648 C 35.0784 76.7058 35 77.9187 35 79.1091 C 35 82.1578 36.12 84.6722 38.3716 86.6596 C 40.6238 88.6528 44.0854 90.5 48.1405 90.5 C 50.7731 90.5 54.537 89.518 57.5841 88.0802 Z">
-                                    </path>
-                                </g>
-                            </svg>
-                        </NavInlineButton>
+                            {info}
+                        </NavInlineButton> */}
                         <GeolocateControl
                             positionOptions={{enableHighAccuracy: false}}
                             trackUserLocation={false}

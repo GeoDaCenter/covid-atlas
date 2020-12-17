@@ -118,3 +118,10 @@ body {
 .mapboxgl-ctrl-top-right {
   position: fixed !important;
 }
+
+/* svg styles */
+
+.cls-1 {
+  stroke-miterlimit:10;
+  stroke-width:4px;
+}

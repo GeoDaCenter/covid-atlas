@@ -10,7 +10,7 @@ import { DateSlider } from '../components';
 const TopDrawer = styled.div`
     position: fixed;
     top:50px;
-    left:50%;
+    left:calc(50% - 25px);
     background:#2b2b2b;
     transform:translateX(-50%);
     width:90vw;

@@ -22,7 +22,7 @@ import {
 
 import { Map, NavBar,
   VariablePanel, BottomPanel, DataPanel, MainLineChart, Scaleable, Draggable, TopPanel,
-  Popover, Preloader, InfoBox, NotificationBox
+  Popover, Preloader, InfoBox, NotificationBox, Dock
 } from './components';  
 import { colorScales, fixedScales, dataPresets, 
   legacyOverlayOrder, legacyResourceOrder, legacySourceOrder } from './config';
@@ -40,10 +40,10 @@ import { colorScales, fixedScales, dataPresets,
 
 function App() {
   // static variables for floating panel sizing
-  let [ defaultX, defaultY, defaultWidth, defaultWidthLong, defaultHeight,
+  let [ defaultX, defaultXLong, defaultY, defaultWidth, defaultWidthLong, defaultHeight,
     minHeight, minWidth] = window.innerWidth <= 1024 ? 
-    [window.innerWidth*.05, window.innerHeight*.35, window.innerWidth*.8, window.innerWidth*.8, window.innerHeight*.4, window.innerHeight*.2, window.innerWidth*.5] : 
-    [window.innerWidth-100, window.innerHeight-100, 300, 450, 300, 300, 300]
+    [window.innerWidth*.1, window.innerWidth*.1, window.innerHeight*.25, window.innerWidth*.8, window.innerWidth*.8, window.innerHeight*.4, window.innerHeight*.2, window.innerWidth*.5] : 
+    [window.innerWidth-400, window.innerWidth-575, 75, 300, 450, 300, 200, 200]
 
 
   // These selectors access different pieces of the store. While App mainly
@@ -322,10 +322,10 @@ function App() {
 
   // default width handlers on resize
   useEffect(() => {
-    [ defaultX, defaultY, defaultWidth, defaultHeight,
+    [ defaultX, defaultXLong, defaultY, defaultWidth, defaultWidthLong, defaultHeight,
       minHeight, minWidth] = window.innerWidth <= 1024 ? 
-      [window.innerWidth*.05, window.innerHeight*.35, window.innerWidth*.8, window.innerHeight*.4, window.innerHeight*.2, window.innerWidth*.5] : 
-      [window.innerWidth-400, window.innerHeight-400, 300, 300, 300, 300]
+      [window.innerWidth*.1, window.innerWidth*.1, window.innerHeight*.25, window.innerWidth*.8, window.innerWidth*.8, window.innerHeight*.4, window.innerHeight*.2, window.innerWidth*.5] : 
+      [window.innerWidth-400, window.innerWidth-575, 75, 300, 450, 300, 200, 200]
   }, [window.innerHeight, window.innerWidth])
   // const dragHandlers = {onStart: this.onStart, onStop: this.onStop};
 
@@ -344,11 +344,27 @@ function App() {
         <VariablePanel />
         <DataPanel />
         <Popover />
-        <NotificationBox />
-        
+        <NotificationBox />  
         <Draggable 
-          defaultX={defaultX-defaultWidth}
-          defaultY={defaultY-defaultHeight}
+          z={9}
+          defaultX={defaultXLong}
+          defaultY={defaultY}
+          title="lineChart"
+          content={
+          <Scaleable 
+            content={
+              <MainLineChart />
+            } 
+            title="lineChart"
+            defaultWidth={defaultWidthLong}
+            defaultHeight={defaultHeight}
+            minHeight={minHeight}
+            minWidth={minWidth} />
+        }/>      
+        <Draggable 
+          z={10}
+          defaultX={defaultX}
+          defaultY={defaultY+20}
           title="tutorial"
           content={
           <Scaleable 
@@ -362,21 +378,7 @@ function App() {
             minHeight={minHeight}
             minWidth={minWidth} />
         }/>
-        <Draggable 
-          defaultX={defaultX-defaultWidthLong}
-          defaultY={defaultY-defaultHeight}
-          title="lineChart"
-          content={
-          <Scaleable 
-            content={
-              <MainLineChart />
-            } 
-            title="lineChart"
-            defaultWidth={defaultWidthLong}
-            defaultHeight={defaultHeight}
-            minHeight={minHeight}
-            minWidth={minWidth} />
-        }/>
+
       </div>
     </div>
   );
