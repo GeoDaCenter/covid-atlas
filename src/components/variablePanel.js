@@ -659,11 +659,11 @@ const VariablePanel = (props) => {
         </TwoUp>        
       </ControlsContainer>
       <div className="noteContainer">
-        <h2>Help us improve the Atlas!</h2>
-        <h3>
+        <h3>Help us improve the Atlas!</h3>
+        <p>
           <a href="https://docs.google.com/forms/d/e/1FAIpQLSf0KdYeVyvwnz0RLnZijY3kdyFe1SwXukPc--a1HFPE1NRxyw/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer">Take the Atlas v2 survey here </a>
           or share your thoughts at <a href="mailto:contact@theuscovidatlas.org" target="_blank" rel="noopener noreferrer">contact@theuscovidatlas.org.</a>
-        </h3>
+        </p>
         <hr></hr>
         <p className="note">
           Data is updated with freshest available data at 3pm CST daily, at minimum. 

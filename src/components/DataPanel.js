@@ -175,7 +175,7 @@ const ReportSection = styled.span`
 `
 
 const BigNumber = styled.h2`
-  font-size:1.5rem;
+  font-size:1.15rem;
   padding:0 0 15px 0 !important;
 `
 
