@@ -1,7 +1,6 @@
-import React, { useEffect, useState, lazy, Suspense } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as jsgeoda from 'jsgeoda';
-
 
 // Helper and Utility functions //
 // first row: data loading
@@ -20,7 +19,9 @@ import {
   dataLoad, dataLoadExisting, storeLisaValues, storeCartogramData,
   setCentroids, setMapParams, setNewBins, setUrlParams, setPanelState } from './actions';
 
-import { Map, NavBar, VariablePanel, BottomPanel,  TopPanel, Preloader} from './components';  
+import { Map, NavBar, VariablePanel, BottomPanel,  TopPanel, Preloader,
+  DataPanel, MainLineChart, Scaleable, Draggable, InfoBox,
+  NotificationBox, Popover } from './components';  
 
 import { colorScales, fixedScales, dataPresets, 
   legacyOverlayOrder, legacyResourceOrder, legacySourceOrder } from './config';
@@ -37,14 +38,6 @@ import { colorScales, fixedScales, dataPresets,
 
 
 function App() {
-  // lazy load components  
-  const DataPanel = lazy(() => import('./components/dataPanel'));
-  const MainLineChart = lazy(() => import('./components/mainLineChart'));
-  const Scaleable = lazy(() => import('./components/scaleable'));
-  const Draggable = lazy(() => import('./components/draggable'));
-  const InfoBox = lazy(() => import('./components/infoBox'));
-  const NotificationBox = lazy(() => import('./components/notificationBox'));
-  const Popover = lazy(() => import('./components/tooltipPopper'));
 
   // static variables for floating panel sizing
   let [ defaultX, defaultXLong, defaultY, defaultWidth, defaultWidthLong, defaultHeight,
@@ -351,44 +344,42 @@ function App() {
         <TopPanel />
         <BottomPanel />
         <VariablePanel />
-        <Suspense fallback={renderLoader()}>
-          <DataPanel />
-          <Popover />
-          <NotificationBox />  
-          <Draggable 
-            z={9}
-            defaultX={defaultXLong}
-            defaultY={defaultY}
+        <DataPanel />
+        <Popover />
+        <NotificationBox />  
+        <Draggable 
+          z={9}
+          defaultX={defaultXLong}
+          defaultY={defaultY}
+          title="lineChart"
+          content={
+          <Scaleable 
+            content={
+              <MainLineChart />
+            } 
             title="lineChart"
+            defaultWidth={defaultWidthLong}
+            defaultHeight={defaultHeight}
+            minHeight={minHeight}
+            minWidth={minWidth} />
+        }/>      
+        <Draggable 
+          z={10}
+          defaultX={defaultX}
+          defaultY={defaultY+20}
+          title="tutorial"
+          content={
+          <Scaleable 
+            notScaleable={true}
             content={
-            <Scaleable 
-              content={
-                <MainLineChart />
-              } 
-              title="lineChart"
-              defaultWidth={defaultWidthLong}
-              defaultHeight={defaultHeight}
-              minHeight={minHeight}
-              minWidth={minWidth} />
-          }/>      
-          <Draggable 
-            z={10}
-            defaultX={defaultX}
-            defaultY={defaultY+20}
+              <InfoBox />
+            } 
             title="tutorial"
-            content={
-            <Scaleable 
-              notScaleable={true}
-              content={
-                <InfoBox />
-              } 
-              title="tutorial"
-              defaultWidth={defaultWidth}
-              defaultHeight={defaultHeight}
-              minHeight={minHeight}
-              minWidth={minWidth} />
-          }/>
-        </Suspense>
+            defaultWidth={defaultWidth}
+            defaultHeight={defaultHeight}
+            minHeight={minHeight}
+            minWidth={minWidth} />
+        }/>
 
       </div>
     </div>
