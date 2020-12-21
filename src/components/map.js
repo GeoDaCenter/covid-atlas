@@ -161,18 +161,26 @@ const Map = () => {
         window.addEventListener('storage', () => {
             // When local storage changes, dump the list to
             // the console.
-            const SHARED_GEOID =  localStorage.getItem('SHARED_GEOID');
-            setHighlightGeog(parseInt(SHARED_GEOID)); 
+            const SHARED_GEOID =  parseInt(localStorage.getItem('SHARED_GEOID'));
+            
+            if (SHARED_GEOID !== null && Number.isInteger(SHARED_GEOID)) {
+                setHighlightGeog(parseInt(SHARED_GEOID)); 
+            }
+            
             const SHARED_VIEW =  JSON.parse(localStorage.getItem('SHARED_VIEW'));
-            setViewState(prevView => ({
-                ...prevView,
-                longitude: SHARED_VIEW.longitude,
-                latitude: SHARED_VIEW.latitude,
-                zoom: SHARED_VIEW.zoom,
-                transitionDuration: 1000,
-                transitionInterpolator: new FlyToInterpolator()
-            })
-            )
+            
+            if (SHARED_VIEW !== null && SHARED_VIEW.hasOwnProperty('latitude')) {
+                setViewState(
+                    prevView => ({
+                        ...prevView,
+                        longitude: SHARED_VIEW.longitude,
+                        latitude: SHARED_VIEW.latitude,
+                        zoom: SHARED_VIEW.zoom,
+                        transitionDuration: 1000,
+                        transitionInterpolator: new FlyToInterpolator()
+                    })
+                )   
+            }
         });
     },[])
 
