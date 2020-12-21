@@ -173,7 +173,15 @@ export const dataPresets = {
         joinCols: ['GEOID', ['UID']], 
         tableNames: ['cases', 'deaths'],
         accumulate: []
-    } 
+    },
+    'cdc.geojson': {
+        plainName: 'Center for Disease Control County',
+        geojson: 'cdc.geojson', 
+        csvs: ['covid_confirmed_cdc','covid_deaths_cdc', 'chr_health_context', 'chr_life', 'chr_health_factors', 'covid_testing_cdc', 'covid_wk_pos_cdc', 'covid_tcap_cdc', 'covid_ccpt_cdc'], 
+        joinCols: ['GEOID', ['FIPS']], 
+        tableNames: ['cases', 'deaths', 'chr_health_context', 'chr_life', 'chr_health_factors', 'testing', 'testing_wk_pos', 'testing_tcap', 'testing_ccpt'],
+        accumulate: []
+    }
 }
 
 export const tooltipInfo = {

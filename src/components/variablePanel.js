@@ -430,11 +430,23 @@ const VariablePanel = (props) => {
     //     ...tempParams
     //   }
     // }))
+
+    // transitioning from a static characteristic (null time range)
+    // to a time-series data set 
     if (dataParams.nType === 'characteristic' && tempParams.nType === 'time-series') tempParams.nRange = 7;
 
+    // if time series over time series, coordinate index and range
+    if (tempParams.nType === 'time-series' && tempParams.dType === 'time-series') {
+      tempParams.dIndex = dataParams.nIndex;
+      tempParams.dRange = tempParams.nRange || dataParams.nRange;
+    }
+
+    console.log(dataParams.nRange)
+    console.log(dataParams.nIndex)
+
+    dispatch(setVariableParams({...tempParams}))
     dispatch(setVariableName(variable))
     dispatch(setMapParams({customScale: tempParams.colorScale || '', fixedScale: tempParams.fixedScale || null}))
-    dispatch(setVariableParams({...tempParams}))
   };
 
   const handleDataSource = (event) => {
@@ -540,6 +552,7 @@ const VariablePanel = (props) => {
             <MenuItem value={'county_usfacts.geojson'} key={'county_usfacts.geojson'}>USA Facts (County)</MenuItem>
             <MenuItem value={'county_nyt.geojson'} key={'county_nyt.geojson'}>New York Times (County)</MenuItem>
             <MenuItem value={'county_1p3a.geojson'} key={'county_1p3a.geojson'}>1point3acres (County)</MenuItem>
+            <MenuItem value={'cdc.geojson'} key={'cdc.geojson'}>CDC (County)</MenuItem>
           <ListSubheader disabled>state data</ListSubheader>
             <MenuItem value={'state_usafacts.geojson'} key={'state_usafacts.geojson'}>USA Facts (State)</MenuItem>
             <MenuItem value={'state_nyt.geojson'} key={'state_nyt.geojson'}>New York Times (State)</MenuItem>
@@ -577,7 +590,7 @@ const VariablePanel = (props) => {
             }
             
             {
-              currentData.includes("state") && Object.keys(StateVariables).map((variable) => {
+              (currentData.includes("state")||currentData.includes("cdc")) && Object.keys(StateVariables).map((variable) => {
                 if (variable.split(':')[0]==="HEADER") {
                   return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
                 } else {

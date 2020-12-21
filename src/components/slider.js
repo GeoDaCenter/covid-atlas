@@ -144,12 +144,17 @@ const DateSlider = () => {
     const [rangeSelectVal, setRangeSelectVal] = useState(7);
     
     const handleChange = (event, newValue) => {
+
+        let tempRange = null;
+
+        if ((newValue - startDateIndex < 7) && (dataParams.nRange === 7)) tempRange = newValue-startDateIndex || 1
+
         if (dataParams.nType === "time-series" && dataParams.dType === "time-series") {
-            dispatch(setVariableParams({nIndex: newValue, dIndex: newValue}))
+            dispatch(setVariableParams({nIndex: newValue, dIndex: newValue, nRange: tempRange || dataParams.nRange, dRange: tempRange || dataParams.nRange }))
         } else if (dataParams.nType === "time-series") {
-            dispatch(setVariableParams({nIndex: newValue}))
+            dispatch(setVariableParams({nIndex: newValue, nRange: tempRange || dataParams.nRange}))
         } else if (dataParams.dType === "time-series") {
-            dispatch(setVariableParams({dIndex: newValue}))
+            dispatch(setVariableParams({dIndex: newValue, dRange: tempRange  || dataParams.nRange }))
         } else if (currentVariable.includes('Testing')){
             dispatch(setVariableParams({nIndex: newValue}))
         }

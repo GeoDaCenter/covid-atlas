@@ -139,14 +139,7 @@ function App() {
 
   const updateBins = () => {
     if (gda_proxy !== null && storedData.hasOwnProperty(currentData) && mapParams.mapType !== "lisa" && mapParams.binMode !== 'dynamic'){
-      if (mapParams.fixedScale !== null) {
-        dispatch(
-          setMapParams({
-            bins: fixedScales[mapParams.fixedScale],
-            colorScale: colorScales[mapParams.fixedScale]
-          })
-        )
-      } else {
+      if (mapParams.fixedScale === null || mapParams.mapType !== 'natural_breaks') {
         let nb = gda_proxy.custom_breaks(
           currentData, 
           mapParams.mapType, 
@@ -158,10 +151,17 @@ function App() {
         dispatch(
           setMapParams({
             bins: {
-              bins: mapParams.mapType === "natural_breaks" ? nb.bins : ['Lower Outlier','< 25%','25-50%','50-75%','>75%','Upper Outlier'],
+              bins: mapParams.mapType === 'natural_breaks' ? nb.bins : ['Lower Outlier','< 25%','25-50%','50-75%','>75%','Upper Outlier'],
               breaks: [-Math.pow(10, 12), ...nb.breaks.slice(1,-1), Math.pow(10, 12)]
             },
-            colorScale: colorScales[mapParams.customScale || mapParams.mapType]
+            colorScale: mapParams.mapType === 'natural_breaks' ? colorScales[mapParams.customScale || mapParams.mapType] : colorScales[mapParams.mapType || mapParams.customScale]
+          })
+        )
+      } else {
+        dispatch(
+          setMapParams({
+            bins: fixedScales[mapParams.fixedScale],
+            colorScale: colorScales[mapParams.fixedScale]
           })
         )
       }
@@ -285,6 +285,7 @@ function App() {
   // Trigger on parameter change for metric values
   // Gets bins and sets map parameters
   useEffect(() => {
+    console.log(dataParams)
     updateBins();
   }, [currentData, dataParams.numerator, dataParams.nProperty, 
     dataParams.nRange, dataParams.denominator, dataParams.dProperty,
@@ -335,10 +336,11 @@ function App() {
     <div className="App">
       <Preloader loaded={mapLoaded} />
       <NavBar />
-      {/* <header className="App-header" style={{position:'fixed', left: '20vw', top:'100px', zIndex:10}}>
-        <button onClick={() => console.log(gda_proxy.wasm.GetNeighbors('county_usfacts.geojson','w_queencounty_usfacts.geojson100',100))}>LOG NEIGHBORS</button>
-        <button onClick={() => total(5)}>test wasm</button>
-      </header> */}
+      <header className="App-header" style={{position:'fixed', left: '20vw', top:'100px', zIndex:10}}>
+        {/* <button onClick={() => console.log(gda_proxy.wasm.GetNeighbors('county_usfacts.geojson','w_queencounty_usfacts.geojson100',100))}>LOG NEIGHBORS</button> */}
+        {/* <button onClick={() => updateBins()}>update bins</button>
+        <button onClick={() => console.log(dataParams)}>data params</button> */}
+      </header>
       <div id="mainContainer">
         <Map />
         <TopPanel />

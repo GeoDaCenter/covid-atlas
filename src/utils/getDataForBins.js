@@ -27,7 +27,6 @@ const getDataForBins = (tableData, dataParams) => {
             rtn.unshift(dataFn(tableData[n][numerator], tableData[n][denominator], dataParams))
         }
     }
-
     return rtn;   
 }
 export default getDataForBins
