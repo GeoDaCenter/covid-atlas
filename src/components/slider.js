@@ -322,7 +322,7 @@ const DateSlider = () => {
                                 >
                                     <MenuItem value={null} key={'cumulative'}>Cumulative</MenuItem>
                                     <MenuItem value={1} key={'daily'}>New Daily</MenuItem>
-                                    <MenuItem value={7} key={'weekly'}>Weekly Average</MenuItem>
+                                    <MenuItem value={7} key={'7-day-ave'}>7-Day Average</MenuItem>
                                     <MenuItem value={'custom'} key={'customRange'}>Custom Range</MenuItem>
                                 </Select>
                             </StyledDropDownNoLabel>

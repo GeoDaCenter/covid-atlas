@@ -392,13 +392,13 @@ const Map = () => {
                 getFillColor: [dataParams, mapParams],
                 getElevation: [dataParams, mapParams],
             },
-            onHover: info => {
-                try {
-                    setHoverInfo(info)
-                } catch {
-                    setHoverInfo(null)
-                }
-            },
+            // onHover: info => {
+            //     try {
+            //         setHoverInfo(info)
+            //     } catch {
+            //         setHoverInfo(null)
+            //     }
+            // },
             onClick: info => {
                 try {
                     dispatch(setDataSidebar(info.object));

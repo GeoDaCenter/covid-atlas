@@ -1,6 +1,8 @@
 // branchless variant
 // const dataFn = (numeratorData, numeratorProperty, index, range, denominatorData, denominatorProperty, denominatorIndex, denominatorRange, scale)  => {
 
+import { min } from "lodash";
+
 //     return (
 //       (
 //         (
@@ -44,9 +46,12 @@ const dataFn = (numeratorData, denominatorData, dataParams)  => {
     nType, dType,
     scale
   } = dataParams;
-
+  
   if (numeratorData === undefined) {
-    return 0;
+    return null;
+  } else if ((nProperty !== null && numeratorData[nProperty] === undefined) || (nIndex !== null && numeratorData[nIndex] === undefined)){
+    console.log('null data')
+    return null;
   } else if (nType ==='time-series' && dType === 'time-series') {
     if (nRange === null & dRange === null) {
       return (

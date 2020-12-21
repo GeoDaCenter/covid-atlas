@@ -19,12 +19,12 @@ const getDataForBins = (tableData, dataParams) => {
         // loop through, do appropriate calculation. add returned value to rtn array
         while (n>0) {
             n--;
-            rtn.unshift(dataFn(tableData[n][numerator], tableData[n][denominator], {...dataParams, nIndex:tempIndex, dIndex: tempDIndex}))
+            rtn.unshift(dataFn(tableData[n][numerator], tableData[n][denominator], {...dataParams, nIndex:tempIndex, dIndex: tempDIndex})||0)
         }
     } else {
        while (n>0) {
             n--;
-            rtn.unshift(dataFn(tableData[n][numerator], tableData[n][denominator], dataParams))
+            rtn.unshift(dataFn(tableData[n][numerator], tableData[n][denominator], dataParams)||0)
         }
     }
     return rtn;   

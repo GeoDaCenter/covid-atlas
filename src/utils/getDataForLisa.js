@@ -23,12 +23,12 @@ const getDataForLisa = (tableData, dataParams, order) => {
         // loop through, do appropriate calculation. add returned value to rtn array
         while (n>0) {
             n--;
-            tempDict[tableData[n].properties.GEOID] = dataFn(tableData[n][numerator], tableData[n][denominator], {...dataParams, nIndex:tempNIndex, dIndex: tempDIndex})
+            tempDict[tableData[n].properties.GEOID] = dataFn(tableData[n][numerator], tableData[n][denominator], {...dataParams, nIndex:tempNIndex, dIndex: tempDIndex})||0
         }
     } else {
        while (n>0) {
             n--;
-            tempDict[tableData[n].properties.GEOID] = dataFn(tableData[n][numerator], tableData[n][denominator], dataParams)
+            tempDict[tableData[n].properties.GEOID] = dataFn(tableData[n][numerator], tableData[n][denominator], dataParams)||0
         }
     }
     
