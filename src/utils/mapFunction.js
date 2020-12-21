@@ -1,6 +1,5 @@
 const mapFn = (val, bins, colors, maptype) => {
   if (val === null) {
-    console.log('null data')
     return null;
   } else if (maptype === "natural_breaks") {
     if (val === 0) return colors[0];

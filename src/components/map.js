@@ -129,7 +129,7 @@ const viewGlobe = new GlobeView({id: 'globe', controller: false, resolution:1});
 const view = new MapView({repeat: true});
 
 const Map = () => { 
-
+    
     const { storedData, storedGeojson, currentData, storedLisaData,
         storedCartogramData, panelState, dates, dataParams, mapParams,
         currentVariable, startDateIndex, urlParams } = useSelector(state => state);
@@ -319,7 +319,7 @@ const Map = () => {
         } else if (mapType === 'lisa') {
             return colorScales.lisa[currLisaData[storedGeojson[currentData]['geoidOrder'][f.properties.GEOID]]]
         } else {
-            return mapFn(dataFn(f[dataParams.numerator], f[dataParams.denominator], dataParams), bins.breaks, mapParams.colorScale, mapParams.mapType) 
+            return mapFn(dataFn(f[dataParams.numerator], f[dataParams.denominator], dataParams), bins.breaks, mapParams.colorScale, mapParams.mapType);
         }
     }
     
@@ -389,16 +389,16 @@ const Map = () => {
             updateTriggers: {
                 data: currentData,
                 pickable: mapParams.vizType,
-                getFillColor: [dataParams, mapParams],
-                getElevation: [dataParams, mapParams],
+                getFillColor: [dataParams, mapParams.mapType, mapParams.bins, mapParams.binMode, mapParams.fixedScale, mapParams.vizType, mapParams.colorScale, mapParams.customScale],
+                getElevation: [dataParams, mapParams.mapType, mapParams.bins, mapParams.binMode, mapParams.fixedScale, mapParams.vizType, mapParams.colorScale, mapParams.customScale],
             },
-            // onHover: info => {
-            //     try {
-            //         setHoverInfo(info)
-            //     } catch {
-            //         setHoverInfo(null)
-            //     }
-            // },
+            onHover: info => {
+                try {
+                    setHoverInfo(info)
+                } catch {
+                    setHoverInfo(null)
+                }
+            },
             onClick: info => {
                 try {
                     dispatch(setDataSidebar(info.object));
