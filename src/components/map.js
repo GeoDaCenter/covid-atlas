@@ -11,7 +11,7 @@ import {fitBounds} from '@math.gl/web-mercator';
 // import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 // import {IcoSphereGeometry} from '@luma.gl/engine';
 
-import ReactMapGL, {NavigationControl, GeolocateControl } from 'react-map-gl';
+import ReactMapGL, {NavigationControl, GeolocateControl, LinearInterpolator } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder'
 
 import { MapTooltipContent } from '../components';
@@ -157,6 +157,25 @@ const Map = () => {
     
     const dispatch = useDispatch();
 
+    useEffect(() => { 
+        window.addEventListener('storage', () => {
+            // When local storage changes, dump the list to
+            // the console.
+            const SHARED_GEOID =  localStorage.getItem('SHARED_GEOID');
+            setHighlightGeog(parseInt(SHARED_GEOID)); 
+            const SHARED_VIEW =  JSON.parse(localStorage.getItem('SHARED_VIEW'));
+            setViewState(prevView => ({
+                ...prevView,
+                longitude: SHARED_VIEW.longitude,
+                latitude: SHARED_VIEW.latitude,
+                zoom: SHARED_VIEW.zoom,
+                transitionDuration: 1000,
+                transitionInterpolator: new FlyToInterpolator()
+            })
+            )
+        });
+    },[])
+
     useEffect(() => {
         let arr = [];
         if (storedData[currentData] && mapParams.vizType === 'cartogram') {
@@ -285,8 +304,6 @@ const Map = () => {
             pitch:0
         }));
     }, [urlParams])
-
-    const mapRef = useRef();
     
     const GetFillColor = (f, bins, mapType) => {
         if (!bins.hasOwnProperty("bins")) {
@@ -321,6 +338,9 @@ const Map = () => {
             return mapFn(val, bins.breaks, mapParams.colorScale, mapParams.mapType) 
         }
     }
+
+    const mapRef = useRef();
+
     const Layers = [
         // new SolidPolygonLayer({
         //     id: 'background',
@@ -374,8 +394,10 @@ const Map = () => {
             onClick: info => {
                 try {
                     dispatch(setDataSidebar(info.object));
-                    setHighlightGeog(info.object.properties.GEOID);
+                    setHighlightGeog(info.object.properties.GEOID); 
                     dispatch(setChartData(getDataForCharts({data: info.object}, 'cases', startDateIndex, dates[currentData], info.object?.properties?.population/100000||1)));
+                    window.localStorage.setItem('SHARED_GEOID', info.object.properties.GEOID);
+                    window.localStorage.setItem('SHARED_VIEW', JSON.stringify(mapRef.current.props.viewState));
                     // if (mapParams.overlay === "mobility-county") {
                     //     setMobilityData(parseMobilityData(info.object.properties.GEOID, storedMobilityData.flows[info.object.properties.GEOID], storedMobilityData.centroids));
                     // }
