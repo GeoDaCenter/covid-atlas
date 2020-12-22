@@ -118,8 +118,8 @@ const MainLineChart = () => {
     const startDateIndex = useSelector(state => state.startDateIndex);
     const sidebarData = useSelector(state => state.sidebarData);
     const [logChart, setLogChart] = useState(false)
-    const { properties
-       } = useSelector(state => state.sidebarData);
+    const { properties } = useSelector(state => state.sidebarData);
+    const chartKeys = useSelector(state => state.chartKeys);
 
     const dispatch = useDispatch();
 
@@ -128,7 +128,7 @@ const MainLineChart = () => {
     }
 
     const chartSetDate = (e) => {
-        if (e.activeTooltipIndex !== undefined) handleChange(e.activeTooltipIndex+startDateIndex)
+        if (e?.activeTooltipIndex !== undefined) handleChange(e.activeTooltipIndex+startDateIndex)
     }    
 
     const handleChange = (newValue) => {
@@ -171,7 +171,7 @@ const MainLineChart = () => {
                         }
                     />
                     {/* <YAxis type="number" /> */}
-                    <YAxis yAxisId="left" type="number" dataKey="count"  scale={logChart ? "log" : "linear"} domain={[0.01, 'dataMax']} allowDataOverflow 
+                    <YAxis yAxisId="left" type="number" scale={logChart ? "log" : "linear"} domain={[0.01, 'dataMax']} allowDataOverflow 
                         ticks={Object.keys(sidebarData).length === 0 ? [2000000,4000000,6000000,8000000,10000000,12000000,14000000] : []} 
                         tick={
                             <CustomTick
@@ -187,7 +187,7 @@ const MainLineChart = () => {
                         >
                         <Label value="Total Cases" position='insideLeft' style={{marginTop:10, fill:colors.lightgray, fontFamily: 'Lato', fontWeight: 600}} angle={-90}  />
                     </YAxis>
-                    <YAxis yAxisId="right" orientation="right" dataKey="dailyNew" scale={logChart ? "log" : "linear"} domain={[0.01, 'dataMax']} allowDataOverflow 
+                    <YAxis yAxisId="right" orientation="right" scale={logChart ? "log" : "linear"} domain={[0.01, 'dataMax']} allowDataOverflow 
                         // ticks={[20000,40000,60000,80000,100000, 120000, 140000]} 
                         tick={
                             <CustomTick
@@ -214,9 +214,11 @@ const MainLineChart = () => {
                         fillOpacity={0.15}
                         isAnimationActive={false}
                     />
-                    <Line type="monotone" yAxisId="left" dataKey="count" name="Total Cases" stroke={colors.lightgray} dot={false} />
-                    <Line type="monotone" yAxisId="right" dataKey="dailyNew" name="7-Day Average New Cases" stroke={colors.yellow} dot={false} />
-                    <Line type="monotone" yAxisId="right" dataKey="selectedGeog" name="Selected Geography Count" stroke={colors.white} dot={false} />
+                    {chartKeys.length===0 && <Line type="monotone" yAxisId="left" dataKey="sum" name="Total Cases" stroke={colors.lightgray} dot={false} isAnimationActive={false} /> }
+                    {chartKeys.length===0 && <Line type="monotone" yAxisId="right" dataKey="count" name="7-Day Average New Cases" stroke={colors.yellow} dot={false} isAnimationActive={false} /> }
+                    
+                    {chartKeys.length !== 0 && chartKeys.map(key => { return <Line type="monotone" yAxisId="left" dataKey={key + ' Total Cases'} name={key + ' Total Cases'} stroke={colors.lightgray} dot={false} isAnimationActive={false}  />})}
+                    {chartKeys.length !== 0 && chartKeys.map(key => { return <Line type="monotone" yAxisId="right" dataKey={key + ' Daily Count'} name={key + ' 7-Day Ave'} stroke={colors.yellow} dot={false} isAnimationActive={false}  />})}
                 </LineChart>
             </ResponsiveContainer>
             <StyledSwitch>

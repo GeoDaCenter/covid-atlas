@@ -284,7 +284,34 @@ var reducer = (state = INITIAL_STATE, action) => {
         case 'SET_CHART_DATA':
             return {
                 ...state,
-                chartData: action.payload.data
+                chartData: action.payload.data.values,
+                chartKeys: [action.payload.data.name]
+            }
+        case 'APPEND_CHART_DATA':
+            let appendedChartData = state.chartData;
+            let countCol = action.payload.data.name + ' Daily Count'
+            let sumCol = action.payload.data.name + ' Total Cases'
+
+            for (let i=0; i<appendedChartData.length;i++) {
+                appendedChartData[i][countCol] = action.payload.data.values[i][countCol]
+                appendedChartData[i][sumCol] = action.payload.data.values[i][sumCol]
+            }
+
+            let appendedChartNames = [action.payload.data.name, ...state.chartKeys];
+
+            return {
+                ...state,
+                chartData: appendedChartData,
+                chartKeys: appendedChartNames
+            }
+        case 'REMOVE_CHART_DATA':
+            let removedChartNames = [...state.chartKeys]
+            let tempRemoveIndex = removedChartNames.indexOf(action.payload.data)
+            removedChartNames.splice(tempRemoveIndex, 1)
+
+            return {
+                ...state,
+                chartKeys: removedChartNames
             }
         case 'SET_ANCHOR_EL':
             return {

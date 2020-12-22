@@ -15,7 +15,7 @@ import ReactMapGL, {NavigationControl, GeolocateControl, LinearInterpolator } fr
 import Geocoder from 'react-map-gl-geocoder'
 
 import { MapTooltipContent } from '../components';
-import { setDataSidebar, setMapLoaded, setPanelState, setChartData } from '../actions';
+import { setDataSidebar, setMapLoaded, setPanelState, setChartData, appendChartData, removeChartData } from '../actions';
 import { mapFn, dataFn, getVarId, getCSV, getCartogramCenter, getDataForCharts, getURLParams } from '../utils';
 import { colors, colorScales } from '../config';
 import MAP_STYLE from '../config/style.json';
@@ -135,7 +135,7 @@ const Map = () => {
         currentVariable, startDateIndex, urlParams } = useSelector(state => state);
 
     const [hoverInfo, setHoverInfo] = useState(false);
-    const [highlightGeog, setHighlightGeog] = useState(false);
+    const [highlightGeog, setHighlightGeog] = useState([]);
     // const [globalMap, setGlobalMap] = useState(false);
     const globalMap = false;
     const [mapStyle, setMapStyle] = useState(defaultMapStyle);
@@ -153,8 +153,10 @@ const Map = () => {
     const [clinicData, setClinicData] = useState(null);
     const [storedCenter, setStoredCenter] = useState(null);
     const [shared, setShared] = useState(false);
+    const [multipleSelect, setMultipleSelect] = useState(false);
+    const [resetSelect, setResetSelect] = useState(null);
     // const [mobilityData, setMobilityData] = useState([]);
-    
+
     const dispatch = useDispatch();
 
     useEffect(() => { 
@@ -164,7 +166,7 @@ const Map = () => {
             const SHARED_GEOID =  parseInt(localStorage.getItem('SHARED_GEOID'));
             
             if (SHARED_GEOID !== null && Number.isInteger(SHARED_GEOID)) {
-                setHighlightGeog(parseInt(SHARED_GEOID)); 
+                setHighlightGeog([parseInt(SHARED_GEOID)]); 
             }
             
             const SHARED_VIEW =  JSON.parse(localStorage.getItem('SHARED_VIEW'));
@@ -348,7 +350,7 @@ const Map = () => {
     }
 
     const mapRef = useRef();
-
+    
     const Layers = [
         // new SolidPolygonLayer({
         //     id: 'background',
@@ -400,21 +402,66 @@ const Map = () => {
                 }
             },
             onClick: info => {
-                try {
-                    dispatch(setDataSidebar(info.object));
-                    setHighlightGeog(info.object.properties.GEOID); 
-                    dispatch(setChartData(getDataForCharts({data: info.object}, 'cases', startDateIndex, dates[currentData], info.object?.properties?.population/100000||1)));
-                    window.localStorage.setItem('SHARED_GEOID', info.object.properties.GEOID);
-                    window.localStorage.setItem('SHARED_VIEW', JSON.stringify(mapRef.current.props.viewState));
-                    // if (mapParams.overlay === "mobility-county") {
-                    //     setMobilityData(parseMobilityData(info.object.properties.GEOID, storedMobilityData.flows[info.object.properties.GEOID], storedMobilityData.centroids));
-                    // }
-                } catch {}
-
+                if (multipleSelect) {
+                    try {
+                        if (highlightGeog.indexOf(info.object.properties.GEOID) === -1) {
+                            dispatch(setDataSidebar(info.object));
+                            setHighlightGeog(prev => [...prev, info.object.properties.GEOID]); 
+                            dispatch(
+                                appendChartData({
+                                    values: getDataForCharts(
+                                        {data: info.object}, 
+                                        'cases', 
+                                        startDateIndex, 
+                                        dates[currentData], 
+                                        `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
+                                    ),
+                                    name: `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
+                                })
+                            );
+                            window.localStorage.setItem('SHARED_GEOID', info.object.properties.GEOID);
+                            window.localStorage.setItem('SHARED_VIEW', JSON.stringify(mapRef.current.props.viewState));
+                        } else {
+                            if (highlightGeog.length > 1) {
+                                let tempArray = [...highlightGeog];
+                                let geogIndex = tempArray.indexOf(info.object.properties.GEOID);
+                                tempArray.splice(geogIndex, 1);
+                                setHighlightGeog(tempArray);
+                                dispatch(
+                                    removeChartData(
+                                        `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
+                                    )
+                                )
+                            }
+                        }
+                    } catch {}
+                } else {
+                    try {
+                        dispatch(setDataSidebar(info.object));
+                        setHighlightGeog([info.object.properties.GEOID]); 
+                        dispatch(
+                            setChartData({
+                                values: getDataForCharts(
+                                    {data: info.object}, 
+                                    'cases', 
+                                    startDateIndex, 
+                                    dates[currentData], 
+                                    `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
+                                ),
+                                name: `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
+                            })
+                        );
+                        window.localStorage.setItem('SHARED_GEOID', info.object.properties.GEOID);
+                        window.localStorage.setItem('SHARED_VIEW', JSON.stringify(mapRef.current.props.viewState));
+                        // if (mapParams.overlay === "mobility-county") {
+                        //     setMobilityData(parseMobilityData(info.object.properties.GEOID, storedMobilityData.flows[info.object.properties.GEOID], storedMobilityData.centroids));
+                        // }
+                    } catch {}
+                }
             },
-                // parameters: {
-                //     depthTest: false
-                // }
+                parameters: {
+                    depthTest: false
+                }
         }),
         new GeoJsonLayer({
             id: 'highlightLayer',
@@ -427,11 +474,14 @@ const Map = () => {
             pickable: false,
             stroked: true,
             filled:false,
-            getLineColor: f => (highlightGeog === f.properties.GEOID ? [20,20,20] : [20,20,20,0]), 
+            getLineColor: f => highlightGeog.indexOf(f.properties.GEOID)!==-1 ? [20,20,20] : [20,20,20,0], 
             lineWidthScale: 500,
             getLineWidth: 5,
             lineWidthMinPixels: 3,
             lineWidthMaxPixels: 10,
+            parameters: {
+                depthTest: false
+            },
             updateTriggers: {
                 data: currentData,
                 getLineColor: highlightGeog,
@@ -663,8 +713,19 @@ const Map = () => {
         }
     }
 
+    const handleCtrlDown = (e) => {
+        if (e.ctrlKey) setMultipleSelect(true)
+    }
+
+    const handleCtrlUp = (e) => {
+        if (!e.ctrlKey) setMultipleSelect(false)
+    }
+
     return (
-        <MapContainer>
+        <MapContainer
+            onKeyDown={handleCtrlDown}
+            onKeyUp={handleCtrlUp}
+        >
             <DeckGL
                 initialViewState={viewState}
                 controller={true}
@@ -765,6 +826,7 @@ const Map = () => {
                             </svg>
 
                         </NavInlineButton>
+
                         <ShareURL type="text" value="" id="share-url" />
                     </MapButtonContainer>
                     <div></div>

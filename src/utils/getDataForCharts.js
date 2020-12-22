@@ -1,8 +1,19 @@
-const getDataForCharts = (data, table, startIndex, dates) => {
+const getDataForCharts = (data, table, startIndex, dates, name=null) => {
     let features = Object.keys(data);
     let n = startIndex;
     let rtn = []
     let j = -7;
+
+    let countCol;
+    let sumCol;
+    
+    if (name===null) {
+        countCol = 'count'
+        sumCol = 'sum'
+    } else {
+        countCol = name + ' Daily Count'
+        sumCol = name + ' Total Cases'
+    }
 
     while (n<data[features[0]][table].length) {
         let tempObj = {};
@@ -14,13 +25,13 @@ const getDataForCharts = (data, table, startIndex, dates) => {
             // tempObj[`n${i}`] = data[features[i]][table][n]
             i++;
         }
-        tempObj.count = sum
+        tempObj[sumCol] = sum
         // dates[n-startIndex]
         tempObj.date = dates[n-startIndex]
         if (j<0) {
-            tempObj.dailyNew = sum
+            tempObj[countCol] = sum
         } else {
-            tempObj.dailyNew = (sum - rtn[j].count)/7
+            tempObj[countCol] = (sum - rtn[j][sumCol])/7
         }
         rtn.push(tempObj);
         n++;

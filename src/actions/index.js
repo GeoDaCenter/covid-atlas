@@ -257,6 +257,26 @@ export const setChartData = ( data ) => {
     }
 }
 
+// adds to current chart data from current data
+export const appendChartData = ( data ) => {
+    return {
+        type: 'APPEND_CHART_DATA',
+        payload: {
+            data
+        }
+    }
+}
+
+// removes from current chart data from current data
+export const removeChartData = ( data ) => {
+    return {
+        type: 'REMOVE_CHART_DATA',
+        payload: {
+            data
+        }
+    }
+}
+
 // sets current text-based variable name (eg. Death Count)
 export const setVariableName = ( name ) => {
     return {

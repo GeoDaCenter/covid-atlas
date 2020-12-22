@@ -159,17 +159,17 @@ const ReportContainer = styled.div`
     // display:flex;
     // flex-direction:column;
     // flex-wrap:wrap;
-    width:500px;
-    columns:${props => props.cols} 250px;
-    column-gap:10px;
-    display:inline-block;
+    // width:500px;
+    // columns:${props => props.cols} 250px;
+    // column-gap:10px;
+    // display:inline-block;
 `
 
 const ReportSection = styled.span`
     padding-right:20px;
     box-sizing:border-box;
-    width:100%;
-    display:inline-block;
+    // width:100%;
+    // display:inline-block;
     padding: 0;
     margin: 0;
 `
@@ -314,7 +314,8 @@ const DataPanel = () => {
         <Button onClick={() => setExpanded(false)} className={expanded ? '' : 'active'}>{compact}</Button>
       </ExpandButtons>}
       <ReportWrapper>
-        <ReportContainer cols={colCount} style={{width: width}}>
+        <ReportContainer >
+        {/* cols={colCount} style={{width: width}} */}
           <ReportSection>
             {properties && <h2>{properties.NAME}{properties.state_name && `, ${properties.state_name}`}</h2>}
             <br/>
@@ -626,14 +627,14 @@ const DataPanel = () => {
           <div className="extraPadding"></div>
           
           {properties && <button onClick={handleOpenClose} id="showHideRight" className={panelState.info ? 'active' : 'hidden'}>{report}</button>}
-          {properties && <ResizeButton 
+          {/* {properties && <ResizeButton 
                   id="resize"
                   onMouseDown={handleDown}
                   onTouchStart={handleTouch}
                   style={{zIndex:10}}
               >
                   {verticalGrip}
-              </ResizeButton>}
+              </ResizeButton>} */}
         </ReportContainer>
       </ReportWrapper>
     </DataPanelContainer>
