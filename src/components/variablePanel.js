@@ -441,9 +441,6 @@ const VariablePanel = (props) => {
       tempParams.dRange = tempParams.nRange || dataParams.nRange;
     }
 
-    console.log(dataParams.nRange)
-    console.log(dataParams.nIndex)
-
     dispatch(setVariableParams({...tempParams}))
     dispatch(setVariableName(variable))
     dispatch(setMapParams({customScale: tempParams.colorScale || '', fixedScale: tempParams.fixedScale || null}))

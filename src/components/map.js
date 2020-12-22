@@ -164,7 +164,7 @@ const Map = () => {
             // When local storage changes, dump the list to
             // the console.
             const SHARED_GEOID =  localStorage.getItem('SHARED_GEOID').split(',').map(d => parseInt(d))
-            console.log(SHARED_GEOID)
+            
             if (SHARED_GEOID !== null) {
                 setHighlightGeog(SHARED_GEOID); 
             }

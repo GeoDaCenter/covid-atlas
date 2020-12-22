@@ -49,8 +49,7 @@ const dataFn = (numeratorData, denominatorData, dataParams)  => {
   
   if (numeratorData === undefined) {
     return null;
-  } else if ((nProperty !== null && numeratorData[nProperty] === undefined) || (nIndex !== null && numeratorData[nIndex] === undefined)){
-    console.log('null data')
+  } else if ((nProperty !== null && numeratorData[nProperty] === undefined) && (nIndex !== null && numeratorData[nIndex] === undefined)){
     return null;
   } else if (nType ==='time-series' && dType === 'time-series') {
     if (nRange === null & dRange === null) {
