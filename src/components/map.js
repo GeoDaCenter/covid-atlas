@@ -163,10 +163,10 @@ const Map = () => {
         window.addEventListener('storage', () => {
             // When local storage changes, dump the list to
             // the console.
-            const SHARED_GEOID =  parseInt(localStorage.getItem('SHARED_GEOID'));
-            
-            if (SHARED_GEOID !== null && Number.isInteger(SHARED_GEOID)) {
-                setHighlightGeog([parseInt(SHARED_GEOID)]); 
+            const SHARED_GEOID =  localStorage.getItem('SHARED_GEOID').split(',').map(d => parseInt(d))
+            console.log(SHARED_GEOID)
+            if (SHARED_GEOID !== null) {
+                setHighlightGeog(SHARED_GEOID); 
             }
             
             const SHARED_VIEW =  JSON.parse(localStorage.getItem('SHARED_VIEW'));
@@ -405,8 +405,9 @@ const Map = () => {
                 if (multipleSelect) {
                     try {
                         if (highlightGeog.indexOf(info.object.properties.GEOID) === -1) {
+                            let GeoidList = [...highlightGeog, info.object.properties.GEOID]
                             dispatch(setDataSidebar(info.object));
-                            setHighlightGeog(prev => [...prev, info.object.properties.GEOID]); 
+                            setHighlightGeog(GeoidList); 
                             dispatch(
                                 appendChartData({
                                     values: getDataForCharts(
@@ -419,7 +420,7 @@ const Map = () => {
                                     name: `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
                                 })
                             );
-                            window.localStorage.setItem('SHARED_GEOID', info.object.properties.GEOID);
+                            window.localStorage.setItem('SHARED_GEOID', GeoidList);
                             window.localStorage.setItem('SHARED_VIEW', JSON.stringify(mapRef.current.props.viewState));
                         } else {
                             if (highlightGeog.length > 1) {
@@ -432,6 +433,8 @@ const Map = () => {
                                         `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
                                     )
                                 )
+                                window.localStorage.setItem('SHARED_GEOID', tempArray);
+                                window.localStorage.setItem('SHARED_VIEW', JSON.stringify(mapRef.current.props.viewState));
                             }
                         }
                     } catch {}
