@@ -351,6 +351,7 @@ const Map = () => {
 
     const mapRef = useRef();
     
+    const mapHover = ({x, y, object}) => setHoverInfo({x, y, object})
     const Layers = [
         // new SolidPolygonLayer({
         //     id: 'background',
@@ -394,13 +395,7 @@ const Map = () => {
                 getFillColor: [dataParams, mapParams.mapType, mapParams.bins, mapParams.binMode, mapParams.fixedScale, mapParams.vizType, mapParams.colorScale, mapParams.customScale],
                 getElevation: [dataParams, mapParams.mapType, mapParams.bins, mapParams.binMode, mapParams.fixedScale, mapParams.vizType, mapParams.colorScale, mapParams.customScale],
             },
-            onHover: info => {
-                try {
-                    setHoverInfo(info)
-                } catch {
-                    setHoverInfo(null)
-                }
-            },
+            onHover: mapHover,
             onClick: info => {
                 let dataName = info?.object?.properties?.state_abbr !== undefined ? `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}` : `${info.object?.properties?.NAME}`
                 if (multipleSelect) {
@@ -524,13 +519,7 @@ const Map = () => {
                 data: hospitalData,
                 visible: mapParams
             },
-            onHover: info => {
-                try {
-                    setHoverInfo(info)
-                } catch {
-                    setHoverInfo(null)
-                }
-            },
+            onHover: mapHover,
         }),
         new IconLayer({
             id: 'clinics-layer',
@@ -549,13 +538,7 @@ const Map = () => {
                 data: clinicData,
                 visible: mapParams
             },
-            onHover: info => {
-                try {
-                    setHoverInfo(info)
-                } catch {
-                    setHoverInfo(null)
-                }
-            },
+            onHover: mapHover,
         }),
         new PolygonLayer({
             id: 'background',

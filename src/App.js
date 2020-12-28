@@ -285,7 +285,6 @@ function App() {
   // Trigger on parameter change for metric values
   // Gets bins and sets map parameters
   useEffect(() => {
-    console.log(dataParams)
     updateBins();
   }, [currentData, dataParams.numerator, dataParams.nProperty, 
     dataParams.nRange, dataParams.denominator, dataParams.dProperty,

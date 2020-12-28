@@ -14,7 +14,7 @@ const getDataForCharts = (data, table, startIndex, dates, name=null) => {
         countCol = name + ' Daily Count'
         sumCol = name + ' Total Cases'
     }
-
+    
     while (n<data[features[0]][table].length) {
         let tempObj = {};
         let sum = 0;
