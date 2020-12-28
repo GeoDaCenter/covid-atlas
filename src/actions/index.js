@@ -248,9 +248,9 @@ export const setMapParams = ( params ) => {
 }
 
 // loads in chart data from current data
-export const setChartData = ( data ) => {
+export const setSelectionData = ( data ) => {
     return {
-        type: 'SET_CHART_DATA',
+        type: 'SET_SELECTION_DATA',
         payload: {
             data
         }
@@ -258,9 +258,9 @@ export const setChartData = ( data ) => {
 }
 
 // adds to current chart data from current data
-export const appendChartData = ( data ) => {
+export const appendSelectionData = ( data ) => {
     return {
-        type: 'APPEND_CHART_DATA',
+        type: 'APPEND_SELECTION_DATA',
         payload: {
             data
         }
@@ -268,9 +268,9 @@ export const appendChartData = ( data ) => {
 }
 
 // removes from current chart data from current data
-export const removeChartData = ( data ) => {
+export const removeSelectionData = ( data ) => {
     return {
-        type: 'REMOVE_CHART_DATA',
+        type: 'REMOVE_SELECTION_DATA',
         payload: {
             data
         }

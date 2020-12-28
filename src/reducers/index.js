@@ -48,6 +48,8 @@ var reducer = (state = INITIAL_STATE, action) => {
                 dates: datesDataObj,
                 dataParams: variableParamsDataObj,
                 currentData,
+                selectionKeys: [],
+                selectionIndex: [],
                 chartData,
                 currDate,
                 startDateIndex,
@@ -74,6 +76,8 @@ var reducer = (state = INITIAL_STATE, action) => {
                 currDate: action.payload.load.currDate,
                 startDateIndex: action.payload.load.startDateIndex,
                 sidebarData: {},
+                selectionKeys: [],
+                selectionIndex: [],
                 panelState: panelsExDataObj
 
             };
@@ -281,13 +285,14 @@ var reducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 currentVariable: action.payload.name
             }
-        case 'SET_CHART_DATA':
+        case 'SET_SELECTION_DATA':
             return {
                 ...state,
                 chartData: action.payload.data.values,
-                chartKeys: [action.payload.data.name]
+                selectionKeys: [action.payload.data.name],
+                selectionIndex: [action.payload.data.index]
             }
-        case 'APPEND_CHART_DATA':
+        case 'APPEND_SELECTION_DATA':
             let appendedChartData = state.chartData;
             let countCol = action.payload.data.name + ' Daily Count'
             let sumCol = action.payload.data.name + ' Total Cases'
@@ -297,21 +302,29 @@ var reducer = (state = INITIAL_STATE, action) => {
                 appendedChartData[i][sumCol] = action.payload.data.values[i][sumCol]
             }
 
-            let appendedChartNames = [action.payload.data.name, ...state.chartKeys];
+            let appendedSelectionNames = [action.payload.data.name, ...state.selectionKeys];
+            let appendedSelectionIndex = [action.payload.data.index, ...state.selectionIndex];
 
             return {
                 ...state,
                 chartData: appendedChartData,
-                chartKeys: appendedChartNames
+                selectionKeys: appendedSelectionNames,
+                selectionIndex: appendedSelectionIndex,
             }
-        case 'REMOVE_CHART_DATA':
-            let removedChartNames = [...state.chartKeys]
-            let tempRemoveIndex = removedChartNames.indexOf(action.payload.data)
-            removedChartNames.splice(tempRemoveIndex, 1)
+        case 'REMOVE_SELECTION_DATA':
+            let removedSelectionNames = [...state.selectionKeys]
+            let tempRemoveIndex = removedSelectionNames.indexOf(action.payload.data.name)
+            removedSelectionNames.splice(tempRemoveIndex, 1)
+
+            let removedSelectionIndex = [...state.selectionIndex]
+            tempRemoveIndex = removedSelectionIndex.indexOf(action.payload.data.index)
+            removedSelectionIndex.splice(tempRemoveIndex, 1)
+
 
             return {
                 ...state,
-                chartKeys: removedChartNames
+                selectionKeys: removedSelectionNames,
+                selectionIndex: removedSelectionIndex,
             }
         case 'SET_ANCHOR_EL':
             return {

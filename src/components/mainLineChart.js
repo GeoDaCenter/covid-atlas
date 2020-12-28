@@ -116,10 +116,8 @@ const MainLineChart = () => {
     const dates = useSelector(state => state.dates);
     const currentData = useSelector(state => state.currentData);
     const startDateIndex = useSelector(state => state.startDateIndex);
-    const sidebarData = useSelector(state => state.sidebarData);
     const [logChart, setLogChart] = useState(false)
-    const { properties } = useSelector(state => state.sidebarData);
-    const chartKeys = useSelector(state => state.chartKeys);
+    const selectionKeys = useSelector(state => state.selectionKeys);
 
     const dispatch = useDispatch();
 
@@ -146,7 +144,7 @@ const MainLineChart = () => {
 
     return (
         <ChartContainer>
-            <ChartTitle>Total Cases and 7-Day Average New Cases{properties && <span>: {properties.NAME}{properties.state_name && `, ${properties.state_name}`}</span>}</ChartTitle>
+            <ChartTitle>Total Cases and 7-Day Average New Cases{selectionKeys.length && <span>: {selectionKeys.map((key, index) => index === selectionKeys.length-1 ? selectionKeys.length === 1 ? key : `and ${key}` : `${key}, `)}</span>}</ChartTitle>
             <ResponsiveContainer width="100%" height="80%">
                 <LineChart
                     data={chartData}
@@ -172,7 +170,7 @@ const MainLineChart = () => {
                     />
                     {/* <YAxis type="number" /> */}
                     <YAxis yAxisId="left" type="number" scale={logChart ? "log" : "linear"} domain={[0.01, 'dataMax']} allowDataOverflow 
-                        ticks={Object.keys(sidebarData).length === 0 ? [2000000,4000000,6000000,8000000,10000000,12000000,14000000] : []} 
+                        ticks={selectionKeys.length === 0 ? [2000000,4000000,6000000,8000000,10000000,12000000,14000000] : []} 
                         tick={
                             <CustomTick
                             style={{
@@ -181,7 +179,7 @@ const MainLineChart = () => {
                                 fontFamily: "Lato",
                                 fontWeight: 600
                             }}
-                            labelFormatter={Object.keys(sidebarData).length === 0 ? millionFormatter : thousandFormatter}
+                            labelFormatter={selectionKeys.length === 0 ? millionFormatter : thousandFormatter}
                             />
                         }
                         >
@@ -214,11 +212,11 @@ const MainLineChart = () => {
                         fillOpacity={0.15}
                         isAnimationActive={false}
                     />
-                    {chartKeys.length===0 && <Line type="monotone" yAxisId="left" dataKey="sum" name="Total Cases" stroke={colors.lightgray} dot={false} isAnimationActive={false} /> }
-                    {chartKeys.length===0 && <Line type="monotone" yAxisId="right" dataKey="count" name="7-Day Average New Cases" stroke={colors.yellow} dot={false} isAnimationActive={false} /> }
+                    {selectionKeys.length===0 && <Line type="monotone" yAxisId="left" dataKey="sum" name="Total Cases" stroke={colors.lightgray} dot={false} isAnimationActive={false} /> }
+                    {selectionKeys.length===0 && <Line type="monotone" yAxisId="right" dataKey="count" name="7-Day Average New Cases" stroke={colors.yellow} dot={false} isAnimationActive={false} /> }
                     
-                    {chartKeys.length !== 0 && chartKeys.map(key => { return <Line type="monotone" yAxisId="left" dataKey={key + ' Total Cases'} name={key + ' Total Cases'} stroke={colors.lightgray} dot={false} isAnimationActive={false}  />})}
-                    {chartKeys.length !== 0 && chartKeys.map(key => { return <Line type="monotone" yAxisId="right" dataKey={key + ' Daily Count'} name={key + ' 7-Day Ave'} stroke={colors.yellow} dot={false} isAnimationActive={false}  />})}
+                    {selectionKeys.length !== 0 && selectionKeys.map(key => { return <Line type="monotone" yAxisId="left" dataKey={key + ' Total Cases'} name={key + ' Total Cases'} stroke={colors.lightgray} dot={false} isAnimationActive={false}  />})}
+                    {selectionKeys.length !== 0 && selectionKeys.map(key => { return <Line type="monotone" yAxisId="right" dataKey={key + ' Daily Count'} name={key + ' 7-Day Ave'} stroke={colors.yellow} dot={false} isAnimationActive={false}  />})}
                 </LineChart>
             </ResponsiveContainer>
             <StyledSwitch>

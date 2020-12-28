@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import {fromJS} from 'immutable';
-import {find} from 'lodash';
+import {find, findIndex} from 'lodash';
 
 import DeckGL from '@deck.gl/react';
 import {MapView, _GlobeView as GlobeView, FlyToInterpolator} from '@deck.gl/core';
@@ -15,7 +15,7 @@ import ReactMapGL, {NavigationControl, GeolocateControl, LinearInterpolator } fr
 import Geocoder from 'react-map-gl-geocoder'
 
 import { MapTooltipContent } from '../components';
-import { setDataSidebar, setMapLoaded, setPanelState, setChartData, appendChartData, removeChartData } from '../actions';
+import { setDataSidebar, setMapLoaded, setPanelState, setSelectionData, appendSelectionData, removeSelectionData } from '../actions';
 import { mapFn, dataFn, getVarId, getCSV, getCartogramCenter, getDataForCharts, getURLParams } from '../utils';
 import { colors, colorScales } from '../config';
 import MAP_STYLE from '../config/style.json';
@@ -402,22 +402,23 @@ const Map = () => {
                 }
             },
             onClick: info => {
+                let dataName = info?.object?.properties?.state_abbr !== undefined ? `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}` : `${info.object?.properties?.NAME}`
                 if (multipleSelect) {
                     try {
                         if (highlightGeog.indexOf(info.object.properties.GEOID) === -1) {
                             let GeoidList = [...highlightGeog, info.object.properties.GEOID]
-                            dispatch(setDataSidebar(info.object));
                             setHighlightGeog(GeoidList); 
                             dispatch(
-                                appendChartData({
+                                appendSelectionData({
                                     values: getDataForCharts(
                                         {data: info.object}, 
                                         'cases', 
                                         startDateIndex, 
                                         dates[currentData], 
-                                        `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
+                                        dataName
                                     ),
-                                    name: `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
+                                    name: dataName,
+                                    index: findIndex(storedData[currentData], o => o.properties.GEOID === info.object.properties.GEOID)
                                 })
                             );
                             window.localStorage.setItem('SHARED_GEOID', GeoidList);
@@ -429,9 +430,10 @@ const Map = () => {
                                 tempArray.splice(geogIndex, 1);
                                 setHighlightGeog(tempArray);
                                 dispatch(
-                                    removeChartData(
-                                        `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
-                                    )
+                                    removeSelectionData({
+                                        name: dataName,
+                                        index: findIndex(storedData[currentData], o => o.properties.GEOID === info.object.properties.GEOID)
+                                    })
                                 )
                                 window.localStorage.setItem('SHARED_GEOID', tempArray);
                                 window.localStorage.setItem('SHARED_VIEW', JSON.stringify(mapRef.current.props.viewState));
@@ -440,18 +442,18 @@ const Map = () => {
                     } catch {}
                 } else {
                     try {
-                        dispatch(setDataSidebar(info.object));
                         setHighlightGeog([info.object.properties.GEOID]); 
                         dispatch(
-                            setChartData({
+                            setSelectionData({
                                 values: getDataForCharts(
                                     {data: info.object}, 
                                     'cases', 
                                     startDateIndex, 
                                     dates[currentData], 
-                                    `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
+                                    dataName
                                 ),
-                                name: `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}`
+                                name: dataName,
+                                index: findIndex(storedData[currentData], o => o.properties.GEOID === info.object.properties.GEOID)
                             })
                         );
                         window.localStorage.setItem('SHARED_GEOID', info.object.properties.GEOID);

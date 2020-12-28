@@ -7,6 +7,9 @@ import ButtonGroup from '@material-ui/core/ButtonGroup';
 import { useSelector, useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import Tooltip from './tooltip';
 import TwoWeekChart from './twoWeekLineChart';
@@ -17,7 +20,9 @@ import { compact, expand, report, verticalGrip} from '../config/svg';
 
 // Styled components CSS
 const DataPanelContainer = styled.div`
+  display: ${props => props.dataLength === 0 ? 'none' : 'initial'};
   position:fixed;
+  min-width:250px;
   right:0;
   top:50px;
   overflow-x:visible;
@@ -47,7 +52,7 @@ const DataPanelContainer = styled.div`
     &.open {
       transform:none;
     }
-    display: ${props => props.otherPanels ? 'none' : 'initial'};
+    display: ${props => (props.otherPanels || props.dataLength === 0) ? 'none' : 'initial'};
   }
   button#showHideRight {
     position:absolute;    
@@ -133,6 +138,7 @@ const DataPanelContainer = styled.div`
     padding:15px 0 5px 0;
     margin:0;
     display:inline-block;
+    max-width:200px;
   }
   h6 {
     padding:0 0 15px 0;
@@ -163,6 +169,31 @@ const ReportContainer = styled.div`
     // columns:${props => props.cols} 250px;
     // column-gap:10px;
     // display:inline-block;
+    h3 {
+      font-size:${props => props.expanded ? '150%' : '100%'};
+      display:${props => props.expanded ? 'block' : 'inline'};
+      margin:${props => props.expanded ? '0': '0 15px 0 0'};
+      padding:${props => props.expanded ? '0 0 15px 0 !important': '0'};
+      &:before {
+        content: ': ';
+        display: ${props => props.expanded ? 'none' : 'initial'};
+      }
+      &:after {
+        content:" ";
+        white-space:pre;
+        height:0;
+        display: ${props => props.expanded ? 'none' : 'block'};
+      }
+    }
+    div.numberChartContainer {
+      width:100%;
+      display:${props => props.expanded ? 'flex' : 'inline'};
+      align-items: center;
+    }
+    div.numberContainer {
+      display:${props => props.expanded ? 'flex' : 'inline'};
+    }
+    
 `
 
 const ReportSection = styled.span`
@@ -174,48 +205,24 @@ const ReportSection = styled.span`
     margin: 0;
 `
 
-const BigNumber = styled.h2`
-  font-size:1.15rem;
-  padding:0 0 15px 0 !important;
-`
-
-const NumberChartContainer = styled.div`
-  width:100%;
-  display:flex;
-  align-items: center;
-`
-
-const ExpandButtons = styled(ButtonGroup)`
+const ExpandSelect = styled(FormControl)`
   outline:none;
   border:none;
-  position:absolute;
-  right:20px;
+  position:absolute !important;
+  right:25px;
   top:15px;
+  div.MuiInputBase-root:before {
+    display:none !important;
+  }
+  div.MuiInputBase-root:after {
+    display:none !important;
+  }
   svg {
-    fill:${colors.white}44;
-    transition:250ms all;
-    height:15px;
-    &:hover {
-      fill:${colors.white}77;
-    }
-  }
-  .MuiButton-root {
-    outline:none !important;
-    border:none !important;
-    min-width:0;
-    padding:10px;
-    box-sizing:border-box;
-    outline:none !important;
-    color:white !important;
-  }
-  .MuiButton-root.active {
-    svg {
+    path {
       fill:white;
-      &:hover: {
-        fill:white;
-      }
     }
   }
+
 `
 const ResizeButton = styled.button`
     position:absolute;
@@ -244,18 +251,34 @@ const DataPanel = () => {
 
   const dispatch = useDispatch();
 
-  // de-structure sidebarData, which houses selected geography data
-  const { properties, cases, deaths, predictions,
-    chr_health_factors, chr_life, chr_health_context,
-    testing_ccpt, testing_tcap, testing_wk_pos, testing
-   } = useSelector(state => state.sidebarData);
+  const storedData = useSelector(state => state.storedData);
   // name of current data set
-
   const currentData = useSelector(state => state.currentData);
+  // current date and index
+  const currDateIndex = useSelector(state => state.dataParams.nIndex);
+  const startDateIndex = useSelector(state => state.startDateIndex);
+  const dates = useSelector(state => state.dates);
+  const selectionKeys = useSelector(state => state.selectionKeys);
+  const selectionIndex = useSelector(state => state.selectionIndex);
   // panels open/close state
   const panelState = useSelector(state => state.panelState);
   //column names
   const cols = useSelector(state => state.cols);
+
+  // de-structure sidebarData, which houses selected geography data
+  const datasetList = ['properties', 'cases', 'deaths', 'predictions',
+    'chr_health_factors', 'chr_life', 'chr_health_context',
+    'testing_ccpt', 'testing_tcap', 'testing_wk_pos', 'testing']
+  const [ properties, cases, deaths, predictions,
+    chr_health_factors, chr_life, chr_health_context,
+    testing_ccpt, testing_tcap, testing_wk_pos, testing
+  ] = datasetList.map(dataset => {
+    if (storedData[currentData] === undefined) {
+      return false 
+    } else {
+      return storedData[currentData][0].hasOwnProperty(dataset)
+    }
+  })
 
   const [expanded, setExpanded] = useState(true)
   const [width, setWidth] = useState(250);
@@ -307,322 +330,272 @@ const DataPanel = () => {
       window.addEventListener('touchend', removeTouchListener)
   }
 
+  // DRY issue -- refactor these functions
+
+  const performOperation = (dataArray, operation, totalPopulation) => {
+    const reducer = (accumulator, currentValue) => accumulator + currentValue;
+    switch(operation) {
+      case 'sum':
+        return dataArray.reduce(reducer)
+      case 'average':
+        return dataArray.reduce(reducer)/dataArray.length
+      case 'weighted_average':
+        return Math.round(dataArray.reduce(reducer)/totalPopulation*100)/100
+      default:
+        return null
+    }
+  } 
+
+  const aggregateProperty = (dataset, property, operation, specialCase=null) => {
+    let dataArray; 
+    let totalPopulation = 0;
+
+    if (operation === 'weighted_average') {
+      dataArray = selectionIndex.map(selection => {
+        let selectionPop = storedData[currentData][selection]['properties']['population'];
+        totalPopulation+=selectionPop;
+        if (specialCase === 'pcp') try { return parseInt(storedData[currentData][selection][dataset][property].split(':')[0])*selectionPop } catch { return 0}
+        return storedData[currentData][selection][dataset][property]*selectionPop
+      })
+    } else {
+      dataArray = selectionIndex.map(selection => storedData[currentData][selection][dataset][property]);
+    }
+
+    return performOperation(dataArray, operation, totalPopulation);
+  }
+
+  const aggregateTimeseries = (dataset, index, operation) => {
+    let dataArray; 
+    let totalPopulation = 0;
+
+    if (operation === 'weighted_average') {
+      dataArray = selectionIndex.map(selection => {
+        let selectionPop = storedData[currentData][selection]['properties']['population'];
+        totalPopulation+=selectionPop;
+        return storedData[currentData][selection][dataset].slice(index,)[0]*selectionPop
+      })
+    } else {
+      dataArray = selectionIndex.map(selection => storedData[currentData][selection][dataset].slice(index,)[0]);
+    }
+
+    return performOperation(dataArray, operation, totalPopulation);
+  }
+
+  const aggregate2WeekTimeSeries = (dataset, index, operation) => {
+    let lookbackPeriod = []
+    for (let i=-13;i<1;i++) {
+      lookbackPeriod.push(index+i)
+    }
+    let rtn = lookbackPeriod.map(day => aggregateTimeseries(dataset, day, operation))
+
+    return rtn;
+  }
+  
+  const aggregateDataFunction = (numerator, denominator, params, operation) => {
+    
+    let dataArray; 
+    let totalPopulation = 0;
+
+    if (operation === 'weighted_average') {
+      dataArray = selectionIndex.map(selection => {
+        let selectionPop = storedData[currentData][selection]['properties']['population'];
+        totalPopulation+=selectionPop;
+        return dataFn(storedData[currentData][selection][numerator], storedData[currentData][selection][denominator], params)*selectionPop
+      })
+    } else {
+      dataArray = selectionIndex.map(selection => dataFn(storedData[currentData][selection][numerator], storedData[currentData][selection][denominator], params));
+    }
+
+    return performOperation(dataArray, operation, totalPopulation);
+  }
+
+  const handleExpandContract = (event) => {
+    setExpanded(event.target.value)
+  }
+
   return (
-    <DataPanelContainer className={panelState.info ? 'open' : ''} id="data-panel"  otherPanels={panelState.variables}>
-      {properties && <ExpandButtons>
-        <Button onClick={() => setExpanded(true)} className={expanded ? 'active' : ''}>{expand}</Button>
-        <Button onClick={() => setExpanded(false)} className={expanded ? '' : 'active'}>{compact}</Button>
-      </ExpandButtons>}
+    <DataPanelContainer className={panelState.info ? 'open' : ''} id="data-panel"  otherPanels={panelState.variables} dataLength={selectionKeys.length}>
+      {properties &&  
+      <ExpandSelect>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={null}
+          onChange={handleExpandContract}
+        >
+          <MenuItem value={true}>Expanded</MenuItem>
+          <MenuItem value={false}>Compact</MenuItem>
+        </Select>
+      </ExpandSelect>
+      }
       <ReportWrapper>
-        <ReportContainer >
-        {/* cols={colCount} style={{width: width}} */}
+        <ReportContainer expanded={expanded}>
           <ReportSection>
-            {properties && <h2>{properties.NAME}{properties.state_name && `, ${properties.state_name}`}</h2>}
+            {(properties && selectionIndex.length) && <h2>{selectionKeys.map((key, index) => index === selectionKeys.length-1 ? selectionKeys.length === 1 ? key : `and ${key}` : `${key}, `)}</h2>}
             <br/>
-          {properties && ( 
-            expanded ? 
+          {(properties && selectionIndex.length) && 
               <span>
-                <p>Population</p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{properties.population?.toLocaleString('en')}</BigNumber>
-                </NumberChartContainer> 
+                <h4>{dates[currentData][currDateIndex-startDateIndex]}</h4>
+                <p>Population</p>
+                <h3>{aggregateProperty('properties', 'population', 'sum').toLocaleString('en')}</h3>
               </span>
-            :
-              <p>Population: {properties.population?.toLocaleString('en')}</p>
-          )}       
+            }       
           </ReportSection>
-          {(cases && deaths) && ( 
-            expanded ? 
-              <ReportSection><br/>
-                <p>Total Cases</p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{cases.slice(-1,)[0]?.toLocaleString('en')}</BigNumber>
-                  <TwoWeekChart data={cases.slice(-14,)} schema='cases/deaths'/>
-                </NumberChartContainer>
-                
-                <p>Total Deaths </p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{deaths.slice(-1,)[0]?.toLocaleString('en')}</BigNumber>
-                  <TwoWeekChart data={deaths.slice(-14,)} schema='cases/deaths'/>
-                </NumberChartContainer>
-
-                <p>Cases per 100k Population</p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{dataFn(cases, properties, {nProperty: null, nIndex: cases.length-1, nRange: null, dProperty: 'population', dIndex: null, dRange: null, scale: 100000})?.toFixed(2).toLocaleString('en')}</BigNumber>
-                </NumberChartContainer> 
-
-                <p>Deaths per 100k Population</p><br/>               
-                <NumberChartContainer>
-                  <BigNumber>{dataFn(deaths, properties, {nProperty: null, nIndex: deaths.length-1, nRange: null, dProperty: 'population', dIndex: null, dRange: null, scale: 100000})?.toFixed(2).toLocaleString('en')}</BigNumber>
-                </NumberChartContainer> 
-
-                <p>New Cases per 100k Population</p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{dataFn(cases, properties, {nProperty: null, nIndex: cases.length-1, nRange: 1, dProperty: 'population', dIndex: null, dRange: null, scale: 100000})?.toFixed(2).toLocaleString('en')}</BigNumber>
-                </NumberChartContainer> 
-
-                <p>New Deaths per 100k Population</p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{dataFn(deaths, properties, {nProperty: null, nIndex: deaths.length-1, nRange: 1, dProperty: 'population', dIndex: null, dRange: null, scale: 100000})?.toFixed(2).toLocaleString('en')}</BigNumber>
-                </NumberChartContainer> 
-
-                <p>Licensed Hospital Beds</p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{properties.beds?.toLocaleString('en')}</BigNumber>
-                </NumberChartContainer> 
+          {(cases && deaths && selectionIndex.length) && 
+              <ReportSection>
+                <p>Total Cases</p>
+                <div className="numberChartContainer">
+                  <h3>{aggregateTimeseries('cases', currDateIndex, 'sum')?.toLocaleString('en')}</h3>
+                  {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('cases', currDateIndex, 'sum')} schema='cases/deaths'/>}
+                </div>
+                <p>Total Deaths </p>
+                <div className="numberChartContainer">
+                  <h3>{aggregateTimeseries('deaths', -1, 'sum')?.toLocaleString('en')}</h3>
+                  {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('deaths', currDateIndex, 'sum')} schema='cases/deaths'/>}
+                </div>
+                <p>Cases per 100k Population</p>
+                <h3>{aggregateDataFunction('cases', 'properties', {nProperty: null, nIndex: currDateIndex, nRange: null, dProperty: 'population', dIndex: null, dRange: null, scale: 100000}, 'weighted_average')?.toFixed(2).toLocaleString('en')}</h3>
+                <p>Deaths per 100k Population</p>
+                <h3>{aggregateDataFunction('deaths', 'properties', {nProperty: null, nIndex: currDateIndex, nRange: null, dProperty: 'population', dIndex: null, dRange: null, scale: 100000}, 'weighted_average')?.toFixed(2).toLocaleString('en')}</h3>
+                <p>New Cases per 100k Population</p>
+                <h3>{aggregateDataFunction('cases', 'properties', {nProperty: null, nIndex: currDateIndex, nRange: 1, dProperty: 'population', dIndex: null, dRange: null, scale: 100000}, 'weighted_average')?.toFixed(2).toLocaleString('en')}</h3>
+                <p>New Deaths per 100k Population</p>
+                <h3>{aggregateDataFunction('deaths', 'properties', {nProperty: null, nIndex: currDateIndex, nRange: 1, dProperty: 'population', dIndex: null, dRange: null, scale: 100000}, 'weighted_average')?.toFixed(2).toLocaleString('en')}</h3>
+                <p>Licensed Hospital Beds</p>
+                <h3>{aggregateProperty('properties','beds','sum').toLocaleString('en')}</h3>
                 {/* <p>Cases per Bed: {dataFn(cases, null, cases.length-1, null, properties, 'beds', null, null, 1)?.toFixed(2)?.toLocaleString('en')}</p><br/> */}
               </ReportSection>
-            :
-            <ReportSection><br/>
-              <p>Total Cases: {cases.slice(-1,)[0]?.toLocaleString('en')}</p><br/>            
-              <p>Total Deaths: {deaths.slice(-1,)[0]?.toLocaleString('en')}</p><br/>
-              <p>Cases per 100k Population: {dataFn(cases, properties, {nProperty: null, nIndex: cases.length-1, nRange: null, dProperty: 'population', dIndex: null, dRange: null, scale: 100000})?.toFixed(2).toLocaleString('en')}</p><br/>
-              <p>Deaths per 100k Population: {dataFn(deaths, properties, {nProperty: null, nIndex: deaths.length-1, nRange: null, dProperty: 'population', dIndex: null, dRange: null, scale: 100000})?.toFixed(2).toLocaleString('en')}</p><br/>
-              <p>New Cases per 100k Population: {dataFn(cases, properties, {nProperty: null, nIndex: cases.length-1, nRange: 1, dProperty: 'population', dIndex: null, dRange: null, scale: 100000})?.toFixed(2).toLocaleString('en')}</p><br/>
-              <p>New Deaths per 100k Population: {dataFn(deaths, properties, {nProperty: null, nIndex: deaths.length-1, nRange: 1, dProperty: 'population', dIndex: null, dRange: null, scale: 100000})?.toFixed(2).toLocaleString('en')}</p><br/>
-              <p>Licensed Hospital Beds: {properties.beds?.toLocaleString('en')}</p><br/>
-              {/* <p>Cases per Bed: {dataFn(cases, null, cases.length-1, null, properties, 'beds', null, null, 1)?.toFixed(2)?.toLocaleString('en')}</p><br/> */}
+            }
+          {(testing && selectionIndex.length) &&
+              <ReportSection>
+                <h2>Testing</h2><br/>
+                <p>7-Day Positivity Rate</p>
+                <div className="numberChartContainer">
+                  <h3>{Math.round(aggregateTimeseries('testing_wk_pos', currDateIndex, 'weighted_average')*100)}%</h3>
+                  {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('testing_wk_pos', currDateIndex, 'weighted_average')} schema='testingPos'/>}
+                </div>
+
+                <p>7-Day Testing Capacity per 100k People</p>
+                <div className="numberChartContainer">
+                  <h3>{Math.round(aggregateTimeseries('testing_tcap', currDateIndex, 'weighted_average')*100)/100}</h3>
+                  {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('testing_tcap', currDateIndex, 'weighted_average')} schema='testingCap'/>}
+                </div>
+
+                <p>Total Testing</p>
+                <h3>{aggregateTimeseries('testing', currDateIndex, 'sum')?.toLocaleString('en')}</h3>
+
+                <p>7-Day Confirmed Cases per Testing</p>
+                <h3>{Math.round(aggregateTimeseries('testing_ccpt', currDateIndex, 'weighted_average')?.toLocaleString('en')*100)}%</h3>
+
+                {/* <p>Testing Criterion</p><br/>
+                <div>
+                  <h3>{aggregateProperty('properties', 'criteria', 'sum')}</h3>
+                </div> */}
+              </ReportSection>
+            }
+          {(chr_health_factors && selectionIndex.length) && 
+            <ReportSection>
+              <h2>Community Health Factors<Tooltip id="healthfactor"/></h2>
+              <h6>Source: <a href="https://www.countyhealthrankings.org/" target="_blank" rel="noopener noreferrer">County Health Rankings</a></h6>
+              <p>Children in poverty</p><Tooltip id="PovChldPrc"/>
+              <h3>{aggregateProperty('chr_health_factors', colLookup(cols, currentData, 'chr_health_factors', 'PovChldPrc'), 'weighted_average')}%</h3>
+              <p>Income inequality<Tooltip id="IncRt"/></p>
+              <h3>{aggregateProperty('chr_health_factors', colLookup(cols, currentData, 'chr_health_factors', 'IncRt'), 'weighted_average')}</h3>
+
+              <p>Median household income</p><Tooltip id="MedianHouseholdIncome"/>
+              <h3>${aggregateProperty('chr_health_factors', colLookup(cols, currentData, 'chr_health_factors', 'MedianHouseholdIncome'), 'weighted_average').toLocaleString('en')}</h3>
+
+              <p>Food insecurity</p><Tooltip id="FdInsPrc"/>
+              <h3>{aggregateProperty('chr_health_factors', colLookup(cols, currentData, 'chr_health_factors', 'FdInsPrc'), 'weighted_average')}%</h3>
+
+              <p>Unemployment</p><Tooltip id="UnEmplyPrc"/>
+              <h3>{aggregateProperty('chr_health_factors', colLookup(cols, currentData, 'chr_health_factors', 'UnEmplyPrc'), 'weighted_average')}%</h3>
+
+              <p>Uninsured</p><Tooltip id="UnInPrc"/>
+              <h3>{aggregateProperty('chr_health_factors', colLookup(cols, currentData, 'chr_health_factors', 'UnInPrc'), 'weighted_average')}%</h3>
+
+              <p>Primary care physicians</p><Tooltip id="PrmPhysRt"/>
+              <h3>{Math.round(aggregateProperty('chr_health_factors', colLookup(cols, currentData, 'chr_health_factors', 'PrmPhysRt'), 'weighted_average', 'pcp'))}:1</h3>
+
+              <p>Preventable hospital stays</p><Tooltip id="PrevHospRt"/>
+              <h3>{aggregateProperty('chr_health_factors', colLookup(cols, currentData, 'chr_health_factors', 'PrevHospRt'), 'sum')}</h3>
+
+              <p>Residential segregation black/white</p>
+              <h3>{aggregateProperty('chr_health_factors', colLookup(cols, currentData, 'chr_health_factors', 'RsiSgrBlckRt'), 'weighted_average')}</h3>
+
+              <p>Severe housing problems</p><Tooltip id="SvrHsngPrbRt"/>
+              <h3>{aggregateProperty('chr_health_factors', colLookup(cols, currentData, 'chr_health_factors', 'SvrHsngPrbRt'), 'weighted_average')}%</h3>
             </ReportSection>
-            
-          )}
-          {testing && ( 
-            expanded ? 
+          }
+          {(chr_health_context && selectionIndex.length) && 
               <ReportSection>
-                <h2>Testing</h2><br/>
-                <p>7-Day Positivity Rate</p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{(testing_wk_pos[testing_wk_pos.length-1]*100).toFixed(2)}%</BigNumber>
-                  <TwoWeekChart data={testing_wk_pos.slice(-14,)} schema='testingPos'/>
-                </NumberChartContainer>
-
-                <p>7-Day Testing Capacity per 100k People</p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{(testing_tcap[testing_tcap.length-1]).toLocaleString('en')}</BigNumber>
-                  <TwoWeekChart data={testing_tcap.slice(-14,)} schema='testingCap'/>
-                </NumberChartContainer>
-
-                <p>Total Testing: {(testing[testing.length-1]).toLocaleString('en')}</p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{(testing_tcap[testing_tcap.length-1]).toLocaleString('en')}</BigNumber>
-                </NumberChartContainer>
-
-                <p>7-Day Confirmed Cases per Testing</p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{(testing_ccpt[testing_ccpt.length-1]*100).toFixed(2)}%</BigNumber>
-                </NumberChartContainer>
-
-                <p>Testing Criterion</p><br/>
-                <NumberChartContainer>
-                  <BigNumber> {properties.criteria}</BigNumber>
-                </NumberChartContainer>
-
-              </ReportSection>
-            :
-              <ReportSection>
-                <h2>Testing</h2><br/>
-                <p>7-Day Positivity Rate: {(testing_wk_pos[testing_wk_pos.length-1]*100).toFixed(2)}%</p><br/>
-                <p>7-Day Testing Capacity per 100k People: {(testing_tcap[testing_tcap.length-1]).toLocaleString('en')}</p><br/>
-                <p>Total Testing: {(testing[testing.length-1]).toLocaleString('en')}</p><br/>
-                <p>7-Day Confirmed Cases per Testing: {(testing_ccpt[testing_ccpt.length-1]*100).toFixed(2)}%</p><br/>
-                <p>Testing Criterion: {properties.criteria}</p><br/>
-              </ReportSection>
-          )}
-          {chr_health_factors && ( 
-            expanded ? 
-              <ReportSection>
-                <h2>Community Health Factors<Tooltip id="healthfactor"/></h2>
-                <h6>Source: <a href="https://www.countyhealthrankings.org/" target="_blank" rel="noopener noreferrer">County Health Rankings</a></h6>
-                <p>Children in poverty</p><Tooltip id="PovChldPrc"/><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'PovChldPrc')]}%</BigNumber>
-                </NumberChartContainer>
-
-                <p>Income inequality<Tooltip id="IncRt"/></p>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'IncRt')]}</BigNumber>
-                </NumberChartContainer> 
-
-                <p>Median household income</p><Tooltip id="MedianHouseholdIncome"/><br/>
-                <NumberChartContainer>
-                  <BigNumber>${chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'MedianHouseholdIncome')]?.toLocaleString('en')}</BigNumber>
-                </NumberChartContainer> 
-
-                <p>Food insecurity</p><Tooltip id="FdInsPrc"/><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'FdInsPrc')]}%</BigNumber>
-                </NumberChartContainer> 
-
-                <p>Unemployment</p><Tooltip id="UnEmplyPrc"/><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'UnEmplyPrc')]}%</BigNumber>
-                </NumberChartContainer> 
-
-                <p>Uninsured</p><Tooltip id="UnInPrc"/><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'UnInPrc')]}%</BigNumber>
-                </NumberChartContainer> 
-
-                <p>Primary care physicians</p><Tooltip id="PrmPhysRt"/><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'PrmPhysRt')]}</BigNumber>
-                </NumberChartContainer> 
-
-                <p>Preventable hospital stays</p><Tooltip id="PrevHospRt"/><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'PrevHospRt')]?.toLocaleString('en')}</BigNumber>
-                </NumberChartContainer> 
-
-                <p>Residential segregation-black/white</p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'RsiSgrBlckRt')]||'NA'}</BigNumber>
-                </NumberChartContainer> 
-
-                <p>Severe housing problems</p><Tooltip id="SvrHsngPrbRt"/><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'SvrHsngPrbRt')]}%</BigNumber>
-                </NumberChartContainer> 
-
-              </ReportSection>
-            : 
-              <ReportSection>
-                <h2>Community Health Factors<Tooltip id="healthfactor"/></h2>
-                <h6>Source: <a href="https://www.countyhealthrankings.org/" target="_blank" rel="noopener noreferrer">County Health Rankings</a></h6>
-                <p>Children in poverty: {chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'PovChldPrc')]}%<Tooltip id="PovChldPrc"/></p><br/>
-                <p>Income inequality: {chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'IncRt')]}<Tooltip id="IncRt"/></p><br/>
-                <p>Median household income: {chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'MedianHouseholdIncome')]?.toLocaleString('en')}<Tooltip id="MedianHouseholdIncome"/></p><br/>
-                <p>Food insecurity: {chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'FdInsPrc')]}<Tooltip id="FdInsPrc"/></p><br/>
-                <p>Unemployment: {chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'UnEmplyPrc')]}%<Tooltip id="UnEmplyPrc"/></p><br/>
-                <p>Uninsured: {chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'UnInPrc')]}%<Tooltip id="UnInPrc"/></p><br/>
-                <p>Primary care physicians: {chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'PrmPhysRt')]}<Tooltip id="PrmPhysRt"/></p><br/>
-                <p>Preventable hospital stays: {chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'PrevHospRt')]?.toLocaleString('en')}<Tooltip id="PrevHospRt"/></p><br/>
-                <p>Residential segregation-black/white: {chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'RsiSgrBlckRt')]||'NA'}</p><br/>
-                <p>Severe housing problems: {chr_health_factors[colLookup(cols, currentData, 'chr_health_factors', 'SvrHsngPrbRt')]}%<Tooltip id="SvrHsngPrbRt"/></p><br/>
-              </ReportSection>
-          )}
-          {chr_health_context && ( 
-            expanded ? 
-              <ReportSection>
-                <h2>Community Health Context</h2><Tooltip id="healthcontext"/>
+                <h2>Community Health Context<Tooltip id="healthcontext"/></h2>
                 <h6>Source: <a href="https://www.countyhealthrankings.org/" target="_blank" rel="noopener noreferrer">County Health Rankings</a></h6>
 
-                <p>65 and older<Tooltip id="Over65YearsPrc"/></p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'Over65YearsPrc')]}%</BigNumber>
-                </NumberChartContainer> 
+                <p>65 and older<Tooltip id="Over65YearsPrc"/></p>
+                <h3>{aggregateProperty('chr_health_context', colLookup(cols, currentData, 'chr_health_context', 'Over65YearsPrc'), 'weighted_average')}%</h3>
 
-                <p>Adult obesity<Tooltip id="AdObPrc"/></p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'AdObPrc')]}%</BigNumber>
-                </NumberChartContainer>  
+                <p>Adult obesity<Tooltip id="AdObPrc"/></p>
+                <h3>{aggregateProperty('chr_health_context', colLookup(cols, currentData, 'chr_health_context', 'AdObPrc'), 'weighted_average')}%</h3>
 
-                <p>Diabetes prevalence<Tooltip id="AdDibPrc"/></p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'AdDibPrc')]}%</BigNumber>
-                </NumberChartContainer>  
+                <p>Diabetes prevalence<Tooltip id="AdDibPrc"/></p>
+                <h3>{aggregateProperty('chr_health_context', colLookup(cols, currentData, 'chr_health_context', 'AdDibPrc'), 'weighted_average')}%</h3>
 
-                <p>Adult smoking<Tooltip id="SmkPrc"/></p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'SmkPrc')]}%</BigNumber>
-                </NumberChartContainer> 
+                <p>Adult smoking<Tooltip id="SmkPrc"/></p>
+                <h3>{aggregateProperty('chr_health_context', colLookup(cols, currentData, 'chr_health_context', 'SmkPrc'), 'weighted_average')}%</h3>
 
-                <p>Excessive drinking<Tooltip id="ExcDrkPrc"/></p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'ExcDrkPrc')]}%</BigNumber>
-                </NumberChartContainer>  
+                <p>Excessive drinking<Tooltip id="ExcDrkPrc"/></p>
+                <h3>{aggregateProperty('chr_health_context', colLookup(cols, currentData, 'chr_health_context', 'ExcDrkPrc'), 'weighted_average')}%</h3>
 
-                <p>Drug overdose deaths<Tooltip id="DrOverdMrtRt"/></p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'DrOverdMrtRt')]||'0'}</BigNumber>
-                </NumberChartContainer> 
+                <p>Drug overdose deaths<Tooltip id="DrOverdMrtRt"/></p>
+                <h3>{aggregateProperty('chr_health_context', colLookup(cols, currentData, 'chr_health_context', 'DrOverdMrtRt'), 'sum')||0}</h3>
+
               </ReportSection>
-            :  
-              <ReportSection>
-                <h2>Community Health Context</h2><Tooltip id="healthcontext"/>
+            }
+          {(chr_life && selectionIndex.length) &&
+              <ReportSection expanded={expanded}>
+                <h2>Length &amp; Quality of Life<Tooltip id="healthlife"/></h2>
                 <h6>Source: <a href="https://www.countyhealthrankings.org/" target="_blank" rel="noopener noreferrer">County Health Rankings</a></h6>
-                <p>65 and older: {chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'Over65YearsPrc')]}% <Tooltip id="Over65YearsPrc"/></p><br/>
-                <p>Adult obesity: {chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'AdObPrc')]}%<Tooltip id="AdObPrc"/></p><br/>
-                <p>Diabetes prevalence: {chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'AdDibPrc')]}% <Tooltip id="AdDibPrc"/></p><br/>
-                <p>Adult smoking: {chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'SmkPrc')]}% <Tooltip id="SmkPrc"/></p><br/>
-                <p>Excessive drinking: {chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'ExcDrkPrc')]}% <Tooltip id="ExcDrkPrc"/></p><br/>
-                <p>Drug overdose deaths: {chr_health_context[colLookup(cols, currentData, 'chr_health_context', 'DrOverdMrtRt')]||'0'}<Tooltip id="DrOverdMrtRt"/></p><br/>
-              </ReportSection>
-          )}
-          {chr_life && ( 
-            expanded ? 
-              <ReportSection>
-                <h2>Length and Quality of Life<Tooltip id="healthlife"/></h2>
-                <h6>Source: <a href="https://www.countyhealthrankings.org/" target="_blank" rel="noopener noreferrer">County Health Rankings</a></h6>
-                <p>Life expectancy<Tooltip id="LfExpRt"/></p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_life[colLookup(cols, currentData, 'chr_life', 'LfExpRt')]}</BigNumber>
-                </NumberChartContainer>  
+                
+                <p>Life expectancy<Tooltip id="LfExpRt"/></p>
+                <h3>{aggregateProperty('chr_life', colLookup(cols, currentData, 'chr_life', 'LfExpRt'), 'weighted_average')}</h3>
 
-                <p>Self-rated health<Tooltip id="SlfHlthPrc"/></p><br/>
-                <NumberChartContainer>
-                  <BigNumber>{chr_life[colLookup(cols, currentData, 'chr_life', 'SlfHlthPrc')]}%</BigNumber>
-                </NumberChartContainer> 
+                <p>Self-rated health<Tooltip id="SlfHlthPrc"/></p>
+                <h3>{aggregateProperty('chr_life', colLookup(cols, currentData, 'chr_life', 'SlfHlthPrc'), 'weighted_average')}%</h3>
 
               </ReportSection>
-            :
-              <ReportSection>
-                <h2>Length and Quality of Life<Tooltip id="healthlife"/></h2>
-                <h6>Source: <a href="https://www.countyhealthrankings.org/" target="_blank" rel="noopener noreferrer">County Health Rankings</a></h6>
-                <p>Life expectancy: {chr_life[colLookup(cols, currentData, 'chr_life', 'LfExpRt')]}<Tooltip id="LfExpRt"/></p><br/>
-                <p>Self-rated health: {chr_life[colLookup(cols, currentData, 'chr_life', 'SlfHlthPrc')]}% <Tooltip id="SlfHlthPrc"/></p><br/>
-              </ReportSection>
-          )}
-          {(predictions && cols[currentData] && cols[currentData].predictions) && ( 
-            expanded ? 
+            }
+          {(predictions && cols[currentData] && cols[currentData].predictions && selectionIndex.length) && 
               <ReportSection>
                 <h2>Forecasting</h2><br/>            
                 <h6>Source: <a href="https://github.com/Yu-Group/covid19-severity-prediction/" target="_blank" rel="noopener noreferrer">Yu Group at Berkeley</a></h6>            
-                <p>5-Day Severity Index<Tooltip id="SeverityIndex"/></p><br />
-                <NumberChartContainer>
-                  <BigNumber> {['','Low','Medium','High'][predictions[1]]}</BigNumber>
-                </NumberChartContainer> 
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[2].split('_'))}<Tooltip id="PredictedDeaths"/></p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{predictions[2]}</BigNumber>
-                </NumberChartContainer> 
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[4].split('_'))}<Tooltip id="PredictedDeaths"/></p><br/> 
-                <NumberChartContainer>
-                  <BigNumber> {predictions[4]}</BigNumber>
-                </NumberChartContainer> 
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[6].split('_'))}<Tooltip id="PredictedDeaths"/></p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{predictions[6]}</BigNumber>
-                </NumberChartContainer> 
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[8].split('_'))}<Tooltip id="PredictedDeaths"/></p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{predictions[8]}</BigNumber>
-                </NumberChartContainer> 
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[10].split('_'))}<Tooltip id="PredictedDeaths"/></p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{predictions[10]}</BigNumber>
-                </NumberChartContainer> 
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[12].split('_'))}<Tooltip id="PredictedDeaths"/></p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{predictions[12]}</BigNumber>
-                </NumberChartContainer> 
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[14].split('_'))}<Tooltip id="PredictedDeaths"/></p><br/> 
-                <NumberChartContainer>
-                  <BigNumber>{predictions[14]}</BigNumber>
-                </NumberChartContainer> 
+                
+                <p>5-Day Severity Index<Tooltip id="SeverityIndex"/></p>
+                <h3> {['','Low','Medium','High'][Math.round(aggregateProperty('predictions', 1, 'weighted_average'))]}</h3>
+                
+                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[2].split('_'))}<Tooltip id="PredictedDeaths"/></p>
+                <h3>{Math.round(aggregateProperty('predictions', 2, 'sum')*10)/10}</h3>
+              
+                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[4].split('_'))}<Tooltip id="PredictedDeaths"/></p>
+                <h3>{Math.round(aggregateProperty('predictions', 4, 'sum')*10)/10}</h3>
+                
+                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[6].split('_'))}<Tooltip id="PredictedDeaths"/></p>
+                <h3>{Math.round(aggregateProperty('predictions', 6, 'sum')*10)/10}</h3>
+                
+                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[8].split('_'))}<Tooltip id="PredictedDeaths"/></p>
+                <h3>{Math.round(aggregateProperty('predictions', 8, 'sum')*10)/10}</h3>
+                
+                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[10].split('_'))}<Tooltip id="PredictedDeaths"/></p>
+                <h3>{Math.round(aggregateProperty('predictions', 10, 'sum')*10)/10}</h3>
+                
+                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[12].split('_'))}<Tooltip id="PredictedDeaths"/></p>
+                <h3>{Math.round(aggregateProperty('predictions', 12, 'sum')*10)/10}</h3>
+                
+                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[14].split('_'))}<Tooltip id="PredictedDeaths"/></p>
+                <h3>{Math.round(aggregateProperty('predictions', 14, 'sum')*10)/10}</h3>
+              
               </ReportSection>
-            : 
-              <ReportSection>
-                <h2>Forecasting</h2><br/>            
-                <h6>Source: <a href="https://github.com/Yu-Group/covid19-severity-prediction/" target="_blank" rel="noopener noreferrer">Yu Group at Berkeley</a></h6>            
-                <p>5-Day Severity Index: {['','Low','Medium','High'][predictions[1]]}<Tooltip id="SeverityIndex"/></p><br />
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[2].split('_'))}: {predictions[2]}<Tooltip id="PredictedDeaths"/></p><br/>
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[4].split('_'))}: {predictions[4]}<Tooltip id="PredictedDeaths"/></p><br/>
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[6].split('_'))}: {predictions[6]}<Tooltip id="PredictedDeaths"/></p><br/>
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[8].split('_'))}: {predictions[8]}<Tooltip id="PredictedDeaths"/></p><br/>
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[10].split('_'))}: {predictions[10]}<Tooltip id="PredictedDeaths"/></p><br/>
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[12].split('_'))}: {predictions[12]}<Tooltip id="PredictedDeaths"/></p><br/>
-                <p>Predicted Deaths by {parsePredictedDate(cols[currentData].predictions[14].split('_'))}: {predictions[14]}<Tooltip id="PredictedDeaths"/></p><br/>
-              </ReportSection>
-          )}
+            }
           
           <div className="extraPadding"></div>
           
