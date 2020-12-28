@@ -11,9 +11,9 @@ const MapTooltipContent = (props) => {
      } = props.content;
 
     // get lengths of time series data for reference below
-    let caseN = cases && cases.length-1;
-    let deathN = deaths && deaths.length-1;
-    let testingN = testing && testing.length-1;
+    let caseN = cases && props.index;
+    let deathN = deaths && props.index;
+    let testingN = testing && props.index;
 
     // conditional returns for combination of information
     // this is not elegant but a bit more reliable than JSX conditional rendering

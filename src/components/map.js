@@ -351,7 +351,8 @@ const Map = () => {
 
     const mapRef = useRef();
     
-    const mapHover = ({x, y, object}) => setHoverInfo({x, y, object})
+    const mapHover = ({x, y, object}) => setHoverInfo({x, y, object});
+
     const Layers = [
         // new SolidPolygonLayer({
         //     id: 'background',
@@ -821,7 +822,7 @@ const Map = () => {
                 </ReactMapGL >
                 {hoverInfo.object && (
                 <HoverDiv style={{position: 'absolute', zIndex: 1, pointerEvents: 'none', left: hoverInfo.x, top: hoverInfo.y}}>
-                    <MapTooltipContent content={hoverInfo.object} />
+                    <MapTooltipContent content={hoverInfo.object} index={dataParams.nIndex-startDateIndex} />
                 </HoverDiv>
                 )}
             </DeckGL>
