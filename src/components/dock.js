@@ -9,7 +9,7 @@ import { setPanelState } from '../actions';
 
 const DockContainer = styled.div`
     position:absolute;
-    left:calc(100% + 5px);
+    left:calc(100% + 2px);
     top:-2px;
     display:flex;
     @media (max-width:1024px) {
@@ -34,7 +34,7 @@ const DockButton = styled.button`
     margin:2px 2px 0 0;
     box-shadow: 2px 0px 5px rgba(0,0,0,0.7);
     cursor:pointer;
-    border-radius: 20px;
+    border-radius: 5px;
     transition:150ms transform, 150ms background;
     font-size:115%;
     display:inline-block;

@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import {fromJS} from 'immutable';
 import {find, findIndex} from 'lodash';
 
 import DeckGL from '@deck.gl/react';
-import {MapView, _GlobeView as GlobeView, FlyToInterpolator} from '@deck.gl/core';
+import {View, MapView, _GlobeView as GlobeView, FlyToInterpolator} from '@deck.gl/core';
 import { GeoJsonLayer, PolygonLayer, ScatterplotLayer, IconLayer, TextLayer } from '@deck.gl/layers';
 import {fitBounds} from '@math.gl/web-mercator';
 // import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
@@ -27,6 +27,18 @@ const bounds = fitBounds({
     width: window.innerWidth,
     height: window.innerHeight,
     bounds: [[-130.14, 53.96],[-67.12, 19]]
+})
+
+const hawaiiBounds = fitBounds({
+    width: window.innerWidth*.15,
+    height: window.innerHeight*.12,
+    bounds: [[-161.13, 23.23],[-152.75, 17.67]]
+})
+
+const alaskaBounds = fitBounds({
+    width: window.innerWidth*.15,
+    height: window.innerHeight*.12,
+    bounds: [[-167.75, 73.59],[-132.70, 50.09]]
 })
 
 const ICON_MAPPING = {
@@ -140,6 +152,41 @@ const Map = () => {
     const globalMap = false;
     const [mapStyle, setMapStyle] = useState(defaultMapStyle);
     const [currLisaData, setCurrLisaData] = useState({})
+    
+
+    const [viewStates, setViewStates] = useState({
+        'main': {
+            latitude: +urlParams.lat || bounds.latitude,
+            longitude: +urlParams.lon || bounds.longitude,
+            zoom: +urlParams.z || bounds.zoom,
+            bearing:0,
+            pitch:0
+        },
+        'hawaiiMap': {
+            latitude: hawaiiBounds.latitude,
+            longitude: hawaiiBounds.longitude,
+            zoom: hawaiiBounds.zoom,
+            bearing:0,
+            pitch:0
+        },
+        'alaskaMap': {
+            latitude: alaskaBounds.latitude,
+            longitude: alaskaBounds.longitude,
+            zoom: alaskaBounds.zoom,
+            bearing:0,
+            pitch:0
+        }
+    });
+
+    // const onViewStateChange = useCallback(({viewId, viewState}) => {
+    //     if (viewId === 'main') {
+    //       setViewStates(currentViewStates => ({
+    //         ...currentViewStates,
+    //         main: viewState
+    //       }));
+    //     } 
+    //   }, []);
+
     const [viewState, setViewState] = useState({
         latitude: +urlParams.lat || bounds.latitude,
         longitude: +urlParams.lon || bounds.longitude,
@@ -496,9 +543,9 @@ const Map = () => {
                     } catch {}
                 }
             },
-                parameters: {
-                    depthTest: false
-                }
+                // parameters: {
+                //     depthTest: false
+                // }
         }),
         new GeoJsonLayer({
             id: 'highlightLayer',
@@ -716,6 +763,11 @@ const Map = () => {
         //   })
     ]
 
+    // const views = [
+    //     new MapView({id: 'main', controller: true}),
+    //     new MapView({id: 'hawaiiMap', x: 10, y: window.innerHeight*.8, width: '15%', height: '12%', controller: false}),
+    //     new MapView({id: 'alaskaMap', x: window.innerWidth*.12, y: window.innerHeight*.8, width: '15%', height: '12%', controller: false})
+    // ]
 
     return (
         <MapContainer
@@ -724,10 +776,11 @@ const Map = () => {
         >
             <DeckGL
                 initialViewState={viewState}
+                
                 controller={true}
                 layers={Layers}
-                views={globalMap ? viewGlobe : view} //enable this for globe view 
-                onViewPortChange={() => console.log('moved')}
+                views={view}
+                // onViewStateChange={onViewStateChange}
             >
                 <ReactMapGL
                     reuseMaps
