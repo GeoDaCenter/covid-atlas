@@ -9,8 +9,8 @@ import InputLabel from '@material-ui/core/InputLabel';
 import styled from 'styled-components';
 import { setDate, setVariableParams, incrementDate, setMapParams } from '../actions';
 import Switch from '@material-ui/core/Switch';
-import { StyledDropDownNoLabel, SwitchContainer } from '../styled_components';
-import { Dock } from '../components';
+import { StyledDropDownNoLabel, BinsContainer } from '../styled_components';
+import { Dock, Tooltip } from '../components';
 // import { getParseCSV, getJson, mergeData, colIndex, getDataForBins } from './utils';
 
 const SliderContainer = styled.div`
@@ -41,10 +41,10 @@ const PlayPauseButton = styled(Button)`
 `
 
 const LineSlider = styled(Slider)`
-transform:translateY(22px);
+    transform:translateY(22px);
     &.MuiSlider-root {
-        width:90%;
-        margin-left:3%;
+        width:80%;
+        margin-left:7%;
         box-sizing:border-box;
     }
     span.MuiSlider-rail {
@@ -81,8 +81,8 @@ const RangeSlider = styled(Slider)`
     box-sizing:border-box;
     transform:translateY(22px);
     &.MuiSlider-root {
-        width:90%;
-        margin-left:3%;
+        width:80%;
+        margin-left:7%;
         box-sizing:border-box;
     }
     span.MuiSlider-rail {
@@ -121,13 +121,49 @@ const DateTitle = styled.h3`
 const InitialDate = styled.p`
     position:absolute;
     left:7%;
-    top:0;
+    bottom:8px;
     font-size:75%;
 `
 
 const EndDate = styled(InitialDate)`
     left:initial;
     right:10px;
+`
+
+const DateSelectorContainer = styled(Grid)`
+    margin:0 18px -10px 0 !important;
+    display:flex;
+    justify-items: center;
+    justify-content: flex-end;
+    align-items:center;
+    .MuiFormControl-root {
+        padding: 0 0 0 20px !important; 
+    }
+    span {
+        font-weight:bold;
+    }
+    #dateSelector {
+        position:absolute;
+        left:50%;
+        transform:translateX(-50%);
+    }
+    #binModeSwitch {
+        .MuiSwitch-root {
+            height:32px;
+            width:50px;
+            padding: 0,
+            display: 'flex',
+        }
+        .MuiButtonBase-root {
+            .MuiIconButton-label {
+                .MuiSwitch-thumb {
+                    height: 12px;
+                    width: 12px;
+                    transform:translateY(1px);
+                }
+            }   
+        }
+    }
 `
 const DateSlider = () => {
     const dispatch = useDispatch();  
@@ -241,12 +277,55 @@ const DateSlider = () => {
         let rawDate = new Date(date);
         return rawDate.toLocaleDateString('en-US', options);
     }
+    
+    const cleanRanges = {
+        null: 'Cumulative',
+        1: 'Daily New',
+        7: '7-Day Average'
+    }
 
     if (dates[currentData] !== undefined) {
         return (
             <SliderContainer style={{display: ((dataParams.nType === 'time-series' || currentVariable.includes('Testing')) ? 'initial' : 'none')}}>
                 <Grid container spacing={2} style={{display:'flex', padding: currentVariable.includes('Testing') ? '0 0 20px 0' : '0'}}>
-                    {!customRange && <DateTitle>{formatDate(dates[currentData][dataParams.nIndex-startDateIndex])}</DateTitle>}
+                    {/* {!customRange && <DateTitle>{formatDate(dates[currentData][dataParams.nIndex-startDateIndex])}</DateTitle>} */}
+                    
+                    {dataParams.nType !== 'characteristic' && 
+                        <DateSelectorContainer item xs={12}>
+                            <StyledDropDownNoLabel id="dateSelector">
+                                <InputLabel htmlFor="date-select">Date Range</InputLabel>
+                                <Select  
+                                    id="date-select"
+                                    value={''}
+                                    onChange={handleRangeButton}
+                                    displayEmpty
+                                    inputProps={{ 'aria-label': 'Without label' }}
+                                >
+                                    <MenuItem value="" disabled style={{display:'none'}}>
+                                        {!customRange && <span>{formatDate(dates[currentData][dataParams.nIndex-startDateIndex])} ({cleanRanges[rangeSelectVal]})</span>}
+                                        {customRange && 'Custom Range'}
+                                    </MenuItem>
+                                    <MenuItem value={null} key={'cumulative'}>Cumulative</MenuItem>
+                                    <MenuItem value={1} key={'daily'}>Daily New</MenuItem>
+                                    <MenuItem value={7} key={'7-day-ave'}>7-Day Average</MenuItem>
+                                    <MenuItem value={'custom'} key={'customRange'}>Custom Range</MenuItem>
+                                </Select>
+                            </StyledDropDownNoLabel>
+
+                            <BinsContainer item xs={12} 
+                                id="binModeSwitch"
+                            >
+                                <Switch
+                                    checked={mapParams.binMode === 'dynamic'}
+                                    onChange={handleSwitch}
+                                    name="bin chart switch"
+                                />
+                                <p>{mapParams.binMode === 'dynamic' ? 'Dynamic' : 'Fixed Bins'}<Tooltip id="BinModes"/></p>
+                            </BinsContainer>
+                        </DateSelectorContainer>
+                    }
+                    
+                    
                     <Grid item xs={1}>
                         <PlayPauseButton id="playPause" onClick={() => handlePlayPause(timerId, 1, 100)}>
                             {timerId === null ? 
@@ -309,39 +388,6 @@ const DateSlider = () => {
                             max={startDateIndex+dates[currentData].length-1}
                         />}
                     </Grid>
-                    {dataParams.nType !== 'characteristic' &&
-                        <Grid item xs={6} id="dateRangeSelector" style={{transform:'translateX(25%)'}}>
-                            <StyledDropDownNoLabel>
-                                <InputLabel htmlFor="date-select">Date Range</InputLabel>
-                                <Select  
-                                    id="date-select"
-                                    value={rangeSelectVal}
-                                    onChange={handleRangeButton}
-                                    displayEmpty
-                                    inputProps={{ 'aria-label': 'Without label' }}
-                                >
-                                    <MenuItem value={null} key={'cumulative'}>Cumulative</MenuItem>
-                                    <MenuItem value={1} key={'daily'}>New Daily</MenuItem>
-                                    <MenuItem value={7} key={'7-day-ave'}>7-Day Average</MenuItem>
-                                    <MenuItem value={'custom'} key={'customRange'}>Custom Range</MenuItem>
-                                </Select>
-                            </StyledDropDownNoLabel>
-                        </Grid>
-                    }
-                    
-                    {dataParams.nType !== 'characteristic' &&
-                        <SwitchContainer item xs={6} 
-                            style={{float:'right', transform:'translate(25%, 5px)'}}
-                            id="binModeSwitch"
-                        >
-                            <Switch
-                                checked={mapParams.binMode === 'dynamic'}
-                                onChange={handleSwitch}
-                                name="bin chart switch"
-                            />
-                            <p>{mapParams.binMode === 'dynamic' ? 'Dynamic Bins' : 'Fixed Bins'}</p>
-                        </SwitchContainer>
-                    }
                     {!customRange && <InitialDate>{dates[currentData][0]}</InitialDate>}
                     {!customRange && <EndDate>{dates[currentData][dates[currentData].length-1]}</EndDate>}
                 </Grid>

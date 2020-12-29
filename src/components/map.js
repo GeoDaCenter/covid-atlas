@@ -351,8 +351,44 @@ const Map = () => {
 
     const mapRef = useRef();
     
-    const mapHover = ({x, y, object}) => setHoverInfo({x, y, object});
+    const handleShare = async (params) => {
+        const shareData = {
+            title: 'The US Covid Atlas',
+            text: 'Near Real-Time Exploration of the COVID-19 Pandemic.',
+            url: `${window.location.href}${getURLParams(params)}`,
+        }
 
+        try {
+            await navigator.share(shareData)
+          } catch(err) {
+            let copyText = document.querySelector("#share-url");
+            copyText.value = `${shareData.url}`;
+            copyText.style.display = 'block'
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            copyText.style.display = 'none';
+            setShared(true)
+            setTimeout(() => setShared(false), 5000);
+        }
+    }
+
+    const handleCtrlDown = (e) => {
+        if (e.ctrlKey) setMultipleSelect(true)
+    }
+
+    const handleCtrlUp = (e) => {
+        if (!e.ctrlKey) setMultipleSelect(false)
+    }
+
+    
+    const handleMapHover = ({x, y, object}) => {
+        // let eps = 1
+        // if (((x-hoverInfo.x>eps||x-hoverInfo.x<-1*eps)&&(y-hoverInfo.y>eps||y-hoverInfo.y<-1*eps))||hoverInfo === false){
+            setHoverInfo({x, y, object})
+        // }
+    }
+    
     const Layers = [
         // new SolidPolygonLayer({
         //     id: 'background',
@@ -390,13 +426,13 @@ const Map = () => {
             // getLineWidth:50,
             // minLineWidth:20,
             // lineWidthScale: 20,
-            updateTriggers: {
-                data: currentData,
-                pickable: mapParams.vizType,
-                getFillColor: [dataParams, mapParams.mapType, mapParams.bins, mapParams.binMode, mapParams.fixedScale, mapParams.vizType, mapParams.colorScale, mapParams.customScale],
-                getElevation: [dataParams, mapParams.mapType, mapParams.bins, mapParams.binMode, mapParams.fixedScale, mapParams.vizType, mapParams.colorScale, mapParams.customScale],
-            },
-            onHover: mapHover,
+            // updateTriggers: {
+            //     data: currentData,
+            //     pickable: mapParams.vizType,
+            //     // getFillColor: [dataParams, mapParams.mapType, mapParams.bins, mapParams.binMode, mapParams.fixedScale, mapParams.vizType, mapParams.colorScale, mapParams.customScale],
+            //     // getElevation: [dataParams, mapParams.mapType, mapParams.bins, mapParams.binMode, mapParams.fixedScale, mapParams.vizType, mapParams.colorScale, mapParams.customScale],
+            // },
+            onHover: handleMapHover,
             onClick: info => {
                 let dataName = info?.object?.properties?.state_abbr !== undefined ? `${info.object?.properties?.NAME}, ${info?.object?.properties?.state_abbr}` : `${info.object?.properties?.NAME}`
                 if (multipleSelect) {
@@ -520,7 +556,7 @@ const Map = () => {
                 data: hospitalData,
                 visible: mapParams
             },
-            onHover: mapHover,
+            onHover: handleMapHover,
         }),
         new IconLayer({
             id: 'clinics-layer',
@@ -539,7 +575,7 @@ const Map = () => {
                 data: clinicData,
                 visible: mapParams
             },
-            onHover: mapHover,
+            onHover: handleMapHover,
         }),
         new PolygonLayer({
             id: 'background',
@@ -680,35 +716,6 @@ const Map = () => {
         //   })
     ]
 
-    const handleShare = async (params) => {
-        const shareData = {
-            title: 'The US Covid Atlas',
-            text: 'Near Real-Time Exploration of the COVID-19 Pandemic.',
-            url: `${window.location.href}${getURLParams(params)}`,
-        }
-
-        try {
-            await navigator.share(shareData)
-          } catch(err) {
-            let copyText = document.querySelector("#share-url");
-            copyText.value = `${shareData.url}`;
-            copyText.style.display = 'block'
-            copyText.select();
-            copyText.setSelectionRange(0, 99999);
-            document.execCommand("copy");
-            copyText.style.display = 'none';
-            setShared(true)
-            setTimeout(() => setShared(false), 5000);
-        }
-    }
-
-    const handleCtrlDown = (e) => {
-        if (e.ctrlKey) setMultipleSelect(true)
-    }
-
-    const handleCtrlUp = (e) => {
-        if (!e.ctrlKey) setMultipleSelect(false)
-    }
 
     return (
         <MapContainer
@@ -821,7 +828,7 @@ const Map = () => {
                     <div></div>
                 </ReactMapGL >
                 {hoverInfo.object && (
-                <HoverDiv style={{position: 'absolute', zIndex: 1, pointerEvents: 'none', left: hoverInfo.x, top: hoverInfo.y}}>
+                <HoverDiv style={{transition: '0ms all', position: 'absolute', zIndex: 1, pointerEvents: 'none', left: hoverInfo.x, top: hoverInfo.y}}>
                     <MapTooltipContent content={hoverInfo.object} index={dataParams.nIndex-startDateIndex} />
                 </HoverDiv>
                 )}

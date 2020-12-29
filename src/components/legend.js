@@ -46,10 +46,10 @@ const BinLabels = styled.div`
 const BinBars = styled.div`
     width:100%;
     display: flex;
-    margin-top:10px;
+    margin-top:3px;
     box-sizing: border-box;
     .bin { 
-        height:10px;
+        height:5px;
         display: inline;
         flex:1;
         border:0;

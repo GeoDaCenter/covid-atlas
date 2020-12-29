@@ -125,3 +125,9 @@ body {
   stroke-miterlimit:10;
   stroke-width:4px;
 }
+
+/* mapbox fix */
+
+button.mapboxgl-ctrl-attrib-button {
+  display:none;
+}
