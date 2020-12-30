@@ -14,11 +14,12 @@ const DockContainer = styled.div`
     display:flex;
     @media (max-width:1024px) {
         position:fixed;
+        display:block;
         left:0px;
         top:210px;
     }
     @media (max-width:600px) {
-        top:240px;
+        top:260px;
     }
 `
 

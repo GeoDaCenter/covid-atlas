@@ -108,7 +108,7 @@ const DataPanelContainer = styled.div`
       left:100%;
       width:30px;
       height:30px;
-      top:160px;
+      top:180px;
       &.hidden svg {
         transform:rotate(0deg);
       }
@@ -413,6 +413,7 @@ const DataPanel = () => {
     setExpanded(event.target.value)
   }
 
+  console.log(selectionIndex)
   return (
     <DataPanelContainer className={panelState.info ? 'open' : ''} id="data-panel"  otherPanels={panelState.variables} dataLength={selectionKeys.length}>
       {properties &&  

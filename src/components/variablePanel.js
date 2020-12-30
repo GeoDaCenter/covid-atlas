@@ -133,6 +133,7 @@ const VariablePanelContainer = styled.div`
       left:90%;
       width:30px;
       height:30px;
+      top:140px;
       :after {
         display:none;
       }

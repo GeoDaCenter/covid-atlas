@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { setDate, setVariableParams, incrementDate, setMapParams } from '../actions';
 import Switch from '@material-ui/core/Switch';
 import { StyledDropDownNoLabel, BinsContainer } from '../styled_components';
-import { Dock, Tooltip } from '../components';
+import { Tooltip } from '../components';
 // import { getParseCSV, getJson, mergeData, colIndex, getDataForBins } from './utils';
 
 const SliderContainer = styled.div`
@@ -25,9 +25,16 @@ const PlayPauseButton = styled(Button)`
     padding:0;
     margin:0;
     transform:translateY(16px);
+    @media (max-width: 600px) {
+        transform:translateY(18px);
+    }
     svg {
         width: 30px;
         height:30px;
+        @media (max-width: 600px) {
+            width: 20px;
+            height:20px;
+        }
         g {
             fill: white;
         },
@@ -43,9 +50,13 @@ const PlayPauseButton = styled(Button)`
 const LineSlider = styled(Slider)`
     transform:translateY(22px);
     &.MuiSlider-root {
-        width:80%;
-        margin-left:7%;
+        width:70%;
+        margin-left:13%;
         box-sizing:border-box;
+        @media (max-width: 600px) {
+            width:50%;
+            margin-left:24%;
+        }
     }
     span.MuiSlider-rail {
         color:white;
@@ -81,9 +92,13 @@ const RangeSlider = styled(Slider)`
     box-sizing:border-box;
     transform:translateY(22px);
     &.MuiSlider-root {
-        width:80%;
-        margin-left:7%;
+        width:70%;
+        margin-left:13%;
         box-sizing:border-box;
+        @media (max-width: 600px) {
+            width:50%;
+            margin-left:24%;
+        }
     }
     span.MuiSlider-rail {
         color:white;
@@ -123,6 +138,10 @@ const InitialDate = styled.p`
     left:7%;
     bottom:8px;
     font-size:75%;
+    @media (max-width: 600px) {
+        bottom:0px;
+        left:12%;
+    }
 `
 
 const EndDate = styled(InitialDate)`
@@ -136,6 +155,9 @@ const DateSelectorContainer = styled(Grid)`
     justify-items: center;
     justify-content: flex-end;
     align-items:center;
+    @media (max-width: 450px) {
+        margin:0 18px 22px 0 !important;
+    }
     .MuiFormControl-root {
         padding: 0 0 0 20px !important; 
     }
@@ -146,8 +168,19 @@ const DateSelectorContainer = styled(Grid)`
         position:absolute;
         left:50%;
         transform:translateX(-50%);
+        @media (max-width: 600px) {
+            transform:none;
+            left:20px;
+        }
+        @media (max-width: 450px) {
+            transform:none;
+            left:0px;
+        }
     }
     #binModeSwitch {
+        @media (max-width: 450px) {
+            transform:translateY(40px);
+        }
         .MuiSwitch-root {
             height:32px;
             width:50px;
@@ -391,8 +424,6 @@ const DateSlider = () => {
                     {!customRange && <InitialDate>{dates[currentData][0]}</InitialDate>}
                     {!customRange && <EndDate>{dates[currentData][dates[currentData].length-1]}</EndDate>}
                 </Grid>
-                
-                <Dock />
             </SliderContainer>
         );
     } else {

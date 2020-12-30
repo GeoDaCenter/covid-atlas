@@ -11,7 +11,7 @@ import {fitBounds} from '@math.gl/web-mercator';
 // import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 // import {IcoSphereGeometry} from '@luma.gl/engine';
 
-import ReactMapGL, {NavigationControl, GeolocateControl, LinearInterpolator } from 'react-map-gl';
+import MapboxGLMap, {NavigationControl, GeolocateControl, LinearInterpolator } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder'
 
 import { MapTooltipContent } from '../components';
@@ -153,6 +153,13 @@ const Map = () => {
     const [mapStyle, setMapStyle] = useState(defaultMapStyle);
     const [currLisaData, setCurrLisaData] = useState({})
     
+    const [viewState, setViewState] = useState({
+        latitude: +urlParams.lat || bounds.latitude,
+        longitude: +urlParams.lon || bounds.longitude,
+        zoom: +urlParams.z || bounds.zoom,
+        bearing:0,
+        pitch:0
+    })
 
     const [viewStates, setViewStates] = useState({
         'main': {
@@ -178,22 +185,15 @@ const Map = () => {
         }
     });
 
-    // const onViewStateChange = useCallback(({viewId, viewState}) => {
-    //     if (viewId === 'main') {
-    //       setViewStates(currentViewStates => ({
-    //         ...currentViewStates,
-    //         main: viewState
-    //       }));
-    //     } 
-    //   }, []);
+    const onViewStateChange = useCallback(({viewId, viewState}) => {
+        if (viewId === 'main') {
+          setViewStates(currentViewStates => ({
+            ...currentViewStates,
+            main: viewState
+          }));
+        } 
+    }, []);
 
-    const [viewState, setViewState] = useState({
-        latitude: +urlParams.lat || bounds.latitude,
-        longitude: +urlParams.lon || bounds.longitude,
-        zoom: +urlParams.z || bounds.zoom,
-        bearing:0,
-        pitch:0
-    })
     const [cartogramData, setCartogramData] = useState([]);
     const [currVarId, setCurrVarId] = useState(null);
     const [hospitalData, setHospitalData] = useState(null);
@@ -763,11 +763,11 @@ const Map = () => {
         //   })
     ]
 
-    // const views = [
-    //     new MapView({id: 'main', controller: true}),
-    //     new MapView({id: 'hawaiiMap', x: 10, y: window.innerHeight*.8, width: '15%', height: '12%', controller: false}),
-    //     new MapView({id: 'alaskaMap', x: window.innerWidth*.12, y: window.innerHeight*.8, width: '15%', height: '12%', controller: false})
-    // ]
+    const views = [
+        new MapView({id: 'main', controller: true}),
+        new MapView({id: 'hawaiiMap', x: 10, y: window.innerHeight*.8, width: '15%', height: '12%', controller: false}),
+        new MapView({id: 'alaskaMap', x: window.innerWidth*.12, y: window.innerHeight*.8, width: '15%', height: '12%', controller: false})
+    ]
 
     return (
         <MapContainer
@@ -775,14 +775,17 @@ const Map = () => {
             onKeyUp={handleCtrlUp}
         >
             <DeckGL
-                initialViewState={viewState}
-                
-                controller={true}
                 layers={Layers}
+
+                initialViewState={viewState}
+                controller={true}
                 views={view}
+
                 // onViewStateChange={onViewStateChange}
+                // viewState={viewStates}
+                // views={views}
             >
-                <ReactMapGL
+                <MapboxGLMap
                     reuseMaps
                     ref={mapRef}
                     mapStyle={mapStyle} //{globalMap || mapParams.vizType === 'cartogram' ? 'mapbox://styles/lixun910/ckhtcdx4b0xyc19qzlt4b5c0d' : 'mapbox://styles/lixun910/ckhkoo8ix29s119ruodgwfxec'}
@@ -879,12 +882,16 @@ const Map = () => {
                         <ShareURL type="text" value="" id="share-url" />
                     </MapButtonContainer>
                     <div></div>
-                </ReactMapGL >
+                </MapboxGLMap >
                 {hoverInfo.object && (
                 <HoverDiv style={{transition: '0ms all', position: 'absolute', zIndex: 1, pointerEvents: 'none', left: hoverInfo.x, top: hoverInfo.y}}>
                     <MapTooltipContent content={hoverInfo.object} index={dataParams.nIndex-startDateIndex} />
                 </HoverDiv>
                 )}
+                
+                {/* <View id="main" />
+                <View id="hawaiiMap" />
+                <View id="alaskaMap" /> */}
             </DeckGL>
         </MapContainer>
     ) 

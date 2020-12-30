@@ -3,16 +3,15 @@ import React from 'react';
 
 import styled from 'styled-components';
 
-import { DateSlider } from '../components';
+import { DateSlider, Dock } from '../components';
 import { colors } from '../config';
 
 // Styled components
 const TopDrawer = styled.div`
     position: fixed;
     top:50px;
-    left:calc(50%);
+    left:calc(50vw - 300px);
     background:${colors.gray};
-    transform:translateX(-50%);
     width:90vw;
     max-width: 600px;
     box-sizing: border-box;
@@ -31,7 +30,6 @@ const TopDrawer = styled.div`
     @media (max-width:768px){
         width:100%;
         max-width:100%;
-        padding:0;
         left:0;
         transform:none;
     }
@@ -44,6 +42,7 @@ const TopPanel = () => {
     return (
         <TopDrawer>
             <DateSlider />
+            <Dock />
         </TopDrawer>
     )
 
