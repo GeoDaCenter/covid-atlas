@@ -225,51 +225,78 @@ const MainLineChart = () => {
         return returnArray;
     }
 
-    const maximums = getMax({array: chartData, variables: ['count','sum']})
+    const summarizeChartData = ( { chartData, keys }) => {
+        let summarizedData = []
+
+        for (let i=0;i<chartData.length;i++) {
+            let tempSum = 0;
+            
+            for (let n=0; n<keys.length;n++ ) {
+                tempSum += chartData[i][`${keys[n]} Daily Count`]
+            }
+
+            summarizedData.push({
+                ...chartData[i],
+                'summarized': tempSum 
+            })
+        }
+
+        return summarizedData
+    }
+
+    const parsedData = summarizeChartData( { chartData: chartData, keys: selectionKeys })
+    const maximums = getMax({array: parsedData, variables: ['count','sum']})
     const dateRange = getDateRange({startDate: new Date('02/01/2020'), endDate: new Date()})
     
     const handleLegendHover = (o) => {
-        setStrokeOpacities([o.target.id])
+        setStrokeOpacities(o.dataKey)
     }
 
     const handleLegendLeave = () => {
-        setStrokeOpacities([])
+        setStrokeOpacities(null)
     }
 
-    const renderLegend = (props) => {
-        const { payload } = props;
-        let dataArray = [];
-        for (let i=0; i<payload.length/2;i++) {
-            dataArray.push(payload[i+payload.length/2])
-            dataArray.push(payload[i])
-        }
+    // const renderLegend = (props) => {
+    //     const { payload } = props;
+    //     let dataArray = [];
+    //     for (let i=0; i<payload.length/2;i++) {
+    //         dataArray.push(payload[i+payload.length/2])
+    //         dataArray.push(payload[i])
+    //     }
 
-        return (
-          <LegendList>
-            {
-              dataArray.map((entry, index) => (
-                <LegendItem 
-                    onMouseEnter={handleLegendHover}
-                    onMouseLeave={handleLegendLeave}
-                    key={`item-${index}`} 
-                    color={entry.color}
-                    active={strokeOpacities.includes(entry.dataKey)}
-                    id={entry.dataKey}
-                    >
-                    {entry.value}
-                </LegendItem>
-              ))
-            }
-          </LegendList>
-        );
-    }
+    //     return (
+    //       <LegendList>
+    //         {
+    //           dataArray.map((entry, index) => (
+    //             <LegendItem 
+    //                 onMouseEnter={handleLegendHover}
+    //                 onMouseLeave={handleLegendLeave}
+    //                 key={`item-${index}`} 
+    //                 color={entry.color}
+    //                 active={strokeOpacities.includes(entry.dataKey)}
+    //                 id={entry.dataKey}
+    //                 >
+    //                 {entry.value}
+    //             </LegendItem>
+    //           ))
+    //         }
+    //       </LegendList>
+    //     );
+    // }
 
     return (
         <ChartContainer>
-            <ChartTitle>Total Cases and 7-Day Average New Cases{selectionKeys.length>0 && <span>: {selectionKeys.map((key, index) => index === selectionKeys.length-1 ? selectionKeys.length === 1 ? key : `and ${key}` : `${key}, `)}</span>}</ChartTitle>
+            {selectionKeys.length < 2 && 
+                <ChartTitle>Total Cases and 7-Day Average New Cases
+                    {selectionKeys.length>0 && `: ${selectionKeys[0]}`}
+                </ChartTitle>
+            }
+            {selectionKeys.length >= 2 && 
+                <ChartTitle>7-Day Average New Cases</ChartTitle>
+            }
             <ResponsiveContainer width="100%" height="80%">
                 <LineChart
-                    data={chartData}
+                    data={parsedData}
                     margin={{
                         top: 0, right: 10, left: 10, bottom: 20,
                     }}
@@ -291,7 +318,6 @@ const MainLineChart = () => {
                             />
                         }
                     />
-                    {/* <YAxis type="number" /> */}
                     <YAxis yAxisId="left" type="number" scale={logChart ? "log" : "linear"} domain={[0.01, 'dataMax']} allowDataOverflow 
                         ticks={selectionKeys.length === 0 ? rangeIncrement({maximum: maximums.sum, increment: 2000000}) : []} 
                         tick={
@@ -322,23 +348,23 @@ const MainLineChart = () => {
                             />
                         }
                         >
-                        <Label value="7-Day Average New Cases" position='insideTopRight' style={{marginTop:10, fill:colors.yellow, fontFamily: 'Lato', fontWeight: 600}} angle={-90}  />
+                        <Label value="7-Day Average New Cases" position='insideTopRight' style={{marginTop:10, fill:(selectionKeys.length < 2 ? colors.yellow : colors.lightgray), fontFamily: 'Lato', fontWeight: 600}} angle={-90}  />
                     </YAxis>
                     <Tooltip
                         content={CustomTooltip}
                     />
                     <ReferenceArea 
                         yAxisId="left"
-                        x1={getStartDate(dataParams.nRange, dataParams.nIndex-startDateIndex, chartData)}
-                        x2={getEndDate(dataParams.nIndex-startDateIndex, chartData)} 
+                        x1={getStartDate(dataParams.nRange, dataParams.nIndex-startDateIndex, parsedData)}
+                        x2={getEndDate(dataParams.nIndex-startDateIndex, parsedData)} 
                         fill="white" 
                         fillOpacity={0.15}
                         isAnimationActive={false}
                     />
-                    {selectionKeys.length===0 && <Line type="monotone" yAxisId="left" dataKey="sum" name="Total Cases" stroke={colors.lightgray} dot={false} isAnimationActive={false} /> }
-                    {selectionKeys.length===0 && <Line type="monotone" yAxisId="right" dataKey="count" name="7-Day Average New Cases" stroke={colors.yellow} dot={false} isAnimationActive={false} /> }
+                    {selectionKeys.length < 2 && <Line type="monotone" yAxisId="left" dataKey={selectionKeys.length > 0 ? selectionKeys[0] + " Total Cases" : "sum"} name="Total Cases" stroke={colors.lightgray} dot={false} isAnimationActive={false} /> }
+                    {selectionKeys.length < 2 && <Line type="monotone" yAxisId="right" dataKey={selectionKeys.length > 0 ? selectionKeys[0] + " Daily Count": "count"} name="7-Day Average New Cases" stroke={colors.yellow} dot={false} isAnimationActive={false} /> }
                     
-                    {selectionKeys.length !== 0 && 
+                    {/* {selectionKeys.length !== 0 && 
                         selectionKeys.map((key,index) => { 
                             return <Line 
                                 type="monotone" 
@@ -351,23 +377,36 @@ const MainLineChart = () => {
                                 strokeOpacity={strokeOpacities.length === 0 || strokeOpacities.includes(key + ' Total Cases') ? 1 : 0.25}
                             />}
                         )
+                    } */}
+                    {selectionKeys.length > 1 && 
+                            <Line 
+                                type='monotone'
+                                yAxisId='right'
+                                dataKey='summarized' 
+                                name='Total For Selection' 
+                                stroke={colors.lightgray}
+                                strokeWidth={3} 
+                                dot={false} 
+                                isAnimationActive={false}  
+                            />
                     }
-                    {selectionKeys.length !== 0 && 
+                    {selectionKeys.length > 1 && 
                         selectionKeys.map((key,index) => {
                             return <Line 
-                                type="monotone"
-                                yAxisId="right" 
+                                type='monotone'
+                                yAxisId='right' 
                                 dataKey={key + ' Daily Count'} 
-                                name={key + ' 7-Day Average'} 
-                                stroke={colors.pairedColors.count[index]} 
+                                name={key} 
+                                stroke={colors.qualtitiveScale[index]} 
                                 dot={false} 
-                                isAnimationActive={false} 
-                                strokeOpacity={strokeOpacities.length === 0 || strokeOpacities.includes(key + ' Daily Count') ? 1 : 0.25} 
+                                isAnimationActive={false}  
+                                strokeOpacity={strokeOpacities === key + ' Daily Count' ? 1 : 0.5}
+                                strokeWidth={strokeOpacities === key + ' Daily Count' ? 2 : 1}
                             />}
                         )
                     }
                     <Legend 
-                        content={renderLegend}
+                        // content={renderLegend}
                         onMouseEnter={handleLegendHover} 
                         onMouseLeave={handleLegendLeave}
                     />
@@ -377,7 +416,7 @@ const MainLineChart = () => {
                 <Switch
                     checked={logChart}
                     onChange={handleSwitch}
-                    name="log chart switch"
+                    name='log chart switch'
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <p>{logChart ? 'Log Scale' : 'Linear Scale'}</p>
