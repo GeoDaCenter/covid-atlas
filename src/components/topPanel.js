@@ -15,7 +15,7 @@ const TopDrawer = styled.div`
     width:90vw;
     max-width: 600px;
     box-sizing: border-box;
-    padding:0 0 10px 0;
+    padding:0;
     margin:0;
     box-shadow: 0px 0px 5px rgba(0,0,0,0.7);
     border-radius:0 0 0.5vh 0.5vh ;

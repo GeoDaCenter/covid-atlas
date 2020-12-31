@@ -137,8 +137,9 @@ const ShareURL = styled.input`
     left:110%;
 `
 
-const viewGlobe = new GlobeView({id: 'globe', controller: false, resolution:1});
-const view = new MapView({repeat: true});
+const MainViewContainer  = styled(View)`
+
+`
 
 const Map = () => { 
     
@@ -763,17 +764,31 @@ const Map = () => {
         //   })
     ]
 
-    const views = [
-        new MapView({id: 'main', controller: true}),
-        new MapView({id: 'hawaiiMap', x: 10, y: window.innerHeight*.8, width: '15%', height: '12%', controller: false}),
-        new MapView({id: 'alaskaMap', x: window.innerWidth*.12, y: window.innerHeight*.8, width: '15%', height: '12%', controller: false})
-    ]
+    const viewGlobe = new GlobeView({id: 'globe', controller: false, resolution:1});
+    const view = new MapView({repeat: true});
+
+    // const views = [
+    //     new MapView({id: 'main', controller: true}),
+    //     new MapView({id: 'hawaiiMap', x: 0, y: '86%', width: '15%', height: '12%', controller: false}),
+    //     new MapView({id: 'alaskaMap', x: '14%', y: '86%', width: '15%', height: '12%', controller: false})
+    // ]
+
+    const [insetMap, setInsetMap] = useState(false)
 
     return (
         <MapContainer
             onKeyDown={handleCtrlDown}
             onKeyUp={handleCtrlUp}
         >
+            <svg height="0" width="0">
+            <defs>
+                <clipPath id="window">
+                    {!insetMap && <rect y="0" x="0" width={window.innerWidth} height={window.innerHeight}/>}
+                    <rect y="0" x="0" width={window.innerWidth} height={window.innerHeight*.8}/>
+                    <rect y={window.innerHeight*.8} x={window.innerWidth*.3} width={window.innerWidth*.7} height={window.innerHeight*.2}/>
+                </clipPath>
+            </defs>
+            </svg>
             <DeckGL
                 layers={Layers}
 
@@ -783,7 +798,7 @@ const Map = () => {
 
                 // onViewStateChange={onViewStateChange}
                 // viewState={viewStates}
-                // views={views}
+                // views={insetMap ? views : views[0]}
             >
                 <MapboxGLMap
                     reuseMaps
@@ -889,9 +904,7 @@ const Map = () => {
                 </HoverDiv>
                 )}
                 
-                {/* <View id="main" />
-                <View id="hawaiiMap" />
-                <View id="alaskaMap" /> */}
+                {/* <View id="main" className="test" style={{display:'none'}}/> */}
             </DeckGL>
         </MapContainer>
     ) 

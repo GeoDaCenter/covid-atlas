@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import {
   LineChart, Line, XAxis, YAxis, ReferenceArea, 
-  Tooltip, Label, ResponsiveContainer
+  Tooltip, Label, ResponsiveContainer, Legend
 } from 'recharts';
 
 import Switch from '@material-ui/core/Switch';
@@ -13,7 +13,9 @@ import { colors } from '../config';
 import { setVariableParams, setDate } from '../actions';
 
 const ChartContainer = styled.span`
-    background:red;
+    span {
+        color:white;
+    }
 `
 
 const StyledSwitch = styled.div`
@@ -45,14 +47,34 @@ const ChartTitle = styled.h3`
     margin:0;
     color:white;
 `
+
+const LegendList = styled.ul`
+    list-style:none;
+    margin-block-start: 0;
+    margin-block-end: 0;
+    padding-inline-start: 0;
+    text-align:center;
+`
+
+const LegendItem = styled.li`
+    color: ${props => props.color};
+    font-family:'Lato', sans-serif;
+    line-height:1.5;
+    text-decoration: ${props => props.active ? 'underline' : 'none'};
+    display:inline;
+    margin-right:10px;
+
+`
+
+
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const millionFormatter = val => { return `${val/1000000}M` };
 const thousandFormatter = val => { return `${val/1000}K` };
-// const dateFormatter = val => { 
-//     let tempDate = new Date(val).getMonth();
-//     return `${monthNames[tempDate]}`
-// };
+const dateFormatter = val => { 
+    let tempDate = new Date(val).getMonth();
+    return `${monthNames[tempDate]}`
+};
 
 const CustomTick = props => {
     return <text {...props}>{props.labelFormatter(props.payload.value)}</text>
@@ -82,6 +104,40 @@ const getEndDate = (index, data) => {
     }
 }
 
+const getDateRange = ({startDate, endDate}) => {
+    let dateArray = [];
+
+    let years;
+
+    if (startDate.getUTCFullYear() === endDate.getUTCFullYear()) {
+        years = [endDate.getUTCFullYear()]
+    } else {
+        years = []
+        for (let i=startDate.getUTCFullYear(); i<endDate.getUTCFullYear(); i++) {
+            years.push(i)
+        }
+    }
+
+    for (let i=0; i<years.length; i++){
+        let yearStr = ''+years[i]
+        let n;
+    
+        if (years[i] === 2020) {
+            n = 2
+        } else {
+            n = 1
+        }
+        while (n<13) {
+            let dateString = `${n}/${1}/${yearStr.slice(-2,)}`
+            if (new Date(dateString) > endDate) break
+            dateArray.push(dateString)
+            n++
+        }
+    }
+
+    return dateArray;
+}
+
 const CustomTooltip = props => {
     if (props.active) {
         let data = props.payload
@@ -109,15 +165,17 @@ const CustomTooltip = props => {
 };
 
 const MainLineChart = () => {
-    
     const chartData = useSelector(state => state.chartData);
     const dataParams = useSelector(state => state.dataParams);
     const currentVariable = useSelector(state => state.currentVariable);
     const dates = useSelector(state => state.dates);
     const currentData = useSelector(state => state.currentData);
     const startDateIndex = useSelector(state => state.startDateIndex);
-    const [logChart, setLogChart] = useState(false)
     const selectionKeys = useSelector(state => state.selectionKeys);
+
+    
+    const [logChart, setLogChart] = useState(false);
+    const [strokeOpacities, setStrokeOpacities] = useState([])
 
     const dispatch = useDispatch();
 
@@ -142,19 +200,84 @@ const MainLineChart = () => {
         dispatch(setDate(dates[currentData][newValue]));
     };
 
+    const getMax = ({ array, variables }) => {
+        let maxVals = {}
+
+        for (let i=0;i<array.length;i++) {
+            for (let n=0;n<variables.length;n++){
+                let tempVal = array[i][variables[n]];
+                if (maxVals[variables[n]]===undefined || maxVals[variables[n]] < tempVal) {
+                    maxVals[variables[n]] = tempVal
+                }
+            }
+        }
+
+        return maxVals
+    }
+
+    const rangeIncrement = ({ maximum, increment }) => {
+        let returnArray = []
+        
+        for (let i=0; i<maximum; i+=increment) {
+            returnArray.push(i)
+        }
+
+        return returnArray;
+    }
+
+    const maximums = getMax({array: chartData, variables: ['count','sum']})
+    const dateRange = getDateRange({startDate: new Date('02/01/2020'), endDate: new Date()})
+    
+    const handleLegendHover = (o) => {
+        setStrokeOpacities([o.target.id])
+    }
+
+    const handleLegendLeave = () => {
+        setStrokeOpacities([])
+    }
+
+    const renderLegend = (props) => {
+        const { payload } = props;
+        let dataArray = [];
+        for (let i=0; i<payload.length/2;i++) {
+            dataArray.push(payload[i+payload.length/2])
+            dataArray.push(payload[i])
+        }
+
+        return (
+          <LegendList>
+            {
+              dataArray.map((entry, index) => (
+                <LegendItem 
+                    onMouseEnter={handleLegendHover}
+                    onMouseLeave={handleLegendLeave}
+                    key={`item-${index}`} 
+                    color={entry.color}
+                    active={strokeOpacities.includes(entry.dataKey)}
+                    id={entry.dataKey}
+                    >
+                    {entry.value}
+                </LegendItem>
+              ))
+            }
+          </LegendList>
+        );
+    }
+
     return (
         <ChartContainer>
-            <ChartTitle>Total Cases and 7-Day Average New Cases{selectionKeys.length && <span>: {selectionKeys.map((key, index) => index === selectionKeys.length-1 ? selectionKeys.length === 1 ? key : `and ${key}` : `${key}, `)}</span>}</ChartTitle>
+            <ChartTitle>Total Cases and 7-Day Average New Cases{selectionKeys.length>0 && <span>: {selectionKeys.map((key, index) => index === selectionKeys.length-1 ? selectionKeys.length === 1 ? key : `and ${key}` : `${key}, `)}</span>}</ChartTitle>
             <ResponsiveContainer width="100%" height="80%">
                 <LineChart
                     data={chartData}
                     margin={{
-                        top: 0, right: 10, left: 10, bottom: 0,
+                        top: 0, right: 10, left: 10, bottom: 20,
                     }}
                     onClick={chartSetDate}
                 >
                     <XAxis 
                         dataKey="date"
+                        ticks={dateRange}
                         tick={
                             <CustomTick
                             style={{
@@ -164,13 +287,13 @@ const MainLineChart = () => {
                                 fontWeight: 600,
                                 transform:'translateY(10px)'
                             }}
-                            labelFormatter={chartSetDate}
+                            labelFormatter={dateFormatter}
                             />
                         }
                     />
                     {/* <YAxis type="number" /> */}
                     <YAxis yAxisId="left" type="number" scale={logChart ? "log" : "linear"} domain={[0.01, 'dataMax']} allowDataOverflow 
-                        ticks={selectionKeys.length === 0 ? [2000000,4000000,6000000,8000000,10000000,12000000,14000000] : []} 
+                        ticks={selectionKeys.length === 0 ? rangeIncrement({maximum: maximums.sum, increment: 2000000}) : []} 
                         tick={
                             <CustomTick
                             style={{
@@ -186,7 +309,7 @@ const MainLineChart = () => {
                         <Label value="Total Cases" position='insideLeft' style={{marginTop:10, fill:colors.lightgray, fontFamily: 'Lato', fontWeight: 600}} angle={-90}  />
                     </YAxis>
                     <YAxis yAxisId="right" orientation="right" scale={logChart ? "log" : "linear"} domain={[0.01, 'dataMax']} allowDataOverflow 
-                        // ticks={[20000,40000,60000,80000,100000, 120000, 140000]} 
+                        ticks={selectionKeys.length === 0 ? rangeIncrement({maximum: maximums.count, increment: 50000}) : []}
                         tick={
                             <CustomTick
                                 style={{
@@ -215,8 +338,39 @@ const MainLineChart = () => {
                     {selectionKeys.length===0 && <Line type="monotone" yAxisId="left" dataKey="sum" name="Total Cases" stroke={colors.lightgray} dot={false} isAnimationActive={false} /> }
                     {selectionKeys.length===0 && <Line type="monotone" yAxisId="right" dataKey="count" name="7-Day Average New Cases" stroke={colors.yellow} dot={false} isAnimationActive={false} /> }
                     
-                    {selectionKeys.length !== 0 && selectionKeys.map(key => { return <Line type="monotone" yAxisId="left" dataKey={key + ' Total Cases'} name={key + ' Total Cases'} stroke={colors.lightgray} dot={false} isAnimationActive={false}  />})}
-                    {selectionKeys.length !== 0 && selectionKeys.map(key => { return <Line type="monotone" yAxisId="right" dataKey={key + ' Daily Count'} name={key + ' 7-Day Ave'} stroke={colors.yellow} dot={false} isAnimationActive={false}  />})}
+                    {selectionKeys.length !== 0 && 
+                        selectionKeys.map((key,index) => { 
+                            return <Line 
+                                type="monotone" 
+                                yAxisId="left" 
+                                dataKey={key + ' Total Cases'} 
+                                name={key + ' Total Cases'} 
+                                stroke={colors.pairedColors.sum[index]} 
+                                dot={false} 
+                                isAnimationActive={false}  
+                                strokeOpacity={strokeOpacities.length === 0 || strokeOpacities.includes(key + ' Total Cases') ? 1 : 0.25}
+                            />}
+                        )
+                    }
+                    {selectionKeys.length !== 0 && 
+                        selectionKeys.map((key,index) => {
+                            return <Line 
+                                type="monotone"
+                                yAxisId="right" 
+                                dataKey={key + ' Daily Count'} 
+                                name={key + ' 7-Day Average'} 
+                                stroke={colors.pairedColors.count[index]} 
+                                dot={false} 
+                                isAnimationActive={false} 
+                                strokeOpacity={strokeOpacities.length === 0 || strokeOpacities.includes(key + ' Daily Count') ? 1 : 0.25} 
+                            />}
+                        )
+                    }
+                    <Legend 
+                        content={renderLegend}
+                        onMouseEnter={handleLegendHover} 
+                        onMouseLeave={handleLegendLeave}
+                    />
                 </LineChart>
             </ResponsiveContainer>
             <StyledSwitch>

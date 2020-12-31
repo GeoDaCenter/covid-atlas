@@ -413,7 +413,6 @@ const DataPanel = () => {
     setExpanded(event.target.value)
   }
 
-  console.log(selectionIndex)
   return (
     <DataPanelContainer className={panelState.info ? 'open' : ''} id="data-panel"  otherPanels={panelState.variables} dataLength={selectionKeys.length}>
       {properties &&  

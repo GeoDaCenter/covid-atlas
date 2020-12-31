@@ -18,7 +18,7 @@ const BottomDrawer = styled.div`
     left:50%;
     background:${colors.gray};
     transform:translateX(-50%);
-    width:90vw;
+    width:38vw;
     max-width: 500px;
     box-sizing: border-box;
     padding:0 0 5px 0;
@@ -30,6 +30,7 @@ const BottomDrawer = styled.div`
         opacity:0.5;
     }
     @media (max-width:1024px){
+        width:50vw;
         div {
             padding-bottom:5px;
         }

@@ -125,13 +125,12 @@ const RangeSlider = styled(Slider)`
 
 const DateTitle = styled.h3`
     width:100%;
-    position:absolute;
     font-size:1.05rem;
-    top:-5px;
+    padding:10px 0 5px 0;
+    margin:0;
     left:0;
     text-align:center;
     pointer-events:none;
-
 `
 const InitialDate = styled.p`
     position:absolute;
@@ -320,9 +319,12 @@ const DateSlider = () => {
     if (dates[currentData] !== undefined) {
         return (
             <SliderContainer style={{display: ((dataParams.nType === 'time-series' || currentVariable.includes('Testing')) ? 'initial' : 'none')}}>
-                <Grid container spacing={2} style={{display:'flex', padding: currentVariable.includes('Testing') ? '0 0 20px 0' : '0'}}>
-                    {/* {!customRange && <DateTitle>{formatDate(dates[currentData][dataParams.nIndex-startDateIndex])}</DateTitle>} */}
-                    
+                <Grid container spacing={2} style={{display:'flex', padding: '5px 0 10px 0'}}>
+                    {currentVariable.includes('Testing') && 
+                        <DateSelectorContainer item xs={12}>
+                            <DateTitle>{formatDate(dates[currentData][dataParams.nIndex-startDateIndex])}</DateTitle>
+                        </DateSelectorContainer>
+                    }
                     {dataParams.nType !== 'characteristic' && 
                         <DateSelectorContainer item xs={12}>
                             <StyledDropDownNoLabel id="dateSelector">

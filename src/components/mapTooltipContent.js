@@ -25,14 +25,14 @@ const MapTooltipContent = (props) => {
                 </h3>
                 <div>
                     <hr />
-                    Cases: {cases[caseN].toLocaleString('en')}<br/>
-                    New Cases: {(cases[caseN]-cases[caseN-1]).toLocaleString('en')}<br/>
-                    Deaths: {deaths[deathN].toLocaleString('en')}<br/>
-                    New Deaths: {(deaths[deathN]-deaths[deathN-1]).toLocaleString('en')}<br/>
-                    Total Testing: {(testing[testingN]).toLocaleString('en')}<br/>
-                    7-Day Positivity Rate: {(testing_wk_pos[testingN]*100).toFixed(2)}%<br/>
-                    7-Day Testing Capacity: {(testing_tcap[testingN]).toFixed(2)}<br/>
-                    7-Day Confirmed Cases per Testing: {(testing_ccpt[testingN]*100).toFixed(2)}%<br/>
+                    Cases: {cases[caseN]?.toLocaleString('en')}<br/>
+                    New Cases: {(cases[caseN]-cases[caseN-1])?.toLocaleString('en')}<br/>
+                    Deaths: {deaths[deathN]?.toLocaleString('en')}<br/>
+                    New Deaths: {(deaths[deathN]-deaths[deathN-1])?.toLocaleString('en')}<br/>
+                    Total Testing: {(testing[testingN])?.toLocaleString('en')}<br/>
+                    7-Day Positivity Rate: {(testing_wk_pos[testingN]*100)?.toFixed(2)}%<br/>
+                    7-Day Testing Capacity: {(testing_tcap[testingN])?.toFixed(2)}<br/>
+                    7-Day Confirmed Cases per Testing: {(testing_ccpt[testingN]*100)?.toFixed(2)}%<br/>
                     Testing Criterion: {properties.criteria}<br/>
                 </div>
             </div>
@@ -45,10 +45,10 @@ const MapTooltipContent = (props) => {
                 </h3>
                 <div>
                     <hr />
-                    Cases: {cases[caseN].toLocaleString('en')}<br/>
-                    Deaths: {deaths[deathN].toLocaleString('en')}<br/>
-                    New Cases: {(cases[caseN]-cases[caseN-1]).toLocaleString('en')}<br/>
-                    New Deaths: {(deaths[deathN]-deaths[deathN-1]).toLocaleString('en')}<br/>
+                    Cases: {cases[caseN]?.toLocaleString('en')}<br/>
+                    Deaths: {deaths[deathN]?.toLocaleString('en')}<br/>
+                    New Cases: {(cases[caseN]-cases[caseN-1])?.toLocaleString('en')}<br/>
+                    New Deaths: {(deaths[deathN]-deaths[deathN-1])?.toLocaleString('en')}<br/>
                 </div>
             </div>
         )

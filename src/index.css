@@ -131,3 +131,13 @@ body {
 button.mapboxgl-ctrl-attrib-button {
   display:none;
 }
+
+#view-main {
+  z-index:0;
+  clip-path:url(#window);
+}
+/* 
+#view-alaskaMap, #view-hawaiiMap {
+  border:1px solid white;
+  z-index:1;
+} */
