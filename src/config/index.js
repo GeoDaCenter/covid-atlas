@@ -182,6 +182,14 @@ export const dataPresets = {
         tableNames: ['cases', 'deaths', 'predictions', 'chr_health_context', 'chr_life', 'chr_health_factors'],
         accumulate: []
     },
+    'state_1p3a.geojson': {
+        plainName: '1Point3Acres State',
+        geojson: 'state_1p3a.geojson', 
+        csvs: ['covid_confirmed_1p3a_state','covid_deaths_1p3a_state', 'chr_health_context_state', 'chr_life_state', 'chr_health_factors_state', 'covid_testing_1p3a_state', 'covid_wk_pos_1p3a_state', 'covid_tcap_1p3a_state', 'covid_ccpt_1p3a_state'], 
+        joinCols: ['GEOID', ['FIPS','fips','countyFIPS', 'GEOID']], 
+        tableNames: ['cases', 'deaths', 'chr_health_context', 'chr_life', 'chr_health_factors', 'testing', 'testing_wk_pos', 'testing_tcap', 'testing_ccpt'],
+        accumulate: ['covid_confirmed_1p3a_state','covid_deaths_1p3a_state']
+    },
     'state_usafacts.geojson': {
         plainName: 'USA Facts State',
         geojson: 'state_usafacts.geojson', 

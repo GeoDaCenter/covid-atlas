@@ -178,7 +178,7 @@ function App() {
 
     dispatch(
       setUrlParams({
-        currentData: paramsDict['src'] ? legacySourceOrder[decodeURI(paramsDict['src'])] : 'county_usfacts.geojson',
+        currentData: paramsDict['src'] ? legacySourceOrder[decodeURI(paramsDict['src'])] : 'county_1p3a.geojson',
         paramsDict,
         mapParams: {
           vizType: paramsDict['cartogram'] ? 'cartogram' : paramsDict['3d'] ? '3D' : '2D',
@@ -336,9 +336,8 @@ function App() {
       <Preloader loaded={mapLoaded} />
       <NavBar />
       <header className="App-header" style={{position:'fixed', left: '20vw', top:'100px', zIndex:10}}>
-        {/* <button onClick={() => console.log(gda_proxy.wasm.GetNeighbors('county_usfacts.geojson','w_queencounty_usfacts.geojson100',100))}>LOG NEIGHBORS</button> */}
-        {/* <button onClick={() => updateBins()}>update bins</button>
-        <button onClick={() => console.log(dataParams)}>data params</button> */}
+        {/* <button onClick={() => console.log(getDataForBins( storedData[currentData], {...dataParams, nIndex: null} ))}>data for bins</button> */}
+        {/* <button onClick={() => console.log(dataParams)}>data params</button> */}
       </header>
       <div id="mainContainer">
         <Map />
@@ -346,7 +345,7 @@ function App() {
         <BottomPanel />
         <VariablePanel />
         <DataPanel />
-        <Popover />
+        <Popover /> 
         <NotificationBox />  
         <Draggable 
           z={9}

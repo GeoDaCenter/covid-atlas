@@ -131,30 +131,36 @@ const InfoBox = () => {
 
     const panels = [
         {
-            title:`Welcome to the US Covid Atlas`,
-            subtitle:`11/22 Hotfix Notes`,
-            content: `Please note that we are now using UsaFacts State level data by default. You can explore this dataset under "Data Source" and then "By State"<br/><br/>          
-            If you are returning to this site, please try clearing your
-            page cache with a hard refresh (control + shift + R or
-            command + shift + R) to avoid any display issues.`
+            title:`Welcome to the US Covid Atlas v2`,
+            subtitle:`1/4 Notes`,
+            content: `Welcome to the refactored US Covid Atlas. We have greatly expanded the functionality,
+            usability, and portability of the Atlas by refactoring the project into the frontend framework, React.
+            <br/><br/>While we've worked to maintain the general structure of the Atlas, we've introduced a few new features
+            and interface elements we hope will make the Atlas more robust and usable for more people.`
         },
         {
             title:`New Features`,
-            subtitle:`November Release Notes`,
-            content:`The November release includes state level testing data, new resource layers for hospitals and clinics, map sharing capabilities, and improved data loading times.<br><br>
-            State level testing data has a variables for testing positivity, capacity, and confirmed cases. With the new map share button on the right, you can share a link to the map you are viewing. Using the re-designed map overlays, you can overlay a collection of map resources and regional highlights.`
-        },
-        {
-            title:`Getting Started`,
-            subtitle:`November Release Notes`,
-            content:`To get started, try the following:
-            <ul>
-              <li>Click the play button in the <a href="#" onclick="highlightElement('sliderdiv', 'id')">timeline</a> on the top of the page to see how the pandemic has unfolded</li>
-              <li>Explore <a href="#" onclick="highlightElement('select-source', 'id')">state level data</a> on testing positivity rates and capacities</li>
-              <li>Use the <a href="#" onclick="highlightElement('mapboxgl-ctrl-geolocate', 'class')">geolocation</a> function and <a href="#" onclick="highlightElement('select-resource', 'id')">Health Clinics layers</a> to find COVID-19 testing near you</li>
-              <li><a href="#" onclick="highlightElement('share-container', 'id')">Share your map</a> on Social Media, or with a colleague or community member</li>
+            subtitle:`January Release Notes`,
+            content:`<ul>
+                <li>New data available: New York Times State and County Data, CDC County Data with County-Level Testing Data</li>
+                <li>New map view: 3D style map visualization</li>
+                <li>Improved line chart module: Click the line chart button by the time slider to view</li>
+                <li>Time range selection: You can now select a specific time range by click the time drop down in the time slider</li>
+                <li>Multiple selection: By holding down the Control or Command key, you can select and aggregate stats from multiple geographies</li>
+                <li>Improved report panel: New visual styles have been added to the report panel</li>
             </ul>`
         },
+        // {
+        //     title:`Getting Started`,
+        //     subtitle:`November Release Notes`,
+        //     content:`To get started, try the following:
+        //     <ul>
+        //       <li>Click the play button in the <a href="#" onclick="highlightElement('sliderdiv', 'id')">timeline</a> on the top of the page to see how the pandemic has unfolded</li>
+        //       <li>Explore <a href="#" onclick="highlightElement('select-source', 'id')">state level data</a> on testing positivity rates and capacities</li>
+        //       <li>Use the <a href="#" onclick="highlightElement('mapboxgl-ctrl-geolocate', 'class')">geolocation</a> function and <a href="#" onclick="highlightElement('select-resource', 'id')">Health Clinics layers</a> to find COVID-19 testing near you</li>
+        //       <li><a href="#" onclick="highlightElement('share-container', 'id')">Share your map</a> on Social Media, or with a colleague or community member</li>
+        //     </ul>`
+        // },
         {
             title:`Found a bug or have a suggestion?`,
             subtitle:`November Release Notes`,

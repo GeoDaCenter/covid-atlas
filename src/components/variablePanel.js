@@ -547,13 +547,14 @@ const VariablePanel = (props) => {
           >
             
           <ListSubheader disabled>county data</ListSubheader>
-            <MenuItem value={'county_usfacts.geojson'} key={'county_usfacts.geojson'}>USA Facts (County)</MenuItem>
-            <MenuItem value={'county_nyt.geojson'} key={'county_nyt.geojson'}>New York Times (County)</MenuItem>
             <MenuItem value={'county_1p3a.geojson'} key={'county_1p3a.geojson'}>1point3acres (County)</MenuItem>
+            <MenuItem value={'county_nyt.geojson'} key={'county_nyt.geojson'}>New York Times (County)</MenuItem>
+            <MenuItem value={'county_usfacts.geojson'} key={'county_usfacts.geojson'}>USA Facts (County)</MenuItem>
             <MenuItem value={'cdc.geojson'} key={'cdc.geojson'}>CDC (County)</MenuItem>
           <ListSubheader disabled>state data</ListSubheader>
-            <MenuItem value={'state_usafacts.geojson'} key={'state_usafacts.geojson'}>USA Facts (State)</MenuItem>
+            <MenuItem value={'state_1p3a.geojson'} key={'state_1p3a.geojson'}>1point3acres (State)</MenuItem>
             <MenuItem value={'state_nyt.geojson'} key={'state_nyt.geojson'}>New York Times (State)</MenuItem>
+            <MenuItem value={'state_usafacts.geojson'} key={'state_usafacts.geojson'}>USA Facts (State)</MenuItem>
           {/* <ListSubheader disabled>global data</ListSubheader>
             <MenuItem value={'global_jhu.geojson'} key={'global_jhu.geojson'}>John Hopkins University (Global)</MenuItem> */}
             
