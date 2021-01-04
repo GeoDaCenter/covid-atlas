@@ -369,7 +369,7 @@ const Map = () => {
         } else if (mapType === 'lisa') {
             return colorScales.lisa[currLisaData[storedGeojson[currentData]['geoidOrder'][f.properties.GEOID]]]
         } else {
-            return mapFn(dataFn(f[dataParams.numerator], f[dataParams.denominator], dataParams), bins.breaks, mapParams.colorScale, mapParams.mapType);
+            return mapFn(dataFn(f[dataParams.numerator], f[dataParams.denominator], dataParams), bins.breaks, mapParams.colorScale, mapParams.mapType, dataParams.numerator);
         }
     }
     
@@ -393,7 +393,7 @@ const Map = () => {
         } else if (mapType === 'lisa') {
             return colorScales.lisa[currLisaData[id]]
         } else {
-            return mapFn(val, bins.breaks, mapParams.colorScale, mapParams.mapType) 
+            return mapFn(val, bins.breaks, mapParams.colorScale, mapParams.mapType, dataParams.numerator) 
         }
     }
 
@@ -436,7 +436,6 @@ const Map = () => {
             setHoverInfo({x, y, object})
         // }
     }
-    
     const Layers = [
         // new SolidPolygonLayer({
         //     id: 'background',
