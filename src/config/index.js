@@ -103,7 +103,7 @@ export const fixedScales = {
         breaks:[0,50,100,150,200,250,300,350,400,Math.pow(10, 12)]
     },
     'lisa':{
-        bins: ["Not significant", "High-High", "Low-Low", "Low-High", "High-Low"] //"Undefined", "Isolated"
+        bins: ["Not significant tooltip:NotSig", "High-High tooltip:HighHigh", "Low-Low tooltip:LowLow", "Low-High  tooltip:LowHigh", "High-Low  tooltip:HighLow"] //"Undefined", "Isolated"
     },
     'forecasting': {
         bins: ['N/A','Low', 'Medium', 'High'],

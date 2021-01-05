@@ -51,7 +51,6 @@ const Popover = () => {
             id={id} 
             open={open} 
             anchorEl={anchorEl}
-            placement="left"
             disablePortal={false}
             modifiers={{
                 flip: {
@@ -59,7 +58,7 @@ const Popover = () => {
                 },
                 preventOverflow: {
                 enabled: true,
-                boundariesElement: 'scrollParent',
+                boundariesElement: 'window',
                 }
             }}
             onMouseEnter={handleMouseOver} 

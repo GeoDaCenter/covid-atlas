@@ -30,8 +30,8 @@
         },
         "mapbox:uiParadigm": "layers"
     },
-    "center": [-4.013421893754639, 46.9469458596522],
-    "zoom": 4.361888672268534,
+    "center": [-106.41142047413177, 43.731407729117365],
+    "zoom": 5.054700049834795,
     "bearing": 0,
     "pitch": 0,
     "sources": {
@@ -670,7 +670,8 @@
                 "text-font": ["Lato Italic", "Arial Unicode MS Regular"],
                 "symbol-placement": "line-center",
                 "text-pitch-alignment": "viewport",
-                "text-field": ["coalesce", ["get", "name_en"], ["get", "name"]]
+                "text-field": ["coalesce", ["get", "name_en"], ["get", "name"]],
+                "visibility": "none"
             },
             "paint": {
                 "text-color": [
@@ -762,7 +763,8 @@
                     ["bay", "water"],
                     7,
                     10
-                ]
+                ],
+                "visibility": "none"
             },
             "paint": {
                 "text-color": [
@@ -928,6 +930,7 @@
             "type": "symbol",
             "source": "composite",
             "source-layer": "place_label",
+            "minzoom": 5.25,
             "maxzoom": 15,
             "filter": [
                 "all",
@@ -1269,7 +1272,7 @@
         }
     ],
     "created": "2020-11-25T16:18:56.139Z",
-    "modified": "2020-12-17T17:57:44.016Z",
+    "modified": "2021-01-04T19:30:35.587Z",
     "id": "ckhxm4ot50yk919pj8witkk2d",
     "owner": "lixun910",
     "visibility": "private",

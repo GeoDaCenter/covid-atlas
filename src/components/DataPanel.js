@@ -431,7 +431,8 @@ const DataPanel = () => {
       <ReportWrapper>
         <ReportContainer expanded={expanded}>
           <ReportSection>
-            {(properties && selectionIndex.length) && <h2>{selectionKeys.map((key, index) => index === selectionKeys.length-1 ? selectionKeys.length === 1 ? key : `and ${key}` : `${key}, `)}</h2>}
+            {(properties && selectionIndex.length < 4) && <h2>{selectionKeys.map((key, index) => index === selectionKeys.length-1 ? selectionKeys.length === 1 ? key : `and ${key}` : `${key}, `)}</h2>}
+            {(properties && selectionIndex.length >= 4) && <h2>{currentData.includes('county') ? 'Selected Counties' : 'Selected States'}</h2>}
             <br/>
           {(properties && selectionIndex.length) && 
               <span>

@@ -307,6 +307,7 @@ const DateSlider = () => {
     const formatDate = (date) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         let rawDate = new Date(date);
+        rawDate.setDate(rawDate.getDate() + 1);
         return rawDate.toLocaleDateString('en-US', options);
     }
     
@@ -319,10 +320,10 @@ const DateSlider = () => {
     if (dates[currentData] !== undefined) {
         return (
             <SliderContainer style={{display: ((dataParams.nType === 'time-series' || currentVariable.includes('Testing')) ? 'initial' : 'none')}}>
-                <Grid container spacing={2} style={{display:'flex', padding: '5px 0 10px 0'}}>
+                <Grid container spacing={2} style={{display:'flex', padding: '0 0 10px 0'}}>
                     {currentVariable.includes('Testing') && 
                         <DateSelectorContainer item xs={12}>
-                            <DateTitle>{formatDate(dates[currentData][dataParams.nIndex-startDateIndex])}</DateTitle>
+                            <DateTitle>{formatDate(`${dates[currentData][dataParams.nIndex-startDateIndex]} 24:00`)}</DateTitle>
                         </DateSelectorContainer>
                     }
                     {dataParams.nType !== 'characteristic' && 

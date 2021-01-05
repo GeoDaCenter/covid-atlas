@@ -19,6 +19,7 @@ import { setDataSidebar, setMapLoaded, setPanelState, setSelectionData, appendSe
 import { mapFn, dataFn, getVarId, getCSV, getCartogramCenter, getDataForCharts, getURLParams } from '../utils';
 import { colors, colorScales } from '../config';
 import MAP_STYLE from '../config/style.json';
+import { selectRect } from '../config/svg'; 
 
 // const cartoGeom = new IcoSphereGeometry({
 //   iterations: 1
@@ -137,6 +138,17 @@ const ShareURL = styled.input`
     left:110%;
 `
 
+const IndicatorBox = styled.div`
+    position:absolute;
+    top:${props => props.y}px;
+    left:${props => props.x}px;
+    width:${props => props.width}px;
+    height:${props => props.height}px;
+    color:red;
+    border:1px solid red;
+    z-index:510000000000000000;
+`
+
 const MainViewContainer  = styled(View)`
 
 `
@@ -202,6 +214,8 @@ const Map = () => {
     const [storedCenter, setStoredCenter] = useState(null);
     const [shared, setShared] = useState(false);
     const [multipleSelect, setMultipleSelect] = useState(false);
+    const [boxSelect, setBoxSelect] = useState(false);
+    const [boxSelectDims, setBoxSelectDims] = useState({});
     const [resetSelect, setResetSelect] = useState(null);
     // const [mobilityData, setMobilityData] = useState([]);
 
@@ -398,6 +412,7 @@ const Map = () => {
     }
 
     const mapRef = useRef();
+    const deckRef = useRef();
     
     const handleShare = async (params) => {
         const shareData = {
@@ -773,12 +788,111 @@ const Map = () => {
     // ]
 
     const [insetMap, setInsetMap] = useState(false)
+    
+    // try {
+        
+    // console.log(deckRef.current.pickObjects({x: 200, y: 200, width:500, height:500, layerIds: ['choropleth']}));
+
+    // } catch {
+
+    // }
+
+    const handleSelectionBoxStart = () => {
+        setBoxSelect(true)
+    }
+
+    const listener = (e) => {
+
+        setBoxSelectDims(prev => {
+            let x = Math.min(e.screenX, prev.x);
+            let y = Math.min(e.screenY, prev.y);
+            let width = Math.abs(e.screenX-prev.x);
+            let height = Math.abs(e.screenY-prev.y);
+
+            return { x, y, width, height }
+        })
+    }
+    
+    const touchListener = (e) => {
+        // setX(e?.targetTouches[0]?.clientX-15)
+        // setY(e?.targetTouches[0]?.clientY-15)
+        console.log(e)
+    }
+
+    const removeListeners = () => {
+        window.removeEventListener('touchmove', touchListener)
+        window.removeEventListener('touchend', removeListeners)
+        window.removeEventListener('mousemove', listener)
+        window.removeEventListener('mouseup', removeListeners)
+    }
+
+    const handleBoxSelect = (e) => {
+        if (e.type === 'mousedown') {
+            setBoxSelectDims({
+                x:e.screenX,
+                y:e.screenY
+            })
+            window.addEventListener('touchmove', touchListener)
+            window.addEventListener('touchend', removeListeners)
+            window.addEventListener('mousemove', listener)
+            window.addEventListener('mouseup', removeListeners)
+        } else {
+
+            const {x, y, width, height } = boxSelectDims;
+
+            let layerIds = ['choropleth'];
+
+            let features = deckRef.current.pickObjects(
+                    {
+                        x, y, width, height, layerIds
+                    }
+                )
+
+            let GeoidList = [];
+            for (let i=0; i<features.length; i++) {
+                GeoidList.push(features[i].object.properties.GEOID)
+                let dataName = features[i]?.object?.properties?.state_abbr !== undefined ? `${features[i].object?.properties?.NAME}, ${features[i]?.object?.properties?.state_abbr}` : `${features[i].object?.properties?.NAME}`
+                
+                dispatch(
+                    appendSelectionData({
+                        values: getDataForCharts(
+                            {data: features[i].object}, 
+                            'cases', 
+                            startDateIndex, 
+                            dates[currentData], 
+                            dataName
+                        ),
+                        name: dataName,
+                        index: findIndex(storedData[currentData], o => o.properties.GEOID === features[i].object.properties.GEOID)
+                    })
+                );
+            }
+            setHighlightGeog(GeoidList); 
+            window.localStorage.setItem('SHARED_GEOID', GeoidList);
+            window.localStorage.setItem('SHARED_VIEW', JSON.stringify(mapRef.current.props.viewState));
+            setBoxSelectDims({});
+            removeListeners();
+            setBoxSelect(false)
+        }
+    }
 
     return (
         <MapContainer
             onKeyDown={handleCtrlDown}
             onKeyUp={handleCtrlUp}
+            onMouseDown={e => boxSelect ? handleBoxSelect(e) : null}
+            onMouseUp={e => boxSelect ? handleBoxSelect(e) : null}
         >
+            {
+                // boxSelectDims.hasOwnProperty('x') && 
+                true && 
+                <IndicatorBox 
+                    x={boxSelectDims.x} 
+                    y={boxSelectDims.y}
+                    width={boxSelectDims.width}
+                    height={boxSelectDims.height}>
+                </IndicatorBox>
+            }
             <svg height="0" width="0">
             <defs>
                 <clipPath id="window">
@@ -790,9 +904,20 @@ const Map = () => {
             </svg>
             <DeckGL
                 layers={Layers}
+                ref={deckRef}
 
                 initialViewState={viewState}
-                controller={true}
+                controller={
+                    {
+                        dragRotate: !boxSelect, 
+                        dragPan: !boxSelect, 
+                        doubleClickZoom: !boxSelect, 
+                        touchZoom: !boxSelect, 
+                        touchRotate: !boxSelect, 
+                        keyboard: true, 
+                        scrollZoom: true
+                    }
+                }
                 views={view}
 
                 // onViewStateChange={onViewStateChange}
@@ -871,6 +996,13 @@ const Map = () => {
                         >
                             {info}
                         </NavInlineButton> */}
+                        <NavInlineButton
+                            title="Selection Box"
+                            isActive={boxSelect}
+                            onClick={() => handleSelectionBoxStart()}
+                        >
+                            {selectRect}
+                        </NavInlineButton>
                         <GeolocateControl
                             positionOptions={{enableHighAccuracy: false}}
                             trackUserLocation={false}
