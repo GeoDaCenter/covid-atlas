@@ -139,14 +139,14 @@ const ShareURL = styled.input`
 `
 
 const IndicatorBox = styled.div`
-    position:absolute;
+    position:fixed;
     top:${props => props.y}px;
     left:${props => props.x}px;
     width:${props => props.width}px;
     height:${props => props.height}px;
-    color:red;
-    border:1px solid red;
-    z-index:510000000000000000;
+    border:1px dashed #FFCE00;
+    background:rgba(0,0,0,0.25);
+    z-index:5;
 `
 
 const MainViewContainer  = styled(View)`
@@ -804,12 +804,28 @@ const Map = () => {
     const listener = (e) => {
 
         setBoxSelectDims(prev => {
-            let x = Math.min(e.screenX, prev.x);
-            let y = Math.min(e.screenY, prev.y);
-            let width = Math.abs(e.screenX-prev.x);
-            let height = Math.abs(e.screenY-prev.y);
+            let x;
+            let y;
+            let width;
+            let height;
 
-            return { x, y, width, height }
+            if (e.clientX < prev.ox) {
+                x = e.clientX;
+                width = prev.ox - e.clientX
+            } else {
+                x = prev.x;
+                width = e.clientX - prev.x
+            }
+
+            if (e.clientY < prev.oy) {
+                y = e.clientY;
+                height = prev.oy - e.clientY
+            } else {
+                y = prev.y;
+                height = e.clientY - prev.y
+            }
+
+            return { ...prev, x, y, width, height }
         })
     }
     
@@ -829,13 +845,17 @@ const Map = () => {
     const handleBoxSelect = (e) => {
         if (e.type === 'mousedown') {
             setBoxSelectDims({
-                x:e.screenX,
-                y:e.screenY
-            })
-            window.addEventListener('touchmove', touchListener)
-            window.addEventListener('touchend', removeListeners)
-            window.addEventListener('mousemove', listener)
-            window.addEventListener('mouseup', removeListeners)
+                x:e.pageX,
+                y:e.pageY,
+                ox:e.pageX,
+                oy:e.pageY,
+                width:0,
+                height:0
+            });
+            window.addEventListener('touchmove', touchListener);
+            window.addEventListener('touchend', removeListeners);
+            window.addEventListener('mousemove', listener);
+            window.addEventListener('mouseup', removeListeners);
         } else {
 
             const {x, y, width, height } = boxSelectDims;
@@ -844,7 +864,7 @@ const Map = () => {
 
             let features = deckRef.current.pickObjects(
                     {
-                        x, y, width, height, layerIds
+                        x, y: y-50, width, height, layerIds
                     }
                 )
 
@@ -853,19 +873,35 @@ const Map = () => {
                 GeoidList.push(features[i].object.properties.GEOID)
                 let dataName = features[i]?.object?.properties?.state_abbr !== undefined ? `${features[i].object?.properties?.NAME}, ${features[i]?.object?.properties?.state_abbr}` : `${features[i].object?.properties?.NAME}`
                 
-                dispatch(
-                    appendSelectionData({
-                        values: getDataForCharts(
-                            {data: features[i].object}, 
-                            'cases', 
-                            startDateIndex, 
-                            dates[currentData], 
-                            dataName
-                        ),
-                        name: dataName,
-                        index: findIndex(storedData[currentData], o => o.properties.GEOID === features[i].object.properties.GEOID)
-                    })
-                );
+                if (i===0){
+                    dispatch(
+                        setSelectionData({
+                            values: getDataForCharts(
+                                {data: features[i].object}, 
+                                'cases', 
+                                startDateIndex, 
+                                dates[currentData], 
+                                dataName
+                            ),
+                            name: dataName,
+                            index: findIndex(storedData[currentData], o => o.properties.GEOID === features[i].object.properties.GEOID)
+                        })
+                    );
+                } else {
+                    dispatch(
+                        appendSelectionData({
+                            values: getDataForCharts(
+                                {data: features[i].object}, 
+                                'cases', 
+                                startDateIndex, 
+                                dates[currentData], 
+                                dataName
+                            ),
+                            name: dataName,
+                            index: findIndex(storedData[currentData], o => o.properties.GEOID === features[i].object.properties.GEOID)
+                        })
+                    );
+                }
             }
             setHighlightGeog(GeoidList); 
             window.localStorage.setItem('SHARED_GEOID', GeoidList);
