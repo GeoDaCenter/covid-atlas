@@ -193,6 +193,9 @@ const ReportContainer = styled.div`
     div.numberContainer {
       display:${props => props.expanded ? 'flex' : 'inline'};
     }
+    .bigOnly {
+      display: ${props => props.expanded ? 'initial' : 'none'};
+    }
     
 `
 
@@ -268,17 +271,17 @@ const DataPanel = () => {
   // de-structure sidebarData, which houses selected geography data
   const datasetList = ['properties', 'cases', 'deaths', 'predictions',
     'chr_health_factors', 'chr_life', 'chr_health_context',
-    'testing_ccpt', 'testing_tcap', 'testing_wk_pos', 'testing']
+    'testing_ccpt', 'testing_tcap', 'testing_wk_pos', 'testing', 'vaccinesAdmin']
   const [ properties, cases, deaths, predictions,
     chr_health_factors, chr_life, chr_health_context,
-    testing_ccpt, testing_tcap, testing_wk_pos, testing
+    testing_ccpt, testing_tcap, testing_wk_pos, testing, vaccinesAdmin
   ] = datasetList.map(dataset => {
     if (storedData[currentData] === undefined) {
       return false 
     } else {
       return storedData[currentData][0].hasOwnProperty(dataset)
     }
-  })
+  });
 
   const [expanded, setExpanded] = useState(true)
   const [width, setWidth] = useState(250);
@@ -498,7 +501,7 @@ const DataPanel = () => {
                   {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('testing_wk_pos', currDateIndex, 'weighted_average')} schema='testingPos'/>}
                 </div>
 
-                <p>7-Day Testing Capacity per 100k People</p>
+                <p>7-Day Testing Capacity<br className="bigOnly"/> per 100k People</p>
                 <div className="numberChartContainer">
                   <h3>{Math.round(aggregateTimeseries('testing_tcap', currDateIndex, 'weighted_average')*100)/100}</h3>
                   {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('testing_tcap', currDateIndex, 'weighted_average')} schema='testingCap'/>}
@@ -507,15 +510,37 @@ const DataPanel = () => {
                 <p>Total Testing</p>
                 <h3>{aggregateTimeseries('testing', currDateIndex, 'sum')?.toLocaleString('en')}</h3>
 
-                <p>7-Day Confirmed Cases per Testing</p>
+                <p>7-Day Confirmed Cases<br className="bigOnly"/>  per Testing</p>
                 <h3>{Math.round(aggregateTimeseries('testing_ccpt', currDateIndex, 'weighted_average')?.toLocaleString('en')*100)}%</h3>
 
-                <p>Testing Criterion</p><br/>
-                <div>
-                  <h3>{aggregateQualitative('properties', 'criteria').map(f => <span>{f}<br/></span>)}</h3>
-                </div>
+                <p>Testing Criterion</p><br className="bigOnly"/>
+                <h3>{aggregateQualitative('properties', 'criteria').map(f => <span>{f}<br/></span>)}</h3>
               </ReportSection>
             }
+            {(vaccinesAdmin && selectionIndex.length) &&
+                <ReportSection>
+                  <h2>COVID Vaccination</h2><br/>
+                  <h6>Source: <a href="https://covid.cdc.gov/covid-data-tracker/#vaccinations" target="_blank" rel="noopener noreferrer">CDC COVID Data Tracker</a></h6>            
+                
+                  <p>Vaccines Administered</p>
+                  <div className="numberChartContainer">
+                    <h3>{Math.round(aggregateTimeseries('vaccinesAdmin', currDateIndex, 'weighted_average'))?.toLocaleString('en')}</h3>
+                    {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('vaccinesAdmin', currDateIndex, 'weighted_average')} schema='testingPos'/>}
+                  </div>
+                  <p>Vaccines Administered<br className="bigOnly"/> Per 100k Population</p>
+                  <h3>{aggregateDataFunction('vaccinesAdmin', 'properties', {nProperty: null, nIndex: currDateIndex, nRange: null, dProperty: 'population', dIndex: null, dRange: null, scale: 100000}, 'weighted_average')?.toFixed(2).toLocaleString('en')}</h3>
+                  
+                  <p>Vaccines Distributed</p>
+                  <div className="numberChartContainer">
+                    <h3>{Math.round(aggregateTimeseries('vaccinesDist', currDateIndex, 'weighted_average'))?.toLocaleString('en')}</h3>
+                    {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('vaccinesDist', currDateIndex, 'weighted_average')} schema='testingPos'/>}
+                  </div>
+
+                  <p>Vaccines Distributed<br className="bigOnly"/>  Per 100k Population</p>
+                  <h3>{aggregateDataFunction('vaccinesDist', 'properties', {nProperty: null, nIndex: currDateIndex, nRange: null, dProperty: 'population', dIndex: null, dRange: null, scale: 100000}, 'weighted_average')?.toFixed(2).toLocaleString('en')}</h3>
+                
+                </ReportSection>
+              }
           {(chr_health_factors && selectionIndex.length) && 
             <ReportSection>
               <h2>Community Health Factors<Tooltip id="healthfactor"/></h2>
