@@ -525,7 +525,7 @@ const DataPanel = () => {
                   <p>Vaccines Administered</p>
                   <div className="numberChartContainer">
                     <h3>{Math.round(aggregateTimeseries('vaccinesAdmin', currDateIndex, 'weighted_average'))?.toLocaleString('en')}</h3>
-                    {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('vaccinesAdmin', currDateIndex, 'weighted_average')} schema='testingPos'/>}
+                    {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('vaccinesAdmin', currDateIndex, 'weighted_average')} schema='vaccination'/>}
                   </div>
                   <p>Vaccines Administered<br className="bigOnly"/> Per 100k Population</p>
                   <h3>{aggregateDataFunction('vaccinesAdmin', 'properties', {nProperty: null, nIndex: currDateIndex, nRange: null, dProperty: 'population', dIndex: null, dRange: null, scale: 100000}, 'weighted_average')?.toFixed(2).toLocaleString('en')}</h3>
@@ -533,7 +533,7 @@ const DataPanel = () => {
                   <p>Vaccines Distributed</p>
                   <div className="numberChartContainer">
                     <h3>{Math.round(aggregateTimeseries('vaccinesDist', currDateIndex, 'weighted_average'))?.toLocaleString('en')}</h3>
-                    {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('vaccinesDist', currDateIndex, 'weighted_average')} schema='testingPos'/>}
+                    {expanded && <TwoWeekChart data={aggregate2WeekTimeSeries('vaccinesDist', currDateIndex, 'weighted_average')} schema='vaccination'/>}
                   </div>
 
                   <p>Vaccines Distributed<br className="bigOnly"/>  Per 100k Population</p>
