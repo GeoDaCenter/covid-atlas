@@ -398,7 +398,32 @@ const VariablePanel = (props) => {
       fixedScale: 'testing',
       colorScale: 'testing',
       scale3D: 10000000
-    }
+    },
+    "HEADER:cdc vaccination":{},
+    "Vaccinations Administered per 100K Population": {
+        numerator: 'vaccinesAdmin',
+        nType: 'time-series',
+        nProperty: null,
+        denominator: 'properties',
+        dType: 'characteristic',
+        dProperty: 'population',
+        dRange:null,
+        dIndex:null,
+        scale:100000,
+        scale3D: 1000
+    },
+    "Vaccinations Distributed per 100K Population": {
+        numerator: 'vaccinesDist',
+        nType: 'time-series',
+        nProperty: null,
+        denominator: 'properties',
+        dType: 'characteristic',
+        dProperty: 'population',
+        dRange:null,
+        dIndex:null,
+        scale:100000,
+        scale3D: 1000
+    },
   }
 
   useEffect(() => {
@@ -441,6 +466,7 @@ const VariablePanel = (props) => {
       tempParams.dIndex = dataParams.nIndex;
       tempParams.dRange = tempParams.nRange || dataParams.nRange;
     }
+
 
     dispatch(setVariableParams({...tempParams}))
     dispatch(setVariableName(variable))
@@ -554,7 +580,7 @@ const VariablePanel = (props) => {
           <ListSubheader disabled>state data</ListSubheader>
             <MenuItem value={'state_1p3a.geojson'} key={'state_1p3a.geojson'}>1point3acres (State)</MenuItem>
             <MenuItem value={'state_nyt.geojson'} key={'state_nyt.geojson'}>New York Times (State)</MenuItem>
-            <MenuItem value={'state_usafacts.geojson'} key={'state_usafacts.geojson'}>USA Facts (State)</MenuItem>
+            {/* <MenuItem value={'state_usafacts.geojson'} key={'state_usafacts.geojson'}>USA Facts (State)</MenuItem> */}
           {/* <ListSubheader disabled>global data</ListSubheader>
             <MenuItem value={'global_jhu.geojson'} key={'global_jhu.geojson'}>John Hopkins University (Global)</MenuItem> */}
             

@@ -413,6 +413,28 @@ const DataPanel = () => {
     setExpanded(event.target.value)
   }
 
+  
+
+  const aggregateQualitative = (dataset, property) => {
+    let dataArray = selectionIndex.map(selection => storedData[currentData][selection][dataset][property]);
+    let dataObj = {}
+    for (let i=0; i<dataArray.length; i++){
+      if (dataObj[dataArray[i]] === undefined) {
+        dataObj[dataArray[i]] = 1
+      } else {
+        dataObj[dataArray[i]] += 1
+      }
+    }
+
+    let returnStr = [];
+
+    for (let i=0; i<Object.keys(dataObj).length; i++){
+      returnStr.push(`${[Object.keys(dataObj)[i]]}: ${Math.round(dataObj[Object.keys(dataObj)[i]]/dataArray.length*10000)/100}%`)
+    }
+
+    return returnStr;
+  }
+
   return (
     <DataPanelContainer className={panelState.info ? 'open' : ''} id="data-panel"  otherPanels={panelState.variables} dataLength={selectionKeys.length}>
       {properties &&  
@@ -488,10 +510,10 @@ const DataPanel = () => {
                 <p>7-Day Confirmed Cases per Testing</p>
                 <h3>{Math.round(aggregateTimeseries('testing_ccpt', currDateIndex, 'weighted_average')?.toLocaleString('en')*100)}%</h3>
 
-                {/* <p>Testing Criterion</p><br/>
+                <p>Testing Criterion</p><br/>
                 <div>
-                  <h3>{aggregateProperty('properties', 'criteria', 'sum')}</h3>
-                </div> */}
+                  <h3>{aggregateQualitative('properties', 'criteria').map(f => <span>{f}<br/></span>)}</h3>
+                </div>
               </ReportSection>
             }
           {(chr_health_factors && selectionIndex.length) && 

@@ -323,7 +323,7 @@ const DateSlider = () => {
                 <Grid container spacing={2} style={{display:'flex', padding: '0 0 10px 0'}}>
                     {currentVariable.includes('Testing') && 
                         <DateSelectorContainer item xs={12}>
-                            <DateTitle>{formatDate(`${dates[currentData][dataParams.nIndex-startDateIndex]} 24:00`)}</DateTitle>
+                            <DateTitle>{formatDate(`${dates[currentData][dataParams.nIndex-startDateIndex]}`)}</DateTitle>
                         </DateSelectorContainer>
                     }
                     {dataParams.nType !== 'characteristic' && 

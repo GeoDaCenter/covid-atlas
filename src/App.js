@@ -86,7 +86,7 @@ function App() {
       // merge data and get results
       let tempData = mergeData(values[0]['data'], joinCols[0], values.slice(1,), tableNames, joinCols[1]);
       let ColNames = getColumns(values.slice(1,), tableNames);
-      let tempDates = findDates(ColNames.cases);
+      let tempDates = findDates(ColNames[tableNames[0]]);
       let chartData = getDataForCharts(tempData,'cases',tempDates[1],tempDates[0]);
       let binData = getDataForBins(tempData, {...dataParams, nIndex: null});
       // calculate breaks

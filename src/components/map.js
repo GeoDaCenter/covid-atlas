@@ -12,7 +12,7 @@ import {fitBounds} from '@math.gl/web-mercator';
 // import {IcoSphereGeometry} from '@luma.gl/engine';
 
 import MapboxGLMap, {NavigationControl, GeolocateControl, LinearInterpolator } from 'react-map-gl';
-import Geocoder from 'react-map-gl-geocoder'
+import Geocoder from 'react-map-gl-geocoder';
 
 import { MapTooltipContent } from '../components';
 import { setDataSidebar, setMapLoaded, setPanelState, setSelectionData, appendSelectionData, removeSelectionData } from '../actions';
@@ -214,6 +214,7 @@ const Map = () => {
     const [storedCenter, setStoredCenter] = useState(null);
     const [shared, setShared] = useState(false);
     const [multipleSelect, setMultipleSelect] = useState(false);
+    const [choroplethInteractive, setChoroplethInteractive] = useState(true);
     const [boxSelect, setBoxSelect] = useState(false);
     const [boxSelectDims, setBoxSelectDims] = useState({});
     const [resetSelect, setResetSelect] = useState(null);
@@ -436,12 +437,14 @@ const Map = () => {
         }
     }
 
-    const handleCtrlDown = (e) => {
-        if (e.ctrlKey) setMultipleSelect(true)
+    const handleKeyDown = (e) => {
+        if (e.ctrlKey) setMultipleSelect(true);
+        if (e.shiftKey) setBoxSelect(true);
     }
 
-    const handleCtrlUp = (e) => {
-        if (!e.ctrlKey) setMultipleSelect(false)
+    const handleKeyUp = (e) => {
+        if (!e.ctrlKey) setMultipleSelect(false);
+        if (!e.shiftKey) setBoxSelect(false);
     }
 
     
@@ -475,7 +478,7 @@ const Map = () => {
                 "features": storedData[currentData] ? storedData[currentData] : [],
             },
             visible: mapParams.vizType !== 'cartogram',
-            pickable: mapParams.vizType !== 'cartogram',
+            pickable: mapParams.vizType !== 'cartogram' && choroplethInteractive,
             stroked: false,
             filled: true,
             wireframe: mapParams.vizType === '3D',
@@ -573,7 +576,7 @@ const Map = () => {
             pickable: false,
             stroked: true,
             filled:false,
-            getLineColor: f => highlightGeog.indexOf(f.properties.GEOID)!==-1 ? [20,20,20] : [20,20,20,0], 
+            getLineColor: f => highlightGeog.indexOf(f.properties.GEOID)!==-1 ? [0, 104, 109] : [0, 104, 109, 0], 
             lineWidthScale: 500,
             getLineWidth: 5,
             lineWidthMinPixels: 3,
@@ -914,8 +917,8 @@ const Map = () => {
 
     return (
         <MapContainer
-            onKeyDown={handleCtrlDown}
-            onKeyUp={handleCtrlUp}
+            onKeyDown={handleKeyDown}
+            onKeyUp={handleKeyUp}
             onMouseDown={e => boxSelect ? handleBoxSelect(e) : null}
             onMouseUp={e => boxSelect ? handleBoxSelect(e) : null}
         >
@@ -974,64 +977,25 @@ const Map = () => {
                     >
                         
                     <MapGeocoder 
-                    mapRef={mapRef}
-                    onViewportChange={viewState  => setViewState(viewState)} 
-                    mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
-                    position="top-right"
-                    id="mapGeocoder"
-                    style={{position: 'fixed', top:'5px', right:'5px'}}
+                        mapRef={mapRef}
+                        id="geocoder"
+                        onViewportChange={viewState  => setViewState(viewState)}
+                        mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
+                        position="top-right"
+                        id="mapGeocoder"
+                        placeholder="Search by Location"
+                        clearAndBlurOnEsc={true}
+                        style={{position: 'fixed', top:'5px', right:'5px'}}
                     />
                         
-                    <MapButtonContainer infoPanel={panelState.info}>
-                        {/* <NavInlineButton
-                            onClick={() => setGlobalMap(prev => !prev)}
-                            isActive={globalMap}
+                    <MapButtonContainer 
+                        infoPanel={panelState.info}
+                        onMouseEnter={() => {
+                            setHoverInfo(false)
+                            setChoroplethInteractive(false)}
+                        }
+                        onMouseLeave={() => setChoroplethInteractive(true)}
                         >
-                            <svg  x="0px" y="0px" viewBox="0 0 100 100" >
-                                <g transform="translate(50 50) scale(0.69 0.69) rotate(0) translate(-50 -50)">
-                                    <g>
-                                        <path d="M50-21c-39.2,0-71,31.9-71,71c0,39.2,31.9,71,71,71c39.2,0,71-31.9,71-71C121,10.8,89.2-21,50-21z M50-10.9
-                                            c1.7,0,3.7,0.9,6.1,3.5c2.4,2.7,4.9,7,7.1,12.5c2.1,5.4,3.8,12.1,5.1,19.4H31.7c1.2-7.4,3-14,5.1-19.4c2.1-5.6,4.7-9.9,7.1-12.5
-                                            C46.3-10,48.3-10.9,50-10.9z M32-8.2c-1.7,2.9-3.3,6.1-4.7,9.7c-2.6,6.7-4.6,14.5-5.9,23.1H-5.3C1.8,9,15.4-3.1,32-8.2z M68-8.2
-                                            C84.6-3.1,98.2,9,105.3,24.6H78.6C77.2,16,75.2,8.2,72.7,1.5C71.3-2.1,69.7-5.3,68-8.2z M-8.9,34.8h29.1c-0.4,4.9-0.7,10-0.7,15.2
-                                            c0,5.2,0.2,10.3,0.7,15.2H-8.9c-1.3-4.9-2-10-2-15.2C-10.9,44.7-10.2,39.6-8.9,34.8z M30.5,34.8h39c0.5,4.9,0.8,9.9,0.8,15.2
-                                            c0,5.3-0.3,10.3-0.8,15.2h-39c-0.5-4.9-0.8-9.9-0.8-15.2C29.7,44.7,30,39.7,30.5,34.8z M79.8,34.8h29.1c1.3,4.9,2,10,2,15.2
-                                            c0,5.3-0.7,10.4-2,15.2H79.8c0.4-4.9,0.7-10,0.7-15.2C80.4,44.8,80.2,39.7,79.8,34.8z M-5.3,75.4h26.8c1.3,8.6,3.3,16.4,5.9,23.1
-                                            c1.4,3.6,2.9,6.8,4.7,9.7C15.4,103.1,1.8,91-5.3,75.4z M31.7,75.4h36.5c-1.2,7.4-3,14-5.1,19.5c-2.1,5.6-4.7,9.9-7.1,12.5
-                                            c-2.4,2.7-4.4,3.5-6.1,3.5s-3.7-0.9-6.1-3.5c-2.4-2.7-4.9-7-7.1-12.5C34.7,89.4,33,82.8,31.7,75.4z M78.6,75.4h26.8
-                                            C98.2,91,84.6,103.1,68,108.2c1.7-2.9,3.3-6.1,4.7-9.7C75.2,91.8,77.2,84,78.6,75.4z"/>
-                                    </g>
-                                </g>
-                            </svg>
-                        </NavInlineButton> */}
-                        {/* <NavInlineButton
-                            onClick={() => console.log( getCartogramCenter(storedCartogramData[getVarId(currentData, dataParams)]))}
-                            isActive={mapParams.use3d}
-                        >
-                            <svg x="0px" y="0px" viewBox="0 0 100 100">
-                                <g transform="translate(50 50) scale(0.69 0.69) rotate(0) translate(-50 -50)">
-                                    <path d="M109,23.7c0-1-0.2-1.9-0.7-2.8c-0.1-0.2-0.3-0.4-0.5-0.7c-0.4-0.6-0.8-1.1-1.3-1.5l0,0L54.1-20.5c-2.3-1.7-5.5-1.7-7.9,0
-                                        L-6.2,18.8l0,0c-0.5,0.4-1,0.9-1.3,1.5C-7.7,20.5-7.8,20.7-8,21c-0.6,0.8-0.9,1.8-1,2.8v52.5c0,0,0,0,0,0.5c0.2,1.7,1,3.3,2.2,4.5
-                                        v0.3l52.5,39.3l0.9,0.5l0.7,0.4c1.5,0.6,3.2,0.6,4.7,0l0.7-0.4l0.9-0.5l52.5-39.3v-0.3c1.3-1.2,2.1-2.8,2.2-4.5c0,0,0,0,0-0.5
-                                        L109,23.7z M4.1,36.8l39.3,29.5v36.1L4.1,72.9V36.8z M56.6,66.3l39.3-29.5v36.1l-39.3,29.5V66.3z M50-7.4l41.5,31.1L50,54.9
-                                        L8.5,23.7L50-7.4z"/>
-                                </g>
-                            </svg>
-                        </NavInlineButton> */}
-                        {/* <NavInlineButton
-                            title="Show Line Chart"
-                            isActive={panelState.lineChart}
-                            onClick={() => handlePanelButton('lineChart')}
-                        >
-                            {chart}
-                        </NavInlineButton>
-                        <NavInlineButton
-                            title="Show Tutorial"
-                            isActive={panelState.tutorial}
-                            onClick={() => handlePanelButton('tutorial')}
-                        >
-                            {info}
-                        </NavInlineButton> */}
                         <NavInlineButton
                             title="Selection Box"
                             isActive={boxSelect}
@@ -1065,14 +1029,15 @@ const Map = () => {
                     </MapButtonContainer>
                     <div></div>
                 </MapboxGLMap >
-                {hoverInfo.object && (
+                
+                {/* <View id="main" className="test" style={{display:'none'}}/> */}
+            </DeckGL>
+            
+            {hoverInfo.object && (
                 <HoverDiv style={{transition: '0ms all', position: 'absolute', zIndex: 1, pointerEvents: 'none', left: hoverInfo.x, top: hoverInfo.y}}>
                     <MapTooltipContent content={hoverInfo.object} index={dataParams.nIndex-startDateIndex} />
                 </HoverDiv>
                 )}
-                
-                {/* <View id="main" className="test" style={{display:'none'}}/> */}
-            </DeckGL>
         </MapContainer>
     ) 
 }
