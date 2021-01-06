@@ -410,7 +410,8 @@ const VariablePanel = (props) => {
         dRange:null,
         dIndex:null,
         scale:100000,
-        scale3D: 1000
+        scale3D: 1000,
+        colorScale: 'vaccination',
     },
     "Vaccinations Distributed per 100K Population": {
         numerator: 'vaccinesDist',
@@ -422,7 +423,8 @@ const VariablePanel = (props) => {
         dRange:null,
         dIndex:null,
         scale:100000,
-        scale3D: 1000
+        scale3D: 1000,
+        colorScale: 'vaccination',
     },
   }
 

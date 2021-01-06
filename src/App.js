@@ -224,8 +224,8 @@ function App() {
         gda_proxy
       )
     } else if (cols[currentData] !== undefined) {
-      let dateIndex = findDates(cols[currentData].cases)[1];
-      let dataLength = cols[currentData].cases.length;
+      let dateIndex = findDates(cols[currentData][dataPresets[currentData]['tableNames'][0]])[1];
+      let dataLength = cols[currentData][dataPresets[currentData]['tableNames'][0]].length;
 
       dispatch(
         dataLoadExisting({
