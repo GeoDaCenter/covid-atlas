@@ -330,7 +330,7 @@ const VariablePanel = (props) => {
       scale:1,
       colorScale: 'lifeExp',
       scale3D: 1000
-    }
+    },
   }
 
   const CountyVariables = {
@@ -349,7 +349,7 @@ const VariablePanel = (props) => {
       colorScale: 'forecasting',
       fixedScale: 'forecasting',
       scale3D: 50000
-    }
+    },
   }
 
   const StateVariables = {
@@ -428,6 +428,34 @@ const VariablePanel = (props) => {
     },
   }
 
+  const OneP3AVariables = {
+    "HEADER:mobility":{},
+    "Dex": {
+        numerator: 'dex',
+        nType: 'time-series',
+        nProperty: null,
+        denominator: 'properties',
+        dType: null,
+        dProperty: null,
+        dRange:null,
+        dIndex:null,
+        scale:1,
+        scale3D: 1000
+    },
+    "Dex Adjusted": {
+        numerator: 'dex_a',
+        nType: 'time-series',
+        nProperty: null,
+        denominator: 'properties',
+        dType: null,
+        dProperty: null,
+        dRange:null,
+        dIndex:null,
+        scale:1,
+        scale3D: 1000
+    },
+  }
+
   useEffect(() => {
     if (urlParams.var) handleVariable({event: { target: { 
       value: legacyVariableOrder[urlParams.src||'county_usfacts.geojson'][urlParams.var]
@@ -446,7 +474,7 @@ const VariablePanel = (props) => {
 
   const handleVariable = (event) => {
     let variable = event.target.value;
-    let tempParams = PresetVariables[variable] || CountyVariables[variable] || StateVariables[variable] || null;
+    let tempParams = PresetVariables[variable] || CountyVariables[variable] || StateVariables[variable] || OneP3AVariables[variable] || null;
     
     // dispatch(variableChange({
     //   variable,
@@ -618,6 +646,15 @@ const VariablePanel = (props) => {
             
             {
               (currentData.includes("state")||currentData.includes("cdc")) && Object.keys(StateVariables).map((variable) => {
+                if (variable.split(':')[0]==="HEADER") {
+                  return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
+                } else {
+                  return <MenuItem value={variable} key={variable}>{variable}</MenuItem> 
+                }
+              })
+            }
+            {
+              currentData.includes("1p3a") && Object.keys(OneP3AVariables).map((variable) => {
                 if (variable.split(':')[0]==="HEADER") {
                   return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
                 } else {

@@ -180,10 +180,10 @@ export const dataPresets = {
     'county_1p3a.geojson': {
         plainName: '1Point3Acres County',
         geojson: 'county_1p3a.geojson', 
-        csvs: ['covid_confirmed_1p3a','covid_deaths_1p3a', 'berkeley_predictions', 'chr_health_context', 'chr_life', 'chr_health_factors'], 
+        csvs: ['covid_confirmed_1p3a','covid_deaths_1p3a', 'berkeley_predictions', 'chr_health_context', 'chr_life', 'chr_health_factors', 'covid_county_dex_1p3a', 'covid_county_dex_a_1p3a'], 
         joinCols: ['GEOID', ['FIPS','fips','countyFIPS', 'GEOID']], 
-        tableNames: ['cases','deaths', 'predictions', 'chr_health_context', 'chr_life', 'chr_health_factors'],
-        accumulate: ['covid_confirmed_1p3a','covid_deaths_1p3a']
+        tableNames: ['cases','deaths', 'predictions', 'chr_health_context', 'chr_life', 'chr_health_factors','dex','dex_a'],
+        accumulate: ['covid_confirmed_1p3a','covid_deaths_1p3a', 'covid_county_dex_1p3a', 'covid_county_dex_a_1p3a']
     },
     'county_nyt.geojson': {
         plainName: 'New York Times County',
@@ -196,10 +196,10 @@ export const dataPresets = {
     'state_1p3a.geojson': {
         plainName: '1Point3Acres State',
         geojson: 'state_1p3a.geojson', 
-        csvs: ['covid_confirmed_1p3a_state','covid_deaths_1p3a_state', 'chr_health_context_state', 'chr_life_state', 'chr_health_factors_state', 'covid_testing_1p3a_state', 'covid_wk_pos_1p3a_state', 'covid_tcap_1p3a_state', 'covid_ccpt_1p3a_state', 'vaccine_admin_cdc_1p3a_state', 'vaccine_dist_cdc_1p3a_state'], 
+        csvs: ['covid_confirmed_1p3a_state','covid_deaths_1p3a_state', 'chr_health_context_state', 'chr_life_state', 'chr_health_factors_state', 'covid_testing_1p3a_state', 'covid_wk_pos_1p3a_state', 'covid_tcap_1p3a_state', 'covid_ccpt_1p3a_state', 'vaccine_admin_cdc_1p3a_state', 'vaccine_dist_cdc_1p3a_state', 'covid_county_dex_1p3a_state', 'covid_county_dex_a_1p3a_state'], 
         joinCols: ['GEOID', ['FIPS','fips','countyFIPS', 'GEOID']], 
-        tableNames: ['cases', 'deaths', 'chr_health_context', 'chr_life', 'chr_health_factors', 'testing', 'testing_wk_pos', 'testing_tcap', 'testing_ccpt', 'vaccinesAdmin', 'vaccinesDist'],
-        accumulate: ['covid_confirmed_1p3a_state','covid_deaths_1p3a_state']
+        tableNames: ['cases', 'deaths', 'chr_health_context', 'chr_life', 'chr_health_factors', 'testing', 'testing_wk_pos', 'testing_tcap', 'testing_ccpt', 'vaccinesAdmin', 'vaccinesDist', 'dex', 'dex_a'],
+        accumulate: ['covid_confirmed_1p3a_state','covid_deaths_1p3a_state', 'covid_county_dex_1p3a_state', 'covid_county_dex_a_1p3a_state']
     },
     'state_usafacts.geojson': {
         plainName: 'USA Facts State',
