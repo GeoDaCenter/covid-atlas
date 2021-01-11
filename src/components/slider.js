@@ -321,32 +321,34 @@ const DateSlider = () => {
         return (
             <SliderContainer style={{display: ((dataParams.nType === 'time-series' || currentVariable.includes('Testing')) ? 'initial' : 'none')}}>
                 <Grid container spacing={2} style={{display:'flex', padding: '0 0 10px 0'}}>
-                    {currentVariable.includes('Testing') && 
+                    {(currentVariable.includes('Testing')||currentData.includes('cdc')) && 
                         <DateSelectorContainer item xs={12}>
                             <DateTitle>{formatDate(`${dates[currentData][dataParams.nIndex-startDateIndex]}`)}</DateTitle>
                         </DateSelectorContainer>
                     }
                     {dataParams.nType !== 'characteristic' && 
                         <DateSelectorContainer item xs={12}>
-                            <StyledDropDownNoLabel id="dateSelector">
-                                <InputLabel htmlFor="date-select">Date Range</InputLabel>
-                                <Select  
-                                    id="date-select"
-                                    value={''}
-                                    onChange={handleRangeButton}
-                                    displayEmpty
-                                    inputProps={{ 'aria-label': 'Without label' }}
-                                >
-                                    <MenuItem value="" disabled style={{display:'none'}}>
-                                        {!customRange && <span>{formatDate(dates[currentData][dataParams.nIndex-startDateIndex])} ({cleanRanges[rangeSelectVal]})</span>}
-                                        {customRange && 'Custom Range'}
-                                    </MenuItem>
-                                    <MenuItem value={null} key={'cumulative'}>Cumulative</MenuItem>
-                                    <MenuItem value={1} key={'daily'}>Daily New</MenuItem>
-                                    <MenuItem value={7} key={'7-day-ave'}>7-Day Average</MenuItem>
-                                    <MenuItem value={'custom'} key={'customRange'}>Custom Range</MenuItem>
-                                </Select>
-                            </StyledDropDownNoLabel>
+                            {!currentData.includes('cdc') &&
+                                <StyledDropDownNoLabel id="dateSelector">
+                                    <InputLabel htmlFor="date-select">Date Range</InputLabel>
+                                    <Select  
+                                        id="date-select"
+                                        value={''}
+                                        onChange={handleRangeButton}
+                                        displayEmpty
+                                        inputProps={{ 'aria-label': 'Without label' }}
+                                    >
+                                        <MenuItem value="" disabled style={{display:'none'}}>
+                                            {!customRange && <span>{formatDate(dates[currentData][dataParams.nIndex-startDateIndex])} ({cleanRanges[rangeSelectVal]})</span>}
+                                            {customRange && 'Custom Range'}
+                                        </MenuItem>
+                                        <MenuItem value={null} key={'cumulative'}>Cumulative</MenuItem>
+                                        <MenuItem value={1} key={'daily'}>Daily New</MenuItem>
+                                        <MenuItem value={7} key={'7-day-ave'}>7-Day Average</MenuItem>
+                                        <MenuItem value={'custom'} key={'customRange'}>Custom Range</MenuItem>
+                                    </Select>
+                                </StyledDropDownNoLabel>
+                            }
 
                             <BinsContainer item xs={12} 
                                 id="binModeSwitch"

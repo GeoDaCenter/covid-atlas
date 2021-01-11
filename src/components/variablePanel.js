@@ -456,6 +456,179 @@ const VariablePanel = (props) => {
     },
   }
 
+  const CDCVariables = {
+    "HEADER:cases":{},
+    "7-Day Confirmed Count": {
+        numerator: 'cases',
+        nType: 'time-series',
+        nProperty: null,
+        nRange:null,
+        denominator: 'properties',
+        dType: null,
+        dProperty: null,
+        dRange:null,
+        dIndex:null,
+        scale:1,
+        scale3D: 100
+    },
+    "7-Day Confirmed Count per 100K Population": {
+        numerator: 'cases',
+        nType: 'time-series',
+        nProperty: null,
+        nRange:null,
+        denominator: 'properties',
+        dType: 'characteristic',
+        dProperty: 'population',
+        dRange:null,
+        dIndex:null,
+        scale:100000,
+        scale3D: 1000
+    },
+    "7-Day Confirmed Count per Licensed Bed": {
+        numerator: 'cases',
+        nType: 'time-series',
+        nProperty: null,
+        nRange:null,
+        denominator: 'properties',
+        dType: 'characteristic',
+        dProperty: 'beds',
+        dRange:null,
+        dIndex:null,
+        scale:1,
+        scale3D: 100000
+    },
+    "HEADER:deaths":{},
+    "7-Day Death Count":{
+      numerator: 'deaths',
+      nType: 'time-series',
+      nProperty: null,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      scale3D: 10000
+    }, 
+    "7-Day Death Count per 100K Population":{
+      numerator: 'deaths',
+      nType: 'time-series',
+      nProperty: null,
+      nRange:null,
+      denominator: 'properties',
+      dType: 'characteristic',
+      dProperty: 'population',
+      dRange:null,
+      dRange:null,
+      dIndex:null,
+      scale:100000,
+      scale3D: 15000
+    },
+    "7-Day Death Count / Confirmed Count":{
+      numerator: 'deaths',
+      nType: 'time-series',
+      nProperty: null,
+      nRange:null,
+      denominator: 'cases',
+      dType: 'time-series',
+      dProperty: null,
+      dRange:null,
+      scale:1
+
+    },
+    "HEADER:testing":{},
+    "7 Day Testing Positivity Rate %": {
+      numerator: 'testing_wk_pos',
+      nType: 'characteristic',
+      nProperty: null,
+      nRange: null,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      fixedScale: 'testing',
+      colorScale: 'testing',
+      scale3D: 10000000
+    },
+    "7 Day Testing Capacity": {
+      numerator: 'testing',
+      nType: 'characteristic',
+      nProperty: null,
+      nRange: null,
+      denominator: 'properties',
+      dType: 'characteristic',
+      dProperty: 'population',
+      dRange:null,
+      dIndex:null,
+      scale:100000,
+      scale3D: 1000,
+      fixedScale: 'testingCap',
+      colorScale: 'testingCap',
+      scale3D: 3000
+    }, 
+    "7 Day Confirmed Cases per Testing %":{
+      numerator: 'testing_ccpt',
+      nType: 'characteristic',
+      nProperty: null,
+      nRange: null,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      fixedScale: 'testing',
+      colorScale: 'testing',
+      scale3D: 10000000
+    },
+    "HEADER:community health":{},
+    "Uninsured % (Community Health Factor)":{
+      numerator: 'chr_health_factors',
+      nType: 'characteristic',
+      nProperty: colLookup(cols, currentData, 'chr_health_factors', 'UnInPrc'),
+      nRange: null,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      colorScale: 'uninsured',
+      scale3D: 15000
+
+    },
+    "Over 65 Years % (Community Health Context)":{
+      numerator: 'chr_health_context',
+      nType: 'characteristic',
+      nProperty: colLookup(cols, currentData, 'chr_health_context', 'Over65YearsPrc'),
+      nRange: null,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      colorScale: 'over65',
+      scale3D: 15000
+    },
+    "Life expectancy (Length and Quality of Life)":{
+      numerator: 'chr_life',
+      nType: 'characteristic',
+      nProperty: colLookup(cols, currentData, 'chr_life', 'LfExpRt'),
+      nRange: null,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      colorScale: 'lifeExp',
+      scale3D: 1000
+    },
+  }
+
   useEffect(() => {
     if (urlParams.var) handleVariable({event: { target: { 
       value: legacyVariableOrder[urlParams.src||'county_usfacts.geojson'][urlParams.var]
@@ -474,7 +647,7 @@ const VariablePanel = (props) => {
 
   const handleVariable = (event) => {
     let variable = event.target.value;
-    let tempParams = PresetVariables[variable] || CountyVariables[variable] || StateVariables[variable] || OneP3AVariables[variable] || null;
+    let tempParams = PresetVariables[variable] || CountyVariables[variable] || StateVariables[variable] || OneP3AVariables[variable] || CDCVariables[variable] || null;
     
     // dispatch(variableChange({
     //   variable,
@@ -524,6 +697,12 @@ const VariablePanel = (props) => {
       dispatch(setVariableName("Confirmed Count per 100K Population"))
       dispatch(setNotification(`${dataPresets[newDataSet].plainName} data do not have ${currentVariable}. The Atlas will default to Confirmed Cases Per 100k People.`))  
 
+      setTimeout(() => {dispatch(setCurrentData(newDataSet))}, 250);
+      setTimeout(() => {dispatch(setNotification(null))},10000);
+    } else if (newDataSet.includes("cdc")) {
+      dispatch(setVariableParams({...CDCVariables["7-Day Confirmed Count per 100K Population"]}))
+      dispatch(setVariableName("7-Day Confirmed Count per 100K Population"))
+      dispatch(setNotification(`CDC County Data is aggregated to 7-Day rolling averages. The Atlas will default to 7-Day rolling average Confirmed Cases Per 100k People.`))  
       setTimeout(() => {dispatch(setCurrentData(newDataSet))}, 250);
       setTimeout(() => {dispatch(setNotification(null))},10000);
     } else {
@@ -590,6 +769,7 @@ const VariablePanel = (props) => {
       dispatch(setMapParams({vizType}))
     }
   }
+
   return (
     <VariablePanelContainer style={{transform: (panelState.variables ? '' : 'translateX(-100%)')}} otherPanels={panelState.info}>
       <ControlsContainer>
@@ -625,7 +805,7 @@ const VariablePanel = (props) => {
             onChange={handleVariable}
           >
             {
-              Object.keys(PresetVariables).map((variable) => {
+              !currentData.includes('cdc') && Object.keys(PresetVariables).map((variable) => {
                 if (variable.split(':')[0]==="HEADER") {
                   return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
                 } else {
@@ -635,7 +815,7 @@ const VariablePanel = (props) => {
             }
             
             {
-              currentData.includes("county") && Object.keys(CountyVariables).map((variable) => {
+              currentData.includes('county') && Object.keys(CountyVariables).map((variable) => {
                 if (variable.split(':')[0]==="HEADER") {
                   return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
                 } else {
@@ -645,7 +825,7 @@ const VariablePanel = (props) => {
             }
             
             {
-              (currentData.includes("state")||currentData.includes("cdc")) && Object.keys(StateVariables).map((variable) => {
+              (currentData.includes("state")) && Object.keys(StateVariables).map((variable) => {
                 if (variable.split(':')[0]==="HEADER") {
                   return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
                 } else {
@@ -655,6 +835,15 @@ const VariablePanel = (props) => {
             }
             {
               currentData.includes("1p3a") && Object.keys(OneP3AVariables).map((variable) => {
+                if (variable.split(':')[0]==="HEADER") {
+                  return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
+                } else {
+                  return <MenuItem value={variable} key={variable}>{variable}</MenuItem> 
+                }
+              })
+            }
+            {
+              currentData.includes("cdc") && Object.keys(CDCVariables).map((variable) => {
                 if (variable.split(':')[0]==="HEADER") {
                   return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
                 } else {
