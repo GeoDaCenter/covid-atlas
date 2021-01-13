@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { Steps, Hints } from 'intro.js-react';
 import { colors } from '../config';
+import { pages } from '../wiki';
 
 const InfoContainer = styled.div`
     background: ${colors.gray};
@@ -128,98 +128,65 @@ const Drawer = styled.div`
     position:absolute;
     left:5px;
     top:25px;
+    max-width:120px;
 `
 
 const DrawerButton = styled.button`
     display:block;
+    text-align:left;
     background:none;
-    color:white;
+    color:${props => props.active ? colors.lightblue : colors.white};
     border:none;
     outline:none;
     line-height:2;
+    transition:250ms;
+    opacity: ${props => props.active ? 1 : 0.6};
+    &:hover {
+        opacity:1;
+    }
 `
 
 const BodyContainer = styled.div`
     position:absolute;
-    left: 10%;
+    left: 120px;
     padding: 0 50px 50px 0;
     box-sizing:border-box;
     top:25px;
     transform:translateX(25px);
     overflow-y:scroll;
     height:calc(100% - 25px);
-    width:90%;
+    width:calc(100% - 105px);
+    .social-container {
+        a {
+            img {
+                width: 25px;
+                height: 25px;
+                padding: 5px 10px 0px 0px;
+                transition: all 250ms ease 0s;
+                opacity: 0.7;
+                &:hover {
+                    opacity:1;
+                }
+            }
+        }
+    }
+    button.hoverButton {
+        background:none;
+        border:none;
+        border-bottom:1px solid ${colors.yellow};
+        outline:none;
+        color:${colors.yellow};
+        padding:0;
+        &:after {
+            content:' ⚼';
+        }
+    }
 
 `
 
 const InfoBox = () => {
     const panelOpen = useSelector(state => state.panelState.tutorial)
-    const [wikiCategories, setWikiCategories] = useState([])
-    const [stepsEnabled, setStepsEnabled] = useState(true)
-    const [open, setOpen] = React.useState(false);
-    const [body, setBody] = React.useState('');
-  
-    const handleDrawerOpen = () => {
-      setOpen(true);
-    };
-  
-    const handleDrawerClose = () => {
-      setOpen(false);
-    };
-
-    useEffect(() => {
-        fetch(`${process.env.PUBLIC_URL}/wiki/index.json`)
-            .then(r => r.json())
-            .then(d => setWikiCategories(d))
-        
-        fetch(`${process.env.PUBLIC_URL}/wiki/pages/welcome.md`)
-            .then(r => r.text())
-            .then(t => setBody(t))
-    }, [])
-
-    const handleWikiLoad = (page) => {
-        fetch(`${process.env.PUBLIC_URL}/wiki/pages/${page}.md`)
-            .then(r => r.text())
-            .then(t => setBody(t))
-    }
-
-    const parseMarkdown = (markdownText) => {
-        const htmlText = markdownText
-            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-            .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
-            .replace(/\*\*(.*)\*\*/gim, '<b>$1</b>')
-            .replace(/\*(.*)\*/gim, '<i>$1</i>')
-            .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' />")
-            .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
-            .replace(/\n$/gim, '<br />')
-    
-        return htmlText.trim()
-    }
-    const test = (info) => console.log(info)
-
-    const steps = [
-        {
-          element: '.selector1',
-          intro: 'test 1',
-          position: 'right',
-          tooltipClass: 'myTooltipClass',
-          highlightClass: 'myHighlightClass',
-        },
-        {
-          element: '.selector2',
-          intro: 'test 2',
-        },
-        {
-          element: '.selector3',
-          intro: 'test 3',
-        },
-    ];
-
-    const onExit = () => {
-        setStepsEnabled(false)
-    }
+    const [currArticle, setCurrArticle] = useState("welcome")
 
     return (
         <InfoContainer active={panelOpen}>
@@ -246,21 +213,23 @@ const InfoBox = () => {
                 </Typography>
                 </Toolbar>
             </AppBar> */}
-            <Steps
-                enabled={stepsEnabled}
-                options={{disableInteraction: false}}
-                disableInteraction={false}
-                steps={steps}
-                initialStep={0}
-                onExit={onExit}
-                />
             <Drawer>
-                {wikiCategories.Pages !== undefined && 
-                    wikiCategories['Pages'].map(page => <DrawerButton onClick={() => handleWikiLoad(page.file)}>{page.pageName}</DrawerButton>)}
+                {Object.keys(pages).map(page => 
+                    pages[page]["pageName"] !== null ? 
+                    <DrawerButton 
+                            onClick={() => setCurrArticle(page)}
+                            active={currArticle === page}
+                        >
+                                {pages[page]["pageName"]}
+                    </DrawerButton>
+                    : ''
+                )}
             </Drawer>
             <BodyContainer>
-                <div dangerouslySetInnerHTML={{ __html: parseMarkdown(body) }} />
-                {test}
+                {pages[currArticle]['content']}
+                {(currArticle === "tutorials" || currArticle === "getting-started") && 
+                    <button onClick={() => setCurrArticle("choropleth-tutorial")}>"choropleth-tutorial"</button>
+                }
             </BodyContainer>
             {/* <PanelContainer panelCount={panels.length} position={panelPosition}>
                 {panels.map((panel,index) => {

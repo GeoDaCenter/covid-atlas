@@ -16,8 +16,6 @@
     "d3-dsv": "^2.0.0",
     "d3-scale": "^3.2.0",
     "immutable": "^4.0.0-rc.12",
-    "intro.js": "^3.2.1",
-    "intro.js-react": "^0.3.0",
     "jsgeoda": "^0.1.8",
     "lodash": "^4.17.20",
     "react": "^17.0.1",

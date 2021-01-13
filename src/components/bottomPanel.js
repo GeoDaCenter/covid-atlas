@@ -74,7 +74,7 @@ const BottomPanel = () => {
     window.addEventListener("resize", handleResize);
     
     return (
-        <BottomDrawer bottom={panelState.chart ? 0 : bottomMargin }>
+        <BottomDrawer bottom={panelState.chart ? 0 : bottomMargin } id="bottomPanel">
             <Legend />
             {/* <DateSlider /> */}
             {/* <hr />
