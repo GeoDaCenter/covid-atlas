@@ -40,7 +40,7 @@ const TopDrawer = styled.div`
 const TopPanel = () => {
     
     return (
-        <TopDrawer>
+        <TopDrawer id="timelinePanel">
             <DateSlider />
             <Dock />
         </TopDrawer>

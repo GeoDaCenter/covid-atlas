@@ -35,6 +35,9 @@ const VariablePanelContainer = styled.div`
   font: 'Lato', sans-serif;
   color:white;
   z-index:50;
+  &.hidden {
+    transform: translateX(-100%);
+  }
   @media (max-width:1024px) {
     min-width:50vw;
   }  
@@ -772,16 +775,14 @@ const VariablePanel = (props) => {
   }
 
   return (
-    <VariablePanelContainer style={{transform: (panelState.variables ? '' : 'translateX(-100%)')}} otherPanels={panelState.info} id="variablePanel">
+    <VariablePanelContainer className={panelState.variables ? '' : 'hidden'} otherPanels={panelState.info} id="variablePanel">
       <ControlsContainer>
         <h2>Data Sources &amp;<br/> Map Variables</h2>
-        <StyledDropDown>
+        <StyledDropDown id="dataSource">
           <InputLabel htmlFor="data-select">Data Source</InputLabel>
           <Select  
-            id="data-select"
             value={currentData}
             onChange={handleDataSource}
-            className='selector1'
           >
             
           <ListSubheader disabled>county data</ListSubheader>
@@ -799,7 +800,7 @@ const VariablePanel = (props) => {
           </Select>
         </StyledDropDown>
         <br />
-        <StyledDropDown>
+        <StyledDropDown id="variableSelect">
           <InputLabel htmlFor="numerator-select">Select Variable</InputLabel>
           <Select 
             value={currentVariable} 
@@ -856,7 +857,7 @@ const VariablePanel = (props) => {
           </Select>
         </StyledDropDown>
         <br/>
-        <StyledDropDown component="Radio" >
+        <StyledDropDown component="Radio" id="mapType">
           <FormLabel component="legend">Map Type</FormLabel>
           <RadioGroup 
             aria-label="maptype" 
@@ -889,13 +890,13 @@ const VariablePanel = (props) => {
           </RadioGroup>
         </StyledDropDown>
         <p>Visualization Type</p>
-        <StyledButtonGroup color="primary" aria-label="text button group">
+        <StyledButtonGroup color="primary" aria-label="text button group" id="visualizationType">
           <Button className={mapParams.vizType === '2D' ? 'active' : ''} data-val="2D" key="2D-btn" onClick={() => handleVizTypeButton('2D')}>2D</Button>
           <Button className={mapParams.vizType === '3D' ? 'active' : ''} data-val="3D" key="3D-btn" onClick={() => handleVizTypeButton('3D')}>3D</Button>
           <Button className={mapParams.vizType === 'cartogram' ? 'active' : ''} data-val="cartogram" key="cartogram-btn" onClick={() => handleVizTypeButton('cartogram')}>Cartogram</Button>
         </StyledButtonGroup>
         <br/>
-        <TwoUp>
+        <TwoUp id="overlaysResources">
           <StyledDropDown>
             <InputLabel htmlFor="overlay-select">Overlay</InputLabel>
             <Select  

@@ -4,10 +4,9 @@ import Grid from '@material-ui/core/Grid';
 import { colors } from '../config';
 
 export const StyledDropDown = styled(FormControl)`
-  padding:0 0 ${props => props.component === 'radios' ? '20' : '40'}px 0!important;
+  margin:0 10px ${props => props.component === 'radios' ? '20' : '40'}px 0!important;
   color:white;
   padding:0;
-  margin: 0 10px 40px 0;
   .MuiInputBase-root {
     font-family: 'Lato', sans-serif;
   }
@@ -95,6 +94,7 @@ export const SwitchContainer = styled(Grid)`
 
 export const BinsContainer = styled.div`
   padding-top:4px !important;
+  margin-top:-35px;
   p { 
     display: inline;
     color:white;

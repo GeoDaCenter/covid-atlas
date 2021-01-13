@@ -1,19 +1,35 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 
-const highlightFeature = ( selector ) => document.querySelector(selector).classList.add('highlighted')
-const unhighlightFeature = ( selector ) => document.querySelector(selector).classList.remove('highlighted')
+const highlightFeature = ( selector, backup=false ) => {
+    try {
+        if (backup && ((document.querySelector(selector).getBoundingClientRect().x < 0) || (document.querySelector('#variablePanel').getBoundingClientRect().x > window.innerWidth))) selector = backup 
+        if (selector === null) return;
+        document.querySelector(selector).classList.add('highlighted')
+    } catch { return }
+}
+
+const unhighlightFeature = ( selector, backup=false ) => {
+    try {
+        if (backup && ((document.querySelector(selector).getBoundingClientRect().x < 0) || (document.querySelector('#variablePanel').getBoundingClientRect().x > window.innerWidth))) selector = backup 
+        if (selector === null) return;
+        document.querySelector(selector).classList.remove('highlighted')
+    } catch { return }
+}
 
 const HoverButton = (props) => {
+    let {selector, backup } = props
+
     return (
         <button 
             className="hoverButton"
-            onMouseEnter={() => highlightFeature(props.selector)}
-            onMouseLeave={() => unhighlightFeature(props.selector)}
+            onMouseEnter={() => highlightFeature(selector, backup)}
+            onMouseLeave={() => unhighlightFeature(selector, backup)}
         >
             {props.text}
         </button>
     )
 }
+
 export const pages = {
     "welcome": {
         "pageName": "Welcome",
@@ -46,6 +62,17 @@ export const pages = {
                     In a quickly changing pandemic landscape, our tool connects COVID case data and community indicators across 
                     the United States from its beginning to today. The Atlas helps you access current, validated county-level data 
                     and spatial analysis to better understand the spread in communities and to bolster planning efforts.
+                </p>
+                <p>
+                    Features and use cases for the Atlas include identifying regional hotspots for mitigation, tracking patterns to plan ahead,
+                    interacting and forecasting the viral spread at both state and county levels, and making vulnerable communities visible. Read more on 
+                    potential use cases on our <a href="./">landing page</a>.
+                </p>
+                <hr />
+                <h3>Tutorials</h3>
+                <p>
+                    Below are tutorials to help you get started using the Atlas. Each has <HoverButton selector={null} text="Highlighted Text" id="exText" /> that will 
+                    highlight the related interface component to help you get started.
                 </p>
             </div>
     },
@@ -85,33 +112,103 @@ export const pages = {
                 </ul>
             </div>
     },
-    "tutorials":{
-        "pageName":"Tutorials"
-    },
+    // "tutorials":{
+    //     "pageName":"Tutorials"
+    // },
     "choropleth-tutorial": {
         "pageName":null,
         "content": 
             <div>
                 <h1>Choropleth Maps</h1>
-                <p>Choropleth maps use color to show the count or percentage of a variable.</p>
-                <p>The Atlas uses color to show the count and percentage of all coronavirus cases, daily new cases, deaths, and hospital beds. 
-                Use choropleth maps to see data about the virus on a particular day.</p>
-                <p>For more details on how the Atlas created the choropleth maps, please see the Methods page.</p>
-                <hr/>
-                <p>The choropleth map is the default display for the atlas webpage. To change data settings, 
-                    use the <HoverButton selector="#variablePanel" text="Variables Panel" />
+                <p>
+                    Choropleth maps use color to show the count or percentage of a variable.
                 </p>
-                To return to the choropleth display, first select the data source and variable you would like to map.
-                Click on the Choropleth button.
-                Use the color ramp at the bottom of the screen to interpret the count or percentage for each county or state.
-                Brighter reds represent larger counts and percentages. Paler yellows represent smaller counts and percentages.
-
+                <p> 
+                    The Atlas uses color to show the count and percentage of all coronavirus cases, daily new cases, deaths, and hospital beds. 
+                    Use choropleth maps to see data about the virus on a particular day.
+                </p>
+                <p>
+                    For more details on how the Atlas created the choropleth maps, please see the <a href="./methods.html">Methods page</a>.
+                </p>
+                <hr/>
+                <ol className="tutorialSteps">
+                    <li>
+                        <p>
+                            The choropleth map is the default display for the atlas webpage. To change data settings, 
+                            use the <HoverButton selector="#variablePanel" backup="#showHideLeft" text="Variables Panel" />
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Select the <HoverButton selector="#dataSource" backup="#showHideLeft" text="Data Source"/> and <HoverButton selector="#variableSelect" backup="#showHideLeft" text="Variable"/> you would like to map.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Click on "Natural Breaks" in the <HoverButton selector="#mapType" backup="#showHideLeft" text="Map Type"/> button group, if not already selected.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Use the <HoverButton selector="#bottomPanel" text="Color Ramp"/> at the bottom of the screen to interpret the count or percentage for each county or state.
+                            Brighter reds represent larger counts and percentages. Paler yellows represent smaller counts and percentages.
+                        </p>
+                    </li>
+                </ol>
             </div>
     },
     "interface":{
         "pageName": "Interface",
         "icon": "info",
-        "file": "interface"
+        "content": 
+        <div>
+            <h1>Interface Overview</h1>
+            <p>
+                The interface for navigating and controlling the map contains 4 main panels and the map itself. This page will briefly describe the functions of each panel and where to find them. <HoverButton selector={null} text="Highlighted Text" id="exText" /> will 
+                highlight the relevant interface feature to help easily identify it.
+            </p>
+            <h3>Data Sources &amp; Map Variables</h3>
+            <p>
+                The <HoverButton selector="#variablePanel" backup="#showHideLeft" text="Data Sources and Map Variables Panel" /> contains
+                the controls to change data sources, the variable being visualized, how it is visualized, and any informational overlays.
+            </p>
+            <p>
+                The <HoverButton selector="#dataSource" backup="#showHideLeft" text="Data Source"/> selection contains the county and state 
+                level datasets currently available in the Atlas. Different datasets are available at the state and county level, and contain
+                different variables depending on the published data. Explore different datasets or read more in the data sources tab below.
+            </p>
+            <p>
+                The <HoverButton selector="#variableSelect" backup="#showHideLeft" text="Variable"/> selection contains the available variables
+                for your selected dataset, including data like cases, deaths, testing rates, forecasting, and community health factors.
+            </p>
+            <p>
+                The <HoverButton selector="#mapType" backup="#showHideLeft" text="Map Type"/> buttons change how the map is colored and how the data is symbolized.
+                Natural breaks (jenks) uses a non-linear algorithm to classify (bin) data into groups, box map uses the same concept as a box plot chart, and hotspots 
+                identify clusters of high and low rates based on LISA methods. Read more on the <a href="./methods.html" target="_blank" rel="noopener noreferrer">methods</a> page.
+            </p>
+            <p>
+                The <HoverButton selector="#visualizationType" backup="#showHideLeft" text="Visualization Type"/> buttons change the visual representation of the map. The 2D map is 
+                a traditional, flat map, the 3D map scales the vertical height of geographies to reflect the selected variable, and the cartogram map scales the geographies as circles 
+                based on the variable values.
+            </p>
+            <p>
+                The <HoverButton selector="#overlaysResources" backup="#showHideLeft" text="Overlays and Resources"/> selection boxes contain useful contextual information, and highlight 
+                potentially vulnerable areas.
+            </p>
+            <h3>Timeline</h3>
+            <p>
+                The <HoverButton selector="#timelinePanel" text="Timeline Panel" /> contains all of the temporal controls for the Atlas. Here, you can select a date, change the timescale (daily, weekly, etc.)
+                and change how the data is binned - relative to the selected date or relative to the most recent date.
+            </p>
+            <p>
+                The <HoverButton selector="#timeSlider" text="Slider" /> can change the date selection for your selected variable. 
+                The <HoverButton selector="#dateSelector" text="Timescale" /> dropdown can change the aggregation over time between daily, weekly, cumulative, or custom date ranges. 
+                The <HoverButton selector="#binModeSwitch" text="Binning Switch" /> can change between fixed bins relative to the today and bins relative to the selected date. 
+                You can animate the map by clicking the <HoverButton selector="#playPause" text="Play/Pause Button" />.
+            </p>
+
+            
+        </div>
     },
     "datasets": {
         "pageName": "Data Sources",
@@ -201,18 +298,18 @@ export const pages = {
             
             <p>
                 The US Covid Atlas team is always working to improve the platform and its ability to generate insights.
-                <br/><br/>
-                Please contact the team at <a href="mailto:contact@theuscovidatlas.org">contact@theuscovidatlas.org</a> or reach out on social media below.
-                <br/><br/>
-                <div class="social-container">
-                    <a href="https://twitter.com/covid_atlas" target="_blank" rel="noopener noreferrer">
-                        <img src="./icons/twitter-icon.png" alt="Twitter Icon" />
-                    </a>
-                    <a href="https://github.com/GeoDaCenter/covid" target="_blank" rel="noopener noreferrer">
-                        <img src="./icons/github-icon.png" alt="Twitter Icon" />
-                    </a>
-                </div>
             </p>
+            <p>
+                Please contact the team at <a href="mailto:contact@theuscovidatlas.org">contact@theuscovidatlas.org</a> or reach out on social media below.
+            </p>
+            <div className="social-container">
+                <a href="https://twitter.com/covid_atlas" target="_blank" rel="noopener noreferrer">
+                    <img src="./icons/twitter-icon.png" alt="Twitter Icon" />
+                </a>
+                <a href="https://github.com/GeoDaCenter/covid" target="_blank" rel="noopener noreferrer">
+                    <img src="./icons/github-icon.png" alt="Twitter Icon" />
+                </a>
+            </div>
         </div>
     }
 }

@@ -149,7 +149,7 @@ const EndDate = styled(InitialDate)`
 `
 
 const DateSelectorContainer = styled(Grid)`
-    margin:0 18px -10px 0 !important;
+    margin:30px 18px -10px 0 !important;
     display:flex;
     justify-items: center;
     justify-content: flex-end;
@@ -352,6 +352,7 @@ const DateSlider = () => {
 
                             <BinsContainer item xs={12} 
                                 id="binModeSwitch"
+
                             >
                                 <Switch
                                     checked={mapParams.binMode === 'dynamic'}
@@ -390,6 +391,7 @@ const DateSlider = () => {
                         {/* Main Slider for changing date */}
                         {!customRange && 
                             <LineSlider 
+                                id="timeSlider"
                                 value={dataParams.nIndex} 
                                 // valueLabelDisplay="on"
                                 onChange={handleChange} 
@@ -415,6 +417,7 @@ const DateSlider = () => {
                         />} */}
                         {/* Slider for changing date range */}
                         {customRange && <RangeSlider 
+                            id="timeSlider"
                             value={[dataParams.nIndex-dataParams.nRange, dataParams.nIndex]} 
                             valueLabelDisplay="on"
                             onChange={handleRangeChange} 

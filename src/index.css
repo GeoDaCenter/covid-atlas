@@ -144,17 +144,16 @@ button.mapboxgl-ctrl-attrib-button {
 
 .highlighted {
   animation: highlightedShadow 1.5s linear infinite;
-  box-shadow: 0px 0px 3px #FFCE0000, -5px 0px 3px #A1E1E300, 5px -5px 3px #FFCE0000, 0px 5px 3px #A1E1E300;
   transition:250ms all;
   /* box-shadow:0px 0px 3px red, -5px 0px 3px red, 5px -5px 3px red, 0px 5px 3px red !important; */
 }
 
 @keyframes highlightedShadow {
-  0% {box-shadow:0px 0px 7px #FFCE00;}
-  25% {box-shadow:0px 0px 7px #FFCE0022;}
-  50% {box-shadow:0px 0px 7px #FFCE00;}
-  75% {box-shadow:0px 0px 7px #FFCE0022;}
-  100% {box-shadow:0px 0px 7px #FFCE00;}
+  0% {box-shadow:inset 0px 0px 0.5vw #FFCE00;}
+  25% {box-shadow:inset 0px 0px 0.5vw #FFCE0055;}
+  50% {box-shadow:inset 0px 0px 0.5vw #FFCE00;}
+  75% {box-shadow:inset 0px 0px 0.5vw #FFCE0055;}
+  100% {box-shadow:inset 0px 0px 0.5vw #FFCE00;}
 }
 
 /* @keyframes highlightedShadow {
