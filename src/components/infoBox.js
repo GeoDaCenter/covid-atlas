@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
+import { Steps, Hints } from 'intro.js-react';
 import { colors } from '../config';
 
 const InfoContainer = styled.div`
@@ -124,62 +124,145 @@ const Arrow = styled.svg`
     }
 `
 
+const Drawer = styled.div`
+    position:absolute;
+    left:5px;
+    top:25px;
+`
+
+const DrawerButton = styled.button`
+    display:block;
+    background:none;
+    color:white;
+    border:none;
+    outline:none;
+    line-height:2;
+`
+
+const BodyContainer = styled.div`
+    position:absolute;
+    left: 10%;
+    padding: 0 50px 50px 0;
+    box-sizing:border-box;
+    top:25px;
+    transform:translateX(25px);
+    overflow-y:scroll;
+    height:calc(100% - 25px);
+    width:90%;
+
+`
+
 const InfoBox = () => {
     const panelOpen = useSelector(state => state.panelState.tutorial)
+    const [wikiCategories, setWikiCategories] = useState([])
+    const [stepsEnabled, setStepsEnabled] = useState(true)
+    const [open, setOpen] = React.useState(false);
+    const [body, setBody] = React.useState('');
+  
+    const handleDrawerOpen = () => {
+      setOpen(true);
+    };
+  
+    const handleDrawerClose = () => {
+      setOpen(false);
+    };
 
-    const [panelPosition, setPanelPosition] = useState(0);
+    useEffect(() => {
+        fetch(`${process.env.PUBLIC_URL}/wiki/index.json`)
+            .then(r => r.json())
+            .then(d => setWikiCategories(d))
+        
+        fetch(`${process.env.PUBLIC_URL}/wiki/pages/welcome.md`)
+            .then(r => r.text())
+            .then(t => setBody(t))
+    }, [])
 
-    const panels = [
+    const handleWikiLoad = (page) => {
+        fetch(`${process.env.PUBLIC_URL}/wiki/pages/${page}.md`)
+            .then(r => r.text())
+            .then(t => setBody(t))
+    }
+
+    const parseMarkdown = (markdownText) => {
+        const htmlText = markdownText
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
+            .replace(/\*\*(.*)\*\*/gim, '<b>$1</b>')
+            .replace(/\*(.*)\*/gim, '<i>$1</i>')
+            .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' />")
+            .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
+            .replace(/\n$/gim, '<br />')
+    
+        return htmlText.trim()
+    }
+    const test = (info) => console.log(info)
+
+    const steps = [
         {
-            title:`Welcome to the US Covid Atlas v2`,
-            subtitle:`1/4 Notes`,
-            content: `Welcome to the refactored US Covid Atlas. We have greatly expanded the functionality,
-            usability, and portability of the Atlas by refactoring the project into the frontend framework, React.
-            <br/><br/>While we've worked to maintain the general structure of the Atlas, we've introduced a few new features
-            and interface elements we hope will make the Atlas more robust and usable for more people.`
+          element: '.selector1',
+          intro: 'test 1',
+          position: 'right',
+          tooltipClass: 'myTooltipClass',
+          highlightClass: 'myHighlightClass',
         },
         {
-            title:`New Features`,
-            subtitle:`January Release Notes`,
-            content:`<ul>
-                <li>New data available: New York Times State and County Data, CDC County Data with County-Level Testing Data</li>
-                <li>New map view: 3D style map visualization</li>
-                <li>Improved line chart module: Click the line chart button by the time slider to view</li>
-                <li>Time range selection: You can now select a specific time range by click the time drop down in the time slider</li>
-                <li>Multiple selection: By holding down the Control or Command key, you can select and aggregate stats from multiple geographies</li>
-                <li>Improved report panel: New visual styles have been added to the report panel</li>
-            </ul>`
+          element: '.selector2',
+          intro: 'test 2',
         },
-        // {
-        //     title:`Getting Started`,
-        //     subtitle:`November Release Notes`,
-        //     content:`To get started, try the following:
-        //     <ul>
-        //       <li>Click the play button in the <a href="#" onclick="highlightElement('sliderdiv', 'id')">timeline</a> on the top of the page to see how the pandemic has unfolded</li>
-        //       <li>Explore <a href="#" onclick="highlightElement('select-source', 'id')">state level data</a> on testing positivity rates and capacities</li>
-        //       <li>Use the <a href="#" onclick="highlightElement('mapboxgl-ctrl-geolocate', 'class')">geolocation</a> function and <a href="#" onclick="highlightElement('select-resource', 'id')">Health Clinics layers</a> to find COVID-19 testing near you</li>
-        //       <li><a href="#" onclick="highlightElement('share-container', 'id')">Share your map</a> on Social Media, or with a colleague or community member</li>
-        //     </ul>`
-        // },
         {
-            title:`Found a bug or have a suggestion?`,
-            subtitle:`November Release Notes`,
-            content:`The US Covid Atlas team is always working to improve the platform and its ability to generate insights.<br><br>
-                Please contact the team at <a href="mailto:contact@theuscovidatlas.org">contact@theuscovidatlas.org</a>
-                or reach out on social media below.
-                <div class="social-container">
-                    <a href="https://twitter.com/covid_atlas" target="_blank" rel="noopener noreferrer">
-                        <img src="${process.env.PUBLIC_URL}/icons/twitter-icon.png" alt="Twitter Icon">
-                    </a>
-                    <a href="https://github.com/GeoDaCenter/covid"  target="_blank" rel="noopener noreferrer">
-                        <img src="${process.env.PUBLIC_URL}/icons/github-icon.png" alt="Twitter Icon">
-                    </a>
-                </div>`
-        }
-    ]
+          element: '.selector3',
+          intro: 'test 3',
+        },
+    ];
+
+    const onExit = () => {
+        setStepsEnabled(false)
+    }
+
     return (
         <InfoContainer active={panelOpen}>
-            <PanelContainer panelCount={panels.length} position={panelPosition}>
+            {/* <AppBar
+                position="fixed"
+                className={clsx(classes.appBar, {
+                [classes.appBarShift]: open,
+                })}
+            >
+                <Toolbar>
+                <IconButton
+                    color="inherit"
+                    aria-label="open drawer"
+                    onClick={handleDrawerOpen}
+                    edge="start"
+                    className={clsx(classes.menuButton, {
+                    [classes.hide]: open,
+                    })}
+                >
+                    <MenuIcon />
+                </IconButton>
+                <Typography variant="h6" noWrap>
+                    Mini variant drawer
+                </Typography>
+                </Toolbar>
+            </AppBar> */}
+            <Steps
+                enabled={stepsEnabled}
+                options={{disableInteraction: false}}
+                disableInteraction={false}
+                steps={steps}
+                initialStep={0}
+                onExit={onExit}
+                />
+            <Drawer>
+                {wikiCategories.Pages !== undefined && 
+                    wikiCategories['Pages'].map(page => <DrawerButton onClick={() => handleWikiLoad(page.file)}>{page.pageName}</DrawerButton>)}
+            </Drawer>
+            <BodyContainer>
+                <div dangerouslySetInnerHTML={{ __html: parseMarkdown(body) }} />
+                {test}
+            </BodyContainer>
+            {/* <PanelContainer panelCount={panels.length} position={panelPosition}>
                 {panels.map((panel,index) => {
                     return (
                         <Panel key={`panel-${index}`}>
@@ -200,7 +283,7 @@ const InfoBox = () => {
                 })}
             </DotsContainer>
             <Arrow viewBox="0 0 100 100" id="right-arrow" onClick={() => setPanelPosition(prev => (prev+1) % panels.length)}><g transform="translate(0,-952.36218)"><path d="m 71.20311,1002.3622 -2.84375,-3.28121 -31.99997,-37 -7.5625,6.5624 29.15622,33.71881 -29.15622,33.7188 7.5625,6.5624 31.99997,-37 2.84375,-3.2812 z"></path></g></Arrow>
-            <Arrow viewBox="0 0 100 100" id="left-arrow" onClick={() => setPanelPosition(prev => (prev-1) >= 0 ? prev-1 : panels.length-1)}><g transform="translate(0,-952.36218)"><path d="m 71.20311,1002.3622 -2.84375,-3.28121 -31.99997,-37 -7.5625,6.5624 29.15622,33.71881 -29.15622,33.7188 7.5625,6.5624 31.99997,-37 2.84375,-3.2812 z"></path></g></Arrow>
+            <Arrow viewBox="0 0 100 100" id="left-arrow" onClick={() => setPanelPosition(prev => (prev-1) >= 0 ? prev-1 : panels.length-1)}><g transform="translate(0,-952.36218)"><path d="m 71.20311,1002.3622 -2.84375,-3.28121 -31.99997,-37 -7.5625,6.5624 29.15622,33.71881 -29.15622,33.7188 7.5625,6.5624 31.99997,-37 2.84375,-3.2812 z"></path></g></Arrow> */}
         </InfoContainer>
     )
 }

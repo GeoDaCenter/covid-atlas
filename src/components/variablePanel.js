@@ -462,7 +462,7 @@ const VariablePanel = (props) => {
         numerator: 'cases',
         nType: 'time-series',
         nProperty: null,
-        nRange:null,
+        nRange:1,
         denominator: 'properties',
         dType: null,
         dProperty: null,
@@ -475,7 +475,7 @@ const VariablePanel = (props) => {
         numerator: 'cases',
         nType: 'time-series',
         nProperty: null,
-        nRange:null,
+        nRange:1,
         denominator: 'properties',
         dType: 'characteristic',
         dProperty: 'population',
@@ -488,7 +488,7 @@ const VariablePanel = (props) => {
         numerator: 'cases',
         nType: 'time-series',
         nProperty: null,
-        nRange:null,
+        nRange:1,
         denominator: 'properties',
         dType: 'characteristic',
         dProperty: 'beds',
@@ -502,6 +502,7 @@ const VariablePanel = (props) => {
       numerator: 'deaths',
       nType: 'time-series',
       nProperty: null,
+      nRange:1,
       denominator: 'properties',
       dType: null,
       dProperty: null,
@@ -514,7 +515,7 @@ const VariablePanel = (props) => {
       numerator: 'deaths',
       nType: 'time-series',
       nProperty: null,
-      nRange:null,
+      nRange:1,
       denominator: 'properties',
       dType: 'characteristic',
       dProperty: 'population',
@@ -528,16 +529,16 @@ const VariablePanel = (props) => {
       numerator: 'deaths',
       nType: 'time-series',
       nProperty: null,
-      nRange:null,
+      nRange:1,
       denominator: 'cases',
       dType: 'time-series',
       dProperty: null,
-      dRange:null,
+      dRange:1,
       scale:1
 
     },
     "HEADER:testing":{},
-    "7 Day Testing Positivity Rate %": {
+    "7 Day County Testing Positivity Rate %": {
       numerator: 'testing_wk_pos',
       nType: 'characteristic',
       nProperty: null,
@@ -550,9 +551,9 @@ const VariablePanel = (props) => {
       scale:1,
       fixedScale: 'testing',
       colorScale: 'testing',
-      scale3D: 10000000
+      scale3D: 1000000
     },
-    "7 Day Testing Capacity": {
+    "7 Day County Testing Capacity": {
       numerator: 'testing',
       nType: 'characteristic',
       nProperty: null,
@@ -566,9 +567,9 @@ const VariablePanel = (props) => {
       scale3D: 1000,
       fixedScale: 'testingCap',
       colorScale: 'testingCap',
-      scale3D: 3000
+      scale3D: 300
     }, 
-    "7 Day Confirmed Cases per Testing %":{
+    "7 Day County Confirmed Cases per Testing %":{
       numerator: 'testing_ccpt',
       nType: 'characteristic',
       nProperty: null,
@@ -780,6 +781,7 @@ const VariablePanel = (props) => {
             id="data-select"
             value={currentData}
             onChange={handleDataSource}
+            className='selector1'
           >
             
           <ListSubheader disabled>county data</ListSubheader>

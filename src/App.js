@@ -365,18 +365,17 @@ function App() {
         }/>      
         <Draggable 
           z={10}
-          defaultX={defaultX}
-          defaultY={defaultY+20}
+          defaultX={window.innerWidth*.325}
+          defaultY={window.innerHeight*.25}
           title="tutorial"
           content={
           <Scaleable 
-            notScaleable={true}
             content={
               <InfoBox />
             } 
             title="tutorial"
-            defaultWidth={defaultWidth}
-            defaultHeight={defaultHeight}
+            defaultWidth={window.innerWidth*.35}
+            defaultHeight={window.innerHeight*.5}
             minHeight={minHeight}
             minWidth={minWidth} />
         }/>
