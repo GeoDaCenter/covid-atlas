@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as jsgeoda from 'jsgeoda';
 
@@ -8,7 +8,7 @@ import * as jsgeoda from 'jsgeoda';
 // third row: data accessing
 import { 
   getParseCSV, mergeData, getColumns, findDates, loadJson,
-  getDataForBins, getDataForCharts, getDataForLisa, 
+  getDataForBins, getDataForCharts, getDataForLisa, getDateLists,
   getLisaValues, getVarId, getCartogramValues } from './utils';
 
 // Actions -- Redux state manipulation following Flux architecture //
@@ -39,6 +39,7 @@ import { colorScales, fixedScales, dataPresets,
 
 function App() {
 
+  const dateLists = useMemo(() => getDateLists())
   // static variables for floating panel sizing
   let [ 
     defaultX, 
@@ -106,14 +107,15 @@ function App() {
   //   then performs a join and loads the data into the store
   const loadData = async (params, gda_proxy) => {
     // destructure parameters
-    const { geojson, csvs, joinCols, tableNames, accumulate } = params
+    const { geojson, csvs, joinCols, tableNames, accumulate, dateList } = params
 
     // promise all data fetching - CSV and Json
     const csvPromises = csvs.map(csv => 
       getParseCSV(
         `${process.env.PUBLIC_URL}/csv/${csv}.csv`, 
         joinCols[1], 
-        accumulate.includes(csv)
+        accumulate.includes(csv),
+        dateLists[dateList+'dateList']
       ).then(result => {return result}))
 
     Promise.all([
@@ -406,7 +408,6 @@ function App() {
   }, [window.innerHeight, window.innerWidth])
   // const dragHandlers = {onStart: this.onStart, onStop: this.onStop};
 
-  const renderLoader = () => <p>Loading</p>;
 
   return (
     <div className="App">

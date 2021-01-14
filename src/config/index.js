@@ -175,7 +175,8 @@ export const dataPresets = {
         csvs: ['covid_confirmed_usafacts','covid_deaths_usafacts', 'berkeley_predictions', 'chr_health_context', 'chr_life', 'chr_health_factors'], 
         joinCols: ['GEOID', ['FIPS','fips','countyFIPS']], 
         tableNames: ['cases','deaths', 'predictions', 'chr_health_context', 'chr_life', 'chr_health_factors',],
-        accumulate: []
+        accumulate: [],
+        dateList: ['us','us',,,,,]
     },
     'county_1p3a.geojson': {
         plainName: '1Point3Acres County',
@@ -183,7 +184,8 @@ export const dataPresets = {
         csvs: ['covid_confirmed_1p3a','covid_deaths_1p3a', 'berkeley_predictions', 'chr_health_context', 'chr_life', 'chr_health_factors', 'covid_county_dex_1p3a', 'covid_county_dex_a_1p3a'], 
         joinCols: ['GEOID', ['FIPS','fips','countyFIPS', 'GEOID']], 
         tableNames: ['cases','deaths', 'predictions', 'chr_health_context', 'chr_life', 'chr_health_factors','dex','dex_a'],
-        accumulate: ['covid_confirmed_1p3a','covid_deaths_1p3a', 'covid_county_dex_1p3a', 'covid_county_dex_a_1p3a']
+        accumulate: ['covid_confirmed_1p3a','covid_deaths_1p3a', 'covid_county_dex_1p3a', 'covid_county_dex_a_1p3a'],
+        dateList: ['iso','iso',,,,,]
     },
     'county_nyt.geojson': {
         plainName: 'New York Times County',

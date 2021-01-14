@@ -1,12 +1,13 @@
 import * as d3 from 'd3-dsv';
 import { findDates } from '../utils';
 
-async function getParseCSV(url, joinCol, accumulate){
+async function getParseCSV(url, joinCol, accumulate, dateList=null){
+  console.log(dateList)
     const tempData = await fetch(url)
       .then(response => {
         return response.ok ? response.text() : Promise.reject(response.status);
       }).then(text => {
-        let data = d3.csvParse(text, d3.autoType)
+        let data = d3.csvParse(text, d3.autoType);
         let rtn = {};
         let n = data.length;
         let selectedJoinColumn;
@@ -36,6 +37,14 @@ async function getParseCSV(url, joinCol, accumulate){
               tempArr.unshift(vals[i])
             }
             rtn[data[n][selectedJoinColumn]] = tempArr
+          }
+        } else if (dateList !== null){
+          console.log(dateList)
+          while (n>0){
+            n--;
+            rtn[data[n][selectedJoinColumn]] = dateList.map(date => {
+              return data[n][date] || null
+            })
           }
         } else {
           while (n>0){

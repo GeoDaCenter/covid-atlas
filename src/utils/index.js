@@ -14,6 +14,7 @@ import getCSV from './getCSV.js';
 import getDataForBins from './getDataForBins.js';
 import getDataForCharts from './getDataForCharts.js';
 import getDataForLisa from './getDataForLisa.js';
+import { getDateLists } from './getDateLists.js';
 import getGeoidIndex from './getGeoidIndex';
 import getGeoids from './getGeoids';
 import getGzipData from './getGzipData';
@@ -45,6 +46,7 @@ export {
     getDataForBins,
     getDataForCharts,
     getDataForLisa,
+    getDateLists,
     getGeoidIndex,
     getGeoids,
     getJson,
