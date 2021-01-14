@@ -237,6 +237,17 @@ export const setVariableParams = ( params ) => {
     }
 }
 
+// change the Z axis variable for bi-variate 3D views
+export const variableChangeZ = ( variable, params ) => {
+    return {
+        type: 'SET_Z_VARIABLE_PARAMS',
+        payload: {
+            variable,
+            params
+        }
+    }
+}
+
 // sets the map parameters (color mode, viz type, etc.)
 export const setMapParams = ( params ) => {
     return {

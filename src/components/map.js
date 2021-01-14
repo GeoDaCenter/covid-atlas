@@ -388,8 +388,13 @@ const Map = () => {
         }
     }
     
-    const GetHeight = (f, bins) => bins.hasOwnProperty("bins") ? dataFn(f[dataParams.numerator], f[dataParams.denominator], dataParams)*(dataParams.scale3D/((dataParams.nType === "time-series" && dataParams.nRange === null) ? (dataParams.nIndex-startDateIndex)/10 : 1)) : 0
-        
+    const GetHeight = (f) => dataFn(f[dataParams.numerator], f[dataParams.denominator], dataParams)*(dataParams.scale3D/((dataParams.nType === "time-series" && dataParams.nRange === null) ? (dataParams.nIndex-startDateIndex)/10 : 1))
+        // if (dataParams.zAxisParams === null) {
+        //     return dataFn(f[dataParams.numerator], f[dataParams.denominator], dataParams)*(dataParams.scale3D)
+        // } else {
+        //     return dataFn(f[dataParams.zAxisParams.numerator], f[dataParams.zAxisParams.denominator], dataParams.zAxisParams)*(dataParams.zAxisParams.scale3D)
+        // }
+
     const handleGeolocate = (viewState) => {
         setViewState(view => ({
             ...view,
@@ -486,7 +491,7 @@ const Map = () => {
             opacity: 0.8,
             material:false,
             getFillColor: f => GetFillColor(f, mapParams.bins, mapParams.mapType),
-            getElevation: f => GetHeight(f, mapParams.bins, mapParams.mapType),
+            getElevation: f => GetHeight(f),
             // getLineColor: [255, 80, 80],
             // getLineWidth:50,
             // minLineWidth:20,

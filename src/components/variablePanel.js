@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import InputLabel from '@material-ui/core/InputLabel';
@@ -10,15 +10,18 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import Switch from '@material-ui/core/Switch';
 
 import styled from 'styled-components';
 
 import { colLookup, getArrayCSV, getGzipData } from '../utils';
 import Tooltip from './tooltip';
-import { StyledDropDown } from '../styled_components';
-import { setVariableParams, setVariableName, setMapParams, setCurrentData, setPanelState, setNotification, storeMobilityData } from '../actions';
+import { StyledDropDown, BinsContainer } from '../styled_components';
+import { setVariableParams, setVariableName, setMapParams, setCurrentData, setPanelState, setNotification, 
+  storeMobilityData, variableChangeZ } from '../actions';
 import { fixedScales, colorScales, dataPresets, legacyVariableOrder, colors } from '../config';
 import { settings } from '../config/svg';
+import { variableTree } from '../config/variableTree'
 
 const VariablePanelContainer = styled.div`
   position:fixed;
@@ -212,8 +215,9 @@ const VariablePanel = (props) => {
 
   const dispatch = useDispatch();    
 
-  const { cols, currentData, currentVariable, dataParams,
+  const { cols, currentData, currentVariable, currentZVariable, dataParams,
     mapParams, panelState, urlParams, storedMobilityData } = useSelector(state => state);
+  const [bivariateZ, setBivariateZ] = useState(false);
 
   const PresetVariables = {
     "HEADER:cases":{},
@@ -680,6 +684,24 @@ const VariablePanel = (props) => {
     dispatch(setMapParams({customScale: tempParams.colorScale || '', fixedScale: tempParams.fixedScale || null}))
   };
 
+  const handleZVariable = (event) => {
+    let variable = event.target.value;
+    let tempParams = PresetVariables[variable] || CountyVariables[variable] || StateVariables[variable] || OneP3AVariables[variable] || CDCVariables[variable] || null;
+    
+    // transitioning from a static characteristic (null time range)
+    if (dataParams.zAxisParams?.nType === 'characteristic' && tempParams.nType === 'time-series') tempParams.nRange = 7;
+    
+    // to a time-series data set 
+
+    // if time series over time series, coordinate index and range
+    if (tempParams.nType === 'time-series' && tempParams.dType === 'time-series') {
+      tempParams.dIndex = dataParams.nIndex;
+      tempParams.dRange = tempParams.nRange || dataParams.nRange;
+    }
+    
+    dispatch(variableChangeZ(variable, tempParams))
+  };
+
   const handleDataSource = (event) => {
     let newDataSet = event.target.value
     if ((newDataSet.includes("state") && CountyVariables.hasOwnProperty(currentVariable))||(newDataSet.includes("county") && StateVariables.hasOwnProperty(currentVariable))) {
@@ -709,7 +731,17 @@ const VariablePanel = (props) => {
       dispatch(setNotification(`CDC County Data is aggregated to 7-Day rolling averages. The Atlas will default to 7-Day rolling average Confirmed Cases Per 100k People.`))  
       setTimeout(() => {dispatch(setCurrentData(newDataSet))}, 250);
       setTimeout(() => {dispatch(setNotification(null))},10000);
-    } else {
+    } else if (currentData.includes('cdc')) {
+      dispatch(setMapParams({customScale: '', fixedScale: null}))
+      dispatch(setVariableParams({...PresetVariables["Confirmed Count per 100K Population"]}))
+      dispatch(setVariableName("Confirmed Count per 100K Population"))
+      dispatch(setNotification(`Changing to ${dataPresets[newDataSet].plainName} data. CDC County Data is aggregated to 7-Day rolling averages. The Atlas will default to Confirmed Cases Per 100k People.`))  
+
+      setTimeout(() => {dispatch(setCurrentData(newDataSet))}, 250);
+      setTimeout(() => {dispatch(setNotification(null))},10000);
+    }
+    
+      else {
       dispatch(setCurrentData(newDataSet)); 
     }
   };
@@ -769,16 +801,112 @@ const VariablePanel = (props) => {
   }
 
   const handleVizTypeButton = (vizType) => {
+    setBivariateZ(false)
     if (mapParams.vizType !== vizType) {
       dispatch(setMapParams({vizType}))
     }
   }
 
+  const handleZSwitch = () => {
+    setBivariateZ(prev => !prev )
+  }
+
+  const [newVariable, setNewVariable] = useState("Confirmed Count per 100K Population")
+  const [currentGeography, setCurrentGeography] = useState('County')
+  const [currentDataset, setCurrentDataset] = useState('1point3acres')
+
+  const handleNewVariable = (e) => {
+    let tempGeography = currentGeography;
+    let tempDataset = currentDataset;
+    // check if valid combination based on variable tree
+    if (!variableTree[e.target.value].hasOwnProperty(tempGeography)) {
+      tempGeography = Object.keys(variableTree[e.target.value])[0]
+      setCurrentGeography(tempGeography)
+    }
+
+    if (!variableTree[e.target.value][tempGeography].hasOwnProperty(tempDataset)) {
+      setCurrentDataset(Object.keys(variableTree[e.target.value][tempGeography])[0])
+    }
+    
+    setNewVariable(e.target.value)
+  }
+
+  const handleGeography = (e) => {
+    
+    if (!variableTree[newVariable][e.target.value].hasOwnProperty(currentDataset)) {
+      setCurrentDataset(Object.keys(variableTree[newVariable][e.target.value])[0])
+    }
+
+    setCurrentGeography(e.target.value)
+  }
+
+  const handleDataset = (e) => {
+    setCurrentDataset(e.target.value)
+  }
+
+  const allGeographies = ['County', 'State']
+  const allDatasets = ['1point3acres', 'USA Facts', 'New York Times', 'CDC', 'Yu Group at Berkeley', 'County Health Rankings']
+
   return (
     <VariablePanelContainer className={panelState.variables ? '' : 'hidden'} otherPanels={panelState.info} id="variablePanel">
       <ControlsContainer>
         <h2>Data Sources &amp;<br/> Map Variables</h2>
-        <StyledDropDown id="dataSource">
+        <StyledDropDown id="newVariableSelect">
+          <InputLabel htmlFor="newVariableSelect">Variable</InputLabel>
+          <Select
+            value={newVariable}
+            onChange={handleNewVariable}
+            >
+            {Object.keys(variableTree).map(variable => {
+              if (variable.split(':')[0]==="HEADER") {
+                return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
+              } else {
+                return <MenuItem value={variable} key={variable}>{variable}</MenuItem> 
+              }
+            })
+          }
+          </Select>
+        </StyledDropDown>
+        <br/>
+        
+        <StyledDropDown id="geographySelect">
+          <InputLabel htmlFor="geographySelect">Geography</InputLabel>
+          <Select
+            value={currentGeography}
+            onChange={handleGeography}
+            >
+            {allGeographies.map(geography => 
+              <MenuItem 
+              value={geography} 
+              key={geography} 
+              disabled={!variableTree[newVariable].hasOwnProperty(geography)}
+              >
+                {geography}
+              </MenuItem>
+            )}
+          </Select>
+        </StyledDropDown>
+        <br/>
+
+        <StyledDropDown id="datasetSelect">
+          <InputLabel htmlFor="datasetSelect">Data Source</InputLabel>
+          <Select
+            value={currentDataset}
+            onChange={handleDataset}
+            >
+            {allDatasets.map(dataset => 
+              <MenuItem 
+              value={dataset}
+              key={dataset} 
+              disabled={variableTree[newVariable][currentGeography] === undefined || !variableTree[newVariable][currentGeography].hasOwnProperty(dataset)}
+              >
+                {dataset}
+              </MenuItem>
+            )}
+          </Select>
+        </StyledDropDown>
+        <br/>
+        {/* <StyledDropDown id="dataSource">
           <InputLabel htmlFor="data-select">Data Source</InputLabel>
           <Select  
             value={currentData}
@@ -793,10 +921,6 @@ const VariablePanel = (props) => {
           <ListSubheader disabled>state data</ListSubheader>
             <MenuItem value={'state_1p3a.geojson'} key={'state_1p3a.geojson'}>1point3acres (State)</MenuItem>
             <MenuItem value={'state_nyt.geojson'} key={'state_nyt.geojson'}>New York Times (State)</MenuItem>
-            {/* <MenuItem value={'state_usafacts.geojson'} key={'state_usafacts.geojson'}>USA Facts (State)</MenuItem> */}
-          {/* <ListSubheader disabled>global data</ListSubheader>
-            <MenuItem value={'global_jhu.geojson'} key={'global_jhu.geojson'}>John Hopkins University (Global)</MenuItem> */}
-            
           </Select>
         </StyledDropDown>
         <br />
@@ -855,7 +979,7 @@ const VariablePanel = (props) => {
               })
             }
           </Select>
-        </StyledDropDown>
+        </StyledDropDown> */}
         <br/>
         <StyledDropDown component="Radio" id="mapType">
           <FormLabel component="legend">Map Type</FormLabel>
@@ -895,6 +1019,78 @@ const VariablePanel = (props) => {
           <Button className={mapParams.vizType === '3D' ? 'active' : ''} data-val="3D" key="3D-btn" onClick={() => handleVizTypeButton('3D')}>3D</Button>
           <Button className={mapParams.vizType === 'cartogram' ? 'active' : ''} data-val="cartogram" key="cartogram-btn" onClick={() => handleVizTypeButton('cartogram')}>Cartogram</Button>
         </StyledButtonGroup>
+        <br/>
+        <br />
+        {/* {
+          mapParams.vizType === '3D' && 
+            <BinsContainer item xs={12} >
+                <Switch
+                    checked={bivariateZ}
+                    onChange={handleZSwitch}
+                    name="chart switch z chart switch"
+                />
+                <p>{bivariateZ ? 'Bivariate Z-Axis' : 'Single Variable Z-Axis'}<Tooltip id="BinModes"/></p>
+            </BinsContainer>
+        }
+        {
+          bivariateZ &&           
+            <StyledDropDown id="3d-variable-select" style={{minWidth: '125px'}}>
+              <InputLabel htmlFor="3d-numerator-select">Z-Axis Variable</InputLabel>
+              <Select 
+                value={currentZVariable} 
+                id="3d-numerator-select"
+                onChange={handleZVariable}
+              >
+                {
+                  !currentData.includes('cdc') && Object.keys(PresetVariables).map((variable) => {
+                    if (variable.split(':')[0]==="HEADER") {
+                      return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
+                    } else {
+                      return <MenuItem value={variable} key={variable}>{variable}</MenuItem> 
+                    }
+                  })
+                }
+                
+                {
+                  currentData.includes('county') && Object.keys(CountyVariables).map((variable) => {
+                    if (variable.split(':')[0]==="HEADER") {
+                      return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
+                    } else {
+                      return <MenuItem value={variable} key={variable}>{variable}</MenuItem> 
+                    }
+                  })
+                }
+                
+                {
+                  (currentData.includes("state")) && Object.keys(StateVariables).map((variable) => {
+                    if (variable.split(':')[0]==="HEADER") {
+                      return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
+                    } else {
+                      return <MenuItem value={variable} key={variable}>{variable}</MenuItem> 
+                    }
+                  })
+                }
+                {
+                  currentData.includes("1p3a") && Object.keys(OneP3AVariables).map((variable) => {
+                    if (variable.split(':')[0]==="HEADER") {
+                      return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
+                    } else {
+                      return <MenuItem value={variable} key={variable}>{variable}</MenuItem> 
+                    }
+                  })
+                }
+                {
+                  currentData.includes("cdc") && Object.keys(CDCVariables).map((variable) => {
+                    if (variable.split(':')[0]==="HEADER") {
+                      return <ListSubheader key={variable.split(':')[1]} disabled>{variable.split(':')[1]}</ListSubheader>
+                    } else {
+                      return <MenuItem value={variable} key={variable}>{variable}</MenuItem> 
+                    }
+                  })
+                }
+              </Select>
+            </StyledDropDown>
+        } */}
         <br/>
         <TwoUp id="overlaysResources">
           <StyledDropDown>

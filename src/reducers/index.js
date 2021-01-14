@@ -241,6 +241,11 @@ var reducer = (state = INITIAL_STATE, action) => {
                 ...action.payload.params
             }
 
+            if (state.dataParams.zAxisParams !== null) {
+                paramObj.zAxisParams.nIndex = paramObj.nIndex;
+                paramObj.zAxisParams.dIndex = paramObj.dIndex;
+            }
+
             if (paramObj.nType === 'time-series' && paramObj.nIndex === null) {
                 paramObj.nIndex = state.storedIndex;
                 paramObj.nRange = state.storedRange;
@@ -262,14 +267,39 @@ var reducer = (state = INITIAL_STATE, action) => {
                     dataParams: paramObj 
                 }
             }
+        case 'SET_Z_VARIABLE_PARAMS':
+            let paramObjZ = {
+                ...state.dataParams,
+                zAxisParams: action.payload.params
+            }
+            
+            return {
+                ...state,
+                currentZVariable: action.payload.variable,
+                dataParams: paramObjZ 
+            }
+
         case 'SET_MAP_PARAMS':
             let mapParamObj = {
                 ...state.mapParams,
                 ...action.payload.params
             }
+
+            let zAxisReset = {
+                ...state.dataParams
+            }
+            let zAxisVariableReset = state.currentZVariable
+
+            if (action.payload.params.vizType !== '3D') {
+                zAxisReset.zAxisParams = null
+                zAxisVariableReset = null
+            }
+
             return {
                 ...state,
-                mapParams: mapParamObj 
+                mapParams: mapParamObj,
+                dataParams: zAxisReset,
+                currentZVariable: zAxisVariableReset
             }
         case 'SET_PANELS':
             let panelsObj = {

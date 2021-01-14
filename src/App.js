@@ -40,10 +40,48 @@ import { colorScales, fixedScales, dataPresets,
 function App() {
 
   // static variables for floating panel sizing
-  let [ defaultX, defaultXLong, defaultY, defaultWidth, defaultWidthLong, defaultHeight,
-    minHeight, minWidth] = window.innerWidth <= 1024 ? 
-    [window.innerWidth*.1, window.innerWidth*.1, window.innerHeight*.25, window.innerWidth*.8, window.innerWidth*.8, window.innerHeight*.4, window.innerHeight*.2, window.innerWidth*.5] : 
-    [window.innerWidth-400, window.innerWidth-575, 75, 300, 450, 300, 200, 200]
+  let [ 
+    defaultX, 
+    defaultXLong, 
+    defaultY, 
+    defaultWidth, 
+    defaultWidthLong, 
+    defaultHeight,
+    defaultHeightManual,
+    defaultWidthManual,
+    defaultXManual,
+    defaultYManual,
+    minHeight, 
+    minWidth
+  ] = window.innerWidth <= 1024 ? 
+    [
+      window.innerWidth*.1, // defaultX
+      window.innerWidth*.1, // defaultXLong
+      window.innerHeight*.25, // defaultY
+      window.innerWidth*.8, // defaultWidth
+      window.innerWidth*.8,  // defaultWidthLong
+      window.innerHeight*.4, // height
+      window.innerHeight*.7, // heightManual
+      window.innerWidth*.5,  // width manual
+      window.innerWidth*.25, // x manual
+      window.innerHeight*.15, // y manual
+      window.innerHeight*.5, // min height
+      window.innerWidth*.5 // min width
+    ] : 
+    [
+      window.innerWidth-400, 
+      window.innerWidth-575, 
+      75, 
+      300, 
+      450, 
+      300, 
+      window.innerHeight*.5, 
+      window.innerWidth*.35, 
+      window.innerWidth*.25, // x manual
+      window.innerHeight*.325, // y manual
+      200, 
+      200
+  ]
 
 
   // These selectors access different pieces of the store. While App mainly
@@ -322,10 +360,49 @@ function App() {
 
   // default width handlers on resize
   useEffect(() => {
-    [ defaultX, defaultXLong, defaultY, defaultWidth, defaultWidthLong, defaultHeight,
-      minHeight, minWidth] = window.innerWidth <= 1024 ? 
-      [window.innerWidth*.1, window.innerWidth*.1, window.innerHeight*.25, window.innerWidth*.8, window.innerWidth*.8, window.innerHeight*.4, window.innerHeight*.2, window.innerWidth*.5] : 
-      [window.innerWidth-400, window.innerWidth-575, 75, 300, 450, 300, 200, 200]
+  // static variables for floating panel sizing
+  [ 
+    defaultX, 
+    defaultXLong, 
+    defaultY, 
+    defaultWidth, 
+    defaultWidthLong, 
+    defaultHeight,
+    defaultHeightManual,
+    defaultWidthManual,
+    defaultXManual,
+    defaultYManual,
+    minHeight, 
+    minWidth
+  ] = window.innerWidth <= 1024 ? 
+    [
+      window.innerWidth*.1, // defaultX
+      window.innerWidth*.1, // defaultXLong
+      window.innerHeight*.25, // defaultY
+      window.innerWidth*.8, // defaultWidth
+      window.innerWidth*.8,  // defaultWidthLong
+      window.innerHeight*.4, // height
+      window.innerHeight*.7, // heightManual
+      window.innerWidth*.5,  // width manual
+      window.innerWidth*.25, // x manual
+      window.innerHeight*.15, // y manual
+      window.innerHeight*.5, // min height
+      window.innerWidth*.5 // min width
+    ] : 
+    [
+      window.innerWidth-400, 
+      window.innerWidth-575, 
+      75, 
+      300, 
+      450, 
+      300, 
+      window.innerHeight*.5, 
+      window.innerWidth*.35, 
+      window.innerWidth*.25, // x manual
+      window.innerHeight*.325, // y manual
+      200, 
+      200
+  ]
   }, [window.innerHeight, window.innerWidth])
   // const dragHandlers = {onStart: this.onStart, onStop: this.onStop};
 
@@ -365,8 +442,8 @@ function App() {
         }/>      
         <Draggable 
           z={10}
-          defaultX={window.innerWidth*.325}
-          defaultY={window.innerHeight*.25}
+          defaultX={defaultXManual}
+          defaultY={defaultYManual}
           title="tutorial"
           content={
           <Scaleable 
@@ -374,8 +451,8 @@ function App() {
               <InfoBox />
             } 
             title="tutorial"
-            defaultWidth={window.innerWidth*.35}
-            defaultHeight={window.innerHeight*.5}
+            defaultWidth={defaultWidthManual}
+            defaultHeight={defaultHeightManual}
             minHeight={minHeight}
             minWidth={minWidth} />
         }/>

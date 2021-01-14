@@ -17,6 +17,7 @@ export const INITIAL_STATE = {
   currDateIndex: '',
   startDateIndex: '',
   currentVariable: 'Confirmed Count per 100K Population',
+  currentZVariable: null,
   currentMethod: 'natural_breaks',
   currentOverlay: '',
   currentResource: '',
@@ -33,7 +34,8 @@ export const INITIAL_STATE = {
     dIndex:null,
     scale:100000,
     binIndex: '',
-    scale3D: 1000
+    scale3D: 1000,
+    zAxisParams: null,
   },
   mapParams: {
     mapType: 'natural_breaks',

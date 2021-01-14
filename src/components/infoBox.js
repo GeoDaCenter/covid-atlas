@@ -1,8 +1,14 @@
 import React, {useState, useEffect} from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+
 import { colors } from '../config';
 import { pages } from '../wiki';
+import { StyledDropDown } from '../styled_components';
 
 const InfoContainer = styled.div`
     background: ${colors.gray};
@@ -11,9 +17,6 @@ const InfoContainer = styled.div`
     overflow: hidden;
     display: ${props => props.active ? 'initial' : 'none'};
     border-radius: 4px;
-    -moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
-    -webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
-    box-shadow: 0 0 0 2px rgba(0,0,0,.1);
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -38,9 +41,6 @@ const InfoContainer = styled.div`
         bottom:50%;
         transform: translate(50%, 50%);
         overflow:hidden;
-        -moz-box-shadow: 0 0 5px rgba(0,0,0,.2);
-        -webkit-box-shadow: 0 0 5px rgba(0,0,0,.2);
-        box-shadow: 0 0 0 5px rgba(0,0,0,.2);
     }
 `
 
@@ -49,7 +49,7 @@ const Drawer = styled.div`
     left:5px;
     top:25px;
     max-width:120px;
-    @media(max-width:768px) {
+    @media(max-width:1024px) {
         width:100%;
     }
 `
@@ -68,8 +68,8 @@ const DrawerButton = styled.button`
     &:hover {
         opacity:1;
     }
-    @media(max-width:768px) {
-        display:inline-block;
+    @media(max-width:1024px) {
+        display:none;
     }
 `
 
@@ -110,7 +110,13 @@ const BodyContainer = styled.div`
             content:' ⚼';
         }
     }
-
+    @media (max-width:1024px) {
+        left:0;
+        width:calc(100% + 15px);
+        height:calc(100% - 75);
+        top:75px;
+        font-size:100% !important;
+    }
 `
 
 const TutorialButton = styled.button`
@@ -137,6 +143,17 @@ const TutorialButton = styled.button`
     }
 `
 
+const PagesDropDown = styled(StyledDropDown)`
+    position:absolute;
+    top:0;
+    visibility:hidden;
+    left:50%;
+    transform:translateX(-50%);
+    @media (max-width:1024px) {
+        visibility:visible;
+    }
+`
+
 const tutorialInfo = [
     {
         "title":"Choropleth Maps",
@@ -149,6 +166,11 @@ const tutorialInfo = [
 const InfoBox = () => {
     const panelOpen = useSelector(state => state.panelState.tutorial)
     const [currArticle, setCurrArticle] = useState("welcome")
+    
+    const handleSelect = (e) => {
+        console.log(e)
+        setCurrArticle(e.target.value)
+    }
 
     return (
         <InfoContainer active={panelOpen}>
@@ -164,6 +186,32 @@ const InfoBox = () => {
                     : ''
                 )}
             </Drawer>
+            <PagesDropDown id="selectPage">
+                    <Select 
+                        value={currArticle} 
+                        id="numerator-select"
+                        onChange={handleSelect}
+                    >
+                        
+                        {Object.keys(pages).map(page => 
+                            pages[page]["pageName"] !== null ? 
+                            <MenuItem 
+                                value={page} 
+                                key={page}
+                                >
+                                        {pages[page]["pageName"]}
+                            </MenuItem>
+                            : 
+                            <MenuItem 
+                                value={page} 
+                                key={page}
+                                style={{display:'none'}}
+                                >
+                                        {pages[page]["pageName"]}
+                            </MenuItem>
+                        )}
+                    </Select>
+                </PagesDropDown>
             <BodyContainer>
                 {pages[currArticle]['content']}
                 {(currArticle === "tutorials" || currArticle === "getting-started") && 
