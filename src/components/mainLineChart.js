@@ -10,7 +10,7 @@ import Switch from '@material-ui/core/Switch';
 
 import styled from 'styled-components';
 import { colors } from '../config';
-import { setVariableParams, setDate } from '../actions';
+import { setVariableParams } from '../actions';
 
 const ChartContainer = styled.span`
     span {
@@ -80,29 +80,47 @@ const CustomTick = props => {
     return <text {...props}>{props.labelFormatter(props.payload.value)}</text>
 };
 
-const getStartDate = (range, index, data) => {
-    if (range === null) {
-        try {
-            return data.slice(0,1)[0].date
-        } catch {
-            return null
-        }
-    } else {
-        try {
-            return data[index-range].date
-        } catch {
-            return null
-        }
-    }
-}
 
-const getEndDate = (index, data) => {
-    try {
-        return data[index].date;
-    } catch {
-        return null;
-    }
-}
+const stripLeadingZero = ( str ) => str[0] !== '0' ? str : str.slice(1,);
+
+// const getStartDate = (range, index, data) => {
+//     if (range === null) {
+//         try {
+//             if ((data.slice(0,1)[0].date).indexOf('-') === -1) {
+//                 return data.slice(0,1)[0].date
+//             } else {
+//                 let tempDate = data.slice(0,1)[0].date.split('-');
+//                 return `${stripLeadingZero(tempDate[1])}/${stripLeadingZero(tempDate[2])}/${tempDate[0].slice(0,2)}`
+//             }            
+//         } catch {
+//             return null
+//         }
+//     } else {
+//         try {
+//             if ((data[index-range].date).indexOf('-') === -1) {
+//                 return data[index-range].date
+//             } else {
+//                 let tempDate = data[index-range].date.split('-');
+//                 return `${stripLeadingZero(tempDate[1])}/${stripLeadingZero(tempDate[2])}/${tempDate[0].slice(0,2)}`
+//             }
+//         } catch {
+//             return null
+//         }
+//     }
+// }
+
+// const getEndDate = (index, data) => {
+//     try {
+//         if ((data[index].date).indexOf('-') === -1) {
+//             return data[index].date
+//         } else {
+//             let tempDate = data[index].date.split('-');
+//             return `${stripLeadingZero(tempDate[1])}/${stripLeadingZero(tempDate[2])}/${tempDate[0].slice(0,2)}`
+//         }
+//     } catch {
+//         return null
+//     }
+// }
 
 const getDateRange = ({startDate, endDate}) => {
     let dateArray = [];
@@ -135,31 +153,37 @@ const getDateRange = ({startDate, endDate}) => {
         }
     }
 
+    console.log(dateArray)
+
     return dateArray;
 }
 
 const CustomTooltip = props => {
-    if (props.active) {
-        let data = props.payload
-        return (
-            <div 
-                style={{
-                    background:colors.darkgray,
-                    padding:'1px 10px',
-                    borderRadius:'4px',
-                    boxShadow: '0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)'
-            
-            }}> 
-            <p style={{color:'white', padding:0,}}>{data[0].payload.date}</p>
-                {data.map(data => 
-                    <p style={{color: data.color, textShadow: `2px 2px 4px ${colors.black}`, fontWeight:600}}>{data.name}: {Number.isInteger(Math.floor(data.payload[data.dataKey])) ? 
-                        Math.floor(data.payload[data.dataKey]).toLocaleString('en') 
-                        : data.payload[data.dataKey]}
-                    </p>
-                    
-                )}
-            </div>
-        )
+    try {
+        if (props.active) {
+            let data = props.payload
+            return (
+                <div 
+                    style={{
+                        background:colors.darkgray,
+                        padding:'1px 10px',
+                        borderRadius:'4px',
+                        boxShadow: '0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)'
+                
+                }}> 
+                <p style={{color:'white', padding:0,}}>{data[0].payload.date}</p>
+                    {data.map(data => 
+                        <p style={{color: data.color, textShadow: `2px 2px 4px ${colors.black}`, fontWeight:600}}>{data.name}: {Number.isInteger(Math.floor(data.payload[data.dataKey])) ? 
+                            Math.floor(data.payload[data.dataKey]).toLocaleString('en') 
+                            : data.payload[data.dataKey]}
+                        </p>
+                        
+                    )}
+                </div>
+            )
+        }
+    } catch {
+        return null;
     }
     return null;
 };
@@ -168,8 +192,8 @@ const MainLineChart = () => {
     const chartData = useSelector(state => state.chartData);
     const dataParams = useSelector(state => state.dataParams);
     const currentVariable = useSelector(state => state.currentVariable);
-    const dates = useSelector(state => state.dates);
     const currentData = useSelector(state => state.currentData);
+    const dateIndices = useSelector(state => state.dateIndices);
     const startDateIndex = useSelector(state => state.startDateIndex);
     const selectionKeys = useSelector(state => state.selectionKeys);
 
@@ -184,7 +208,14 @@ const MainLineChart = () => {
     }
 
     const chartSetDate = (e) => {
-        if (e?.activeTooltipIndex !== undefined) handleChange(e.activeTooltipIndex+startDateIndex)
+        console.log(e)
+        if (e?.activeTooltipIndex !== undefined) {
+            if (dateIndices[currentData][dataParams.numerator].indexOf(e.activeTooltipIndex) !== -1) {
+                handleChange(e.activeTooltipIndex)
+            } else {
+                handleChange(dateIndices[currentData][dataParams.numerator].reduce((a, b) => {return Math.abs(b - e.activeTooltipIndex) < Math.abs(a - e.activeTooltipIndex) ? b : a}))
+            }
+        }
     }    
 
     const handleChange = (newValue) => {
@@ -197,7 +228,6 @@ const MainLineChart = () => {
         } else if (currentVariable.includes('Testing')){
             dispatch(setVariableParams({nIndex: newValue}))
         }
-        dispatch(setDate(dates[currentData][newValue]));
     };
 
     const getMax = ({ array, variables }) => {
@@ -256,34 +286,6 @@ const MainLineChart = () => {
         setStrokeOpacities(null)
     }
 
-    // const renderLegend = (props) => {
-    //     const { payload } = props;
-    //     let dataArray = [];
-    //     for (let i=0; i<payload.length/2;i++) {
-    //         dataArray.push(payload[i+payload.length/2])
-    //         dataArray.push(payload[i])
-    //     }
-
-    //     return (
-    //       <LegendList>
-    //         {
-    //           dataArray.map((entry, index) => (
-    //             <LegendItem 
-    //                 onMouseEnter={handleLegendHover}
-    //                 onMouseLeave={handleLegendLeave}
-    //                 key={`item-${index}`} 
-    //                 color={entry.color}
-    //                 active={strokeOpacities.includes(entry.dataKey)}
-    //                 id={entry.dataKey}
-    //                 >
-    //                 {entry.value}
-    //             </LegendItem>
-    //           ))
-    //         }
-    //       </LegendList>
-    //     );
-    // }
-
     return (
         <ChartContainer>
             {selectionKeys.length < 2 && 
@@ -300,7 +302,7 @@ const MainLineChart = () => {
                     margin={{
                         top: 0, right: 10, left: 10, bottom: 20,
                     }}
-                    onClick={chartSetDate}
+                    onClick={dataParams.nType === 'characteristic' ? '' : chartSetDate}
                 >
                     <XAxis 
                         dataKey="date"
@@ -355,8 +357,12 @@ const MainLineChart = () => {
                     />
                     <ReferenceArea 
                         yAxisId="left"
-                        x1={getStartDate(dataParams.nRange, dataParams.nIndex-startDateIndex, parsedData)}
-                        x2={getEndDate(dataParams.nIndex-startDateIndex, parsedData)} 
+                        // x1={getStartDate(dataParams.nRange, dataParams.nIndex, parsedData)}
+                        // x2={getEndDate(dataParams.nIndex, parsedData)} 
+                        x1={dataParams.nRange === null ? 
+                            dataParams.variableName.indexOf('Testing') !== -1 ? dataParams.nIndex - 7 : 0
+                            : dataParams.nIndex-dataParams.nRange}
+                        x2={dataParams.nIndex}
                         fill="white" 
                         fillOpacity={0.15}
                         isAnimationActive={false}

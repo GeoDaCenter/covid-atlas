@@ -105,7 +105,7 @@ export const variableTree = {
             }, 
         }
     },
-    "Death County per 100K Population": {
+    "Death Count per 100K Population": {
         "County": {
             "1point3acres": {
                 "geojson":'county_1p3a.geojson',
@@ -203,15 +203,15 @@ export const variableTree = {
             }
         },
     },
-    "HEADER:forecasting":{},
-    "Forecasting":{
-        "County": {
-            "Yu Group at Berkeley": {
-                "geojson":'county_usfacts.geojson',
-                "csv":['berkeley_predictions']
-            }
-        }
-    },
+    // "HEADER:forecasting":{},
+    // "Forecasting (5-Day Severity Index)":{
+    //     "County": {
+    //         "Yu Group at Berkeley": {
+    //             "geojson":'county_usfacts.geojson',
+    //             "csv":['berkeley_predictions']
+    //         }
+    //     }
+    // },
     "HEADER:community health information":{},
     "Uninsured %": {
         "County": {

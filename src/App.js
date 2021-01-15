@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as jsgeoda from 'jsgeoda';
 
@@ -9,14 +9,14 @@ import * as jsgeoda from 'jsgeoda';
 import { 
   getParseCSV, mergeData, getColumns, findDates, loadJson,
   getDataForBins, getDataForCharts, getDataForLisa, getDateLists,
-  getLisaValues, getVarId, getCartogramValues } from './utils';
+  getLisaValues, getVarId, getCartogramValues, getDateIndices } from './utils';
 
 // Actions -- Redux state manipulation following Flux architecture //
 // first row: data storage
 // second row: data and metadata handling 
 // third row: map and variable parameters
 import { 
-  dataLoad, dataLoadExisting, storeLisaValues, storeCartogramData,
+  dataLoad, dataLoadExisting, storeLisaValues, storeCartogramData, setDates,
   setCentroids, setMapParams, setNewBins, setUrlParams, setPanelState } from './actions';
 
 import { Map, NavBar, VariablePanel, BottomPanel,  TopPanel, Preloader,
@@ -89,7 +89,7 @@ function App() {
   // dispatches to the store, we need checks to make sure side effects
   // are OK to trigger. Issues arise with missing data, columns, etc.
   const {storedData, storedGeojson, storedLisaData, storedCartogramData,
-    currentData, cols, dates, mapParams, dataParams, 
+    currentData, cols, dates, mapParams, dataParams, dateIndices,
     startDateIndex, mapLoaded } = useSelector(state => state);
   
   // gda_proxy is the WebGeoda proxy class. Generally, having a non-serializable
@@ -108,14 +108,13 @@ function App() {
   const loadData = async (params, gda_proxy) => {
     // destructure parameters
     const { geojson, csvs, joinCols, tableNames, accumulate, dateList } = params
-
     // promise all data fetching - CSV and Json
     const csvPromises = csvs.map(csv => 
       getParseCSV(
         `${process.env.PUBLIC_URL}/csv/${csv}.csv`, 
         joinCols[1], 
         accumulate.includes(csv),
-        dateLists[dateList+'dateList']
+        dateLists[dateList[csv]]
       ).then(result => {return result}))
 
     Promise.all([
@@ -126,17 +125,29 @@ function App() {
       // merge data and get results
       let tempData = mergeData(values[0]['data'], joinCols[0], values.slice(1,), tableNames, joinCols[1]);
       let ColNames = getColumns(values.slice(1,), tableNames);
-      let tempDates = findDates(ColNames[tableNames[0]]);
-      let chartData = getDataForCharts(tempData,'cases',tempDates[1],tempDates[0]);
-      let binData = getDataForBins(tempData, {...dataParams, nIndex: null});
-      // calculate breaks
-      let nb = gda_proxy.custom_breaks(
-        geojson, 
-        mapParams.mapType,
-        mapParams.nBins,
-        null, 
-        binData
-      );
+      let DateIndices = getDateIndices(values.slice(1,), tableNames);
+      let denomIndices = DateIndices[dataParams.numerator]
+      let lastIndex = denomIndices !== null ? denomIndices.slice(-1,)[0] : null;
+      let chartData = getDataForCharts(tempData, 'cases', DateIndices['cases'], dateLists.isoDateList);
+      let binData = getDataForBins(tempData, {...dataParams, nIndex: lastIndex || dataParams.nIndex, binIndex: lastIndex || dataParams.bomOmdex});
+      let bins;
+
+      if (dataParams.fixedScale === null || dataParams.fixedScale === undefined){
+        // calculate breaks
+        let nb = gda_proxy.custom_breaks(
+          geojson, 
+          mapParams.mapType,
+          mapParams.nBins,
+          null,
+          binData
+        );
+        bins = {
+          bins: mapParams.mapType === "natural_breaks" ? nb.bins : ['Lower Outlier','< 25%','25-50%','50-75%','>75%','Upper Outlier'],
+          breaks: [-Math.pow(10, 12), ...nb.breaks.slice(1,-1), Math.pow(10, 12)]
+        }
+      } else {
+        bins = fixedScales[dataParams.fixedScale]
+      }
 
       // store data, data name, and column names
       dispatch(
@@ -150,63 +161,64 @@ function App() {
             data: ColNames,
             name: geojson
           },
+          dateIndices: {
+            data: DateIndices,
+            name: geojson
+          },
           storeGeojson: {
             data: values[0]['geoidIndex'],
             name: geojson
           },
           chartData: chartData,
           mapParams: {
-            bins: {
-              bins: mapParams.mapType === "natural_breaks" ? nb.bins : ['Lower Outlier','< 25%','25-50%','50-75%','>75%','Upper Outlier'],
-              breaks: [-Math.pow(10, 12), ...nb.breaks.slice(1,-1), Math.pow(10, 12)]
-            },
-            colorScale: colorScales[mapParams.customScale || mapParams.mapType]
+            bins,
+            colorScale: colorScales[dataParams.colorScale || mapParams.mapType]
           },
-          dates: {
-            data:tempDates[0],
-            name:geojson
-          },
-          currDate: tempDates[0][tempDates.length-1],
-          startDateIndex: tempDates[1],
           variableParams: {
-            nIndex: ColNames['cases'].length-1,
-            binIndex: ColNames['cases'].length-1
-          }
+            nIndex: lastIndex || dataParams.nIndex,
+            binIndex: lastIndex || dataParams.binIndex
+          },
         })
       )
     })
   }
 
-  const updateBins = () => {
-    if (gda_proxy !== null && storedData.hasOwnProperty(currentData) && mapParams.mapType !== "lisa" && mapParams.binMode !== 'dynamic'){
-      if (mapParams.fixedScale === null || mapParams.mapType !== 'natural_breaks') {
+  const updateBins = useCallback((params) => {
+    const { storedData, currentData, dataParams, mapParams, gda_proxy, colorScales } = params;
+    if (
+      !storedData.hasOwnProperty(currentData) || 
+      !storedData[currentData][0].hasOwnProperty(dataParams.numerator)
+    ) { return };
+
+    if (gda_proxy !== null && storedData.hasOwnProperty(currentData) && mapParams.mapType !== "lisa"){
+      if (dataParams.fixedScale === null) {
         let nb = gda_proxy.custom_breaks(
           currentData, 
           mapParams.mapType, 
           mapParams.nBins, 
           null, 
-          getDataForBins( storedData[currentData], {...dataParams, nIndex: null} )
-        )
-        
+          getDataForBins( storedData[currentData], dataParams )
+        )      
         dispatch(
           setMapParams({
             bins: {
               bins: mapParams.mapType === 'natural_breaks' ? nb.bins : ['Lower Outlier','< 25%','25-50%','50-75%','>75%','Upper Outlier'],
               breaks: [-Math.pow(10, 12), ...nb.breaks.slice(1,-1), Math.pow(10, 12)]
             },
-            colorScale: mapParams.mapType === 'natural_breaks' ? colorScales[mapParams.customScale || mapParams.mapType] : colorScales[mapParams.mapType || mapParams.customScale]
+            colorScale: mapParams.mapType === 'natural_breaks' ? colorScales[dataParams.colorScale || mapParams.mapType] : colorScales[mapParams.mapType || dataParams.colorScale]
           })
         )
       } else {
         dispatch(
           setMapParams({
-            bins: fixedScales[mapParams.fixedScale],
-            colorScale: colorScales[mapParams.fixedScale]
+            bins: fixedScales[dataParams.fixedScale],
+            colorScale: colorScales[dataParams.fixedScale]
           })
         )
       }
     }
-  }
+  });
+
   // After runtime is initialized, this loads in gda_proxy to the state
   // TODO: Recompile WebGeoda and load it into a worker
   useEffect(() => {
@@ -244,6 +256,7 @@ function App() {
     }
 
     newGeoda()
+    dispatch(setDates(dateLists.isoDateList))
   },[])
 
 
@@ -263,23 +276,28 @@ function App() {
         dataPresets[currentData],
         gda_proxy
       )
-    } else if (cols[currentData] !== undefined) {
-      let dateIndex = findDates(cols[currentData][dataPresets[currentData]['tableNames'][0]])[1];
-      let dataLength = cols[currentData][dataPresets[currentData]['tableNames'][0]].length;
-
+    } else if (dateIndices[currentData] !== undefined) {
+      
+      let denomIndices = dateIndices[currentData][dataParams.numerator]
+      let lastIndex = denomIndices !== null ? denomIndices.slice(-1,)[0] : null;
       dispatch(
         dataLoadExisting({
-          currDate: dates[currentData][dates[currentData].length-1],
-          startDateIndex: dateIndex,
           variableParams: {
-            nIndex: dataLength-1,
-            binIndex: dataLength-1
+            nIndex: lastIndex || dataParams.nIndex,
+            binIndex: lastIndex || dataParams.nIndex,
           },
-          chartData: getDataForCharts(storedData[currentData],'cases',dateIndex,dates[currentData]),
+          chartData: getDataForCharts(storedData[currentData],'cases', dateIndices[currentData]['cases'], dateLists.isoDateList)
         })
       )
+      updateBins( { storedData, currentData, mapParams, gda_proxy, colorScales,
+        dataParams: { 
+          ...dataParams,  
+          nIndex: lastIndex || dataParams.nIndex,
+          binIndex: lastIndex || dataParams.nIndex,
+        }, 
+      })
       
-      updateBins();
+      // updateBins();
     }
   },[gda_proxy, currentData])
 
@@ -304,7 +322,7 @@ function App() {
           )
         )
       }
-    } 
+    }
     if (gda_proxy !== null && mapParams.vizType === 'cartogram'){
       let tempId = getVarId(currentData, dataParams)
       if (!(storedCartogramData.hasOwnProperty(tempId))) {
@@ -325,40 +343,17 @@ function App() {
   // Trigger on parameter change for metric values
   // Gets bins and sets map parameters
   useEffect(() => {
-    updateBins();
-  }, [currentData, dataParams.numerator, dataParams.nProperty, 
-    dataParams.nRange, dataParams.denominator, dataParams.dProperty,
-    dataParams.dRange, dataParams.scale, mapParams.mapType]
-  )
-
-  // trigger on date (index) change for dynamic binning
-  useEffect(() => {
-    if (gda_proxy !== null && mapParams.binMode === 'dynamic' && currentData !== '' && mapParams.mapType !== 'lisa'){
-      let nb = gda_proxy.custom_breaks(
-        currentData, 
-        mapParams.mapType,
-        mapParams.nBins,
-        null, 
-        getDataForBins( storedData[currentData], dataParams ), 
-      );
-      dispatch(
-        setNewBins({
-          mapParams: {
-            bins: {
-              bins: mapParams.mapType === "natural_breaks" ? nb.bins : ['Lower Outlier','< 25%','25-50%','50-75%','>75%','Upper Outlier'],
-              breaks: [-Math.pow(10, 12), ...nb.breaks.slice(1,-1), Math.pow(10, 12)]
-            },
-            colorScale: colorScales[mapParams.customScale || mapParams.mapType]
-          },
-          variableParams: {
-            binIndex: dataParams.nIndex, 
-          }
-        })
-      )
+    if (storedData.hasOwnProperty(currentData) && gda_proxy !== null && mapParams.binMode !== 'dynamic' && mapParams.mapType !== 'lisa') {
+      updateBins( { storedData, currentData, dataParams, mapParams, gda_proxy, colorScales } );
     }
+  }, [dataParams.numerator, dataParams.nProperty, dataParams.nRange, dataParams.denominator, dataParams.dProperty, dataParams.dRange, mapParams.mapType] );
 
-  }, [dataParams.nIndex, dataParams.dIndex, mapParams.binMode])
-  
+  // Trigger on index change while dynamic bin mode
+  useEffect(() => {
+    if (storedData.hasOwnProperty(currentData) && gda_proxy !== null && mapParams.binMode === 'dynamic' && mapParams.mapType !== 'lisa') {
+      updateBins( { storedData, currentData, dataParams: { ...dataParams, binIndex: dataParams.nIndex }, mapParams, gda_proxy, colorScales } );
+    }
+  }, [dataParams.nIndex, dataParams.dIndex, mapParams.binMode, dataParams.variableName, dataParams.nRange, mapParams.mapType] ); 
 
   // default width handlers on resize
   useEffect(() => {

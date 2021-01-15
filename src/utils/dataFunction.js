@@ -46,6 +46,8 @@ const dataFn = (numeratorData, denominatorData, dataParams)  => {
     nType, dType,
     scale
   } = dataParams;
+
+  if ( nIndex < nRange ) nRange = nIndex
   
   if (numeratorData === undefined) {
     return null;

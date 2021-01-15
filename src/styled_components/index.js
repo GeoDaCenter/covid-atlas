@@ -93,8 +93,10 @@ export const SwitchContainer = styled(Grid)`
 `
 
 export const BinsContainer = styled.div`
-  padding-top:4px !important;
-  margin-top:-35px;
+  display:inline-block;
+  transform:translateY(10px);
+  opacity: ${props => props.disabled ? 0.25 : 1};
+  pointer-events: ${props => props.disabled ? 'none' : 'initial'};
   p { 
     display: inline;
     color:white;

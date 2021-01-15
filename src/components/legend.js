@@ -63,33 +63,34 @@ const BinBars = styled.div`
 
 const Legend =  () => {
     
-    const mapParams = useSelector(state => state.mapParams)
-    const title = useSelector(state => state.currentVariable)
+    const mapParams = useSelector(state => state.mapParams);
+    const dataParams = useSelector(state => state.dataParams);
 
     return (
         <LegendContainer>
             <Grid container spacing={2} id='legend-bins-container'>
                 <Grid item xs={12}>
                     <LegendTitle>
-                        {title}
+                        {dataParams.variableName}
                     </LegendTitle>
                 </Grid>
                 <Grid item xs={12}>
-                    <BinBars firstBinZero={`${mapParams.colorScale[0]}` === `240,240,240` && mapParams.fixedScale === null}>
-                        {
-                            mapParams.colorScale !== undefined && 
-                            mapParams.colorScale.map(color => <div className="bin color" key={`${color[0]}${color[1]}`}style={{backgroundColor:`rgb(${color[0]},${color[1]},${color[2]})`}}></div>)
-                        }
-                    </BinBars>
-                    <BinLabels firstBinZero={`${mapParams.colorScale[0]}` === `240,240,240`} binLength={mapParams.bins.bins.length}>
-                        {(`${mapParams.colorScale[0]}` === `240,240,240` && mapParams.fixedScale === null) && <div className="bin firstBin">0</div>}
+                    {mapParams.colorScale !== undefined &&  
+                        <span>
+                            <BinBars firstBinZero={`${mapParams.colorScale[0]}` === `240,240,240` && dataParams.fixedScale === null}>
+                                {mapParams.colorScale.map(color => <div className="bin color" key={`${color[0]}${color[1]}`}style={{backgroundColor:`rgb(${color[0]},${color[1]},${color[2]})`}}></div>)}
+                            </BinBars>
+                            <BinLabels firstBinZero={`${mapParams.colorScale[0]}` === `240,240,240`} binLength={mapParams.bins.bins.length}>
+                                {(`${mapParams.colorScale[0]}` === `240,240,240` && dataParams.fixedScale === null) && <div className="bin firstBin">0</div>}
 
-                        {
-                            mapParams.bins.bins !== undefined && 
-                            <BinsList data={mapParams.bins.bins} />
-                        }
-                        
-                    </BinLabels>
+                                {
+                                    mapParams.bins.bins !== undefined && 
+                                    <BinsList data={mapParams.bins.bins} />
+                                }
+                                
+                            </BinLabels>
+                        </span>
+                    }
                 </Grid>
             </Grid>
         </LegendContainer>

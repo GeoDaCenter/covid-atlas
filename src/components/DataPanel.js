@@ -259,7 +259,6 @@ const DataPanel = () => {
   const currentData = useSelector(state => state.currentData);
   // current date and index
   const currDateIndex = useSelector(state => state.dataParams.nIndex);
-  const startDateIndex = useSelector(state => state.startDateIndex);
   const dates = useSelector(state => state.dates);
   const selectionKeys = useSelector(state => state.selectionKeys);
   const selectionIndex = useSelector(state => state.selectionIndex);
@@ -457,11 +456,11 @@ const DataPanel = () => {
         <ReportContainer expanded={expanded}>
           <ReportSection>
             {(properties && selectionIndex.length < 4) && <h2>{selectionKeys.map((key, index) => index === selectionKeys.length-1 ? selectionKeys.length === 1 ? key : `and ${key}` : `${key}, `)}</h2>}
-            {(properties && selectionIndex.length >= 4) && <h2>{currentData.includes('county') ? 'Selected Counties' : 'Selected States'}</h2>}
+            {(properties && selectionIndex.length >= 4) && <h2>{(currentData.includes('county')||currentData.includes('cdc')) ? 'Selected Counties' : 'Selected States'}</h2>}
             <br/>
           {(properties && selectionIndex.length) && 
               <span>
-                <h4>{dates[currentData][currDateIndex-startDateIndex]}</h4>
+                <h4>{dates[currDateIndex]}</h4>
                 <p>Population</p>
                 <h3>{aggregateProperty('properties', 'population', 'sum').toLocaleString('en')}</h3>
               </span>

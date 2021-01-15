@@ -10,10 +10,10 @@ import { colors } from '../config';
 const TopDrawer = styled.div`
     position: fixed;
     top:50px;
-    left:calc(50vw - 300px);
+    left:calc(50vw - 225px);
     background:${colors.gray};
     width:90vw;
-    max-width: 600px;
+    max-width: 450px;
     box-sizing: border-box;
     padding:0;
     margin:0;

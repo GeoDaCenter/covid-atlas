@@ -16,9 +16,9 @@ import styled from 'styled-components';
 
 import { colLookup, getArrayCSV, getGzipData } from '../utils';
 import Tooltip from './tooltip';
-import { StyledDropDown, BinsContainer } from '../styled_components';
+import { StyledDropDown, StyledDropDownNoLabel, BinsContainer } from '../styled_components';
 import { setVariableParams, setVariableName, setMapParams, setCurrentData, setPanelState, setNotification, 
-  storeMobilityData, variableChangeZ } from '../actions';
+  storeMobilityData, variableChangeZ, setParametersAndData } from '../actions';
 import { fixedScales, colorScales, dataPresets, legacyVariableOrder, colors } from '../config';
 import { settings } from '../config/svg';
 import { variableTree } from '../config/variableTree'
@@ -171,6 +171,11 @@ const StyledButtonGroup = styled(ButtonGroup)`
   }
 `
 
+const DateSelectorContainer = styled.div`
+  opacity:${props => props.disabled ? 0.25 : 1};
+  pointer-events:${props => props.disabled ? 'none' : 'initial'};
+`
+
 const TwoUp = styled.div`
   width:100%;
   .MuiFormControl-root {
@@ -219,9 +224,10 @@ const VariablePanel = (props) => {
     mapParams, panelState, urlParams, storedMobilityData } = useSelector(state => state);
   const [bivariateZ, setBivariateZ] = useState(false);
 
-  const PresetVariables = {
+  const VariablePresets = {
     "HEADER:cases":{},
     "Confirmed Count": {
+        variableName:"Confirmed Count",
         numerator: 'cases',
         nType: 'time-series',
         nProperty: null,
@@ -231,9 +237,12 @@ const VariablePanel = (props) => {
         dRange:null,
         dIndex:null,
         scale:1,
-        scale3D: 100
+        scale3D: 100,
+        fixedScale: null,
+        colorScale: null,
     },
     "Confirmed Count per 100K Population": {
+        variableName:"Confirmed Count per 100K Population",
         numerator: 'cases',
         nType: 'time-series',
         nProperty: null,
@@ -243,9 +252,12 @@ const VariablePanel = (props) => {
         dRange:null,
         dIndex:null,
         scale:100000,
-        scale3D: 1000
+        scale3D: 1000,
+        fixedScale: null,
+        colorScale: null,
     },
     "Confirmed Count per Licensed Bed": {
+        variableName:"Confirmed Count per Licensed Bed",
         numerator: 'cases',
         nType: 'time-series',
         nProperty: null,
@@ -255,10 +267,13 @@ const VariablePanel = (props) => {
         dRange:null,
         dIndex:null,
         scale:1,
-        scale3D: 100000
+        scale3D: 100000,
+        fixedScale: null,
+        colorScale: null,
     },
     "HEADER:deaths":{},
     "Death Count":{
+      variableName:"Death Count",
       numerator: 'deaths',
       nType: 'time-series',
       nProperty: null,
@@ -268,10 +283,12 @@ const VariablePanel = (props) => {
       dRange:null,
       dIndex:null,
       scale:1,
-      scale3D: 10000
-        
+      scale3D: 10000,
+      fixedScale: null,
+      colorScale: null,        
     }, 
     "Death Count per 100K Population":{
+      variableName:"Death Count per 100K Population",
       numerator: 'deaths',
       nType: 'time-series',
       nProperty: null,
@@ -281,21 +298,25 @@ const VariablePanel = (props) => {
       dRange:null,
       dIndex:null,
       scale:100000,
-      scale3D: 15000
-
+      scale3D: 15000,
+      fixedScale: null,
+      colorScale: null,
     },
     "Death Count / Confirmed Count":{
+      variableName:"Death Count / Confirmed Count",
       numerator: 'deaths',
       nType: 'time-series',
       nProperty: null,
       denominator: 'cases',
       dType: 'time-series',
       dProperty: null,
-      scale:1
-
+      scale:1,
+      fixedScale: null,
+      colorScale: null,
     },
     "HEADER:community health":{},
-    "Uninsured % (Community Health Factor)":{
+    "Uninsured %":{
+      variableName:"Uninsured %",
       numerator: 'chr_health_factors',
       nType: 'characteristic',
       nProperty: colLookup(cols, currentData, 'chr_health_factors', 'UnInPrc'),
@@ -306,11 +327,12 @@ const VariablePanel = (props) => {
       dRange:null,
       dIndex:null,
       scale:1,
+      fixedScale: null,
       colorScale: 'uninsured',
-      scale3D: 15000
-
+      scale3D: 15000,
     },
-    "Over 65 Years % (Community Health Context)":{
+    "Over 65 Years %":{
+      variableName:"Over 65 Years %",
       numerator: 'chr_health_context',
       nType: 'characteristic',
       nProperty: colLookup(cols, currentData, 'chr_health_context', 'Over65YearsPrc'),
@@ -321,10 +343,12 @@ const VariablePanel = (props) => {
       dRange:null,
       dIndex:null,
       scale:1,
+      fixedScale: null,
       colorScale: 'over65',
-      scale3D: 15000
+      scale3D: 15000,
     },
-    "Life expectancy (Length and Quality of Life)":{
+    "Life Expectancy":{
+      variableName:"Life Expectancy",
       numerator: 'chr_life',
       nType: 'characteristic',
       nProperty: colLookup(cols, currentData, 'chr_life', 'LfExpRt'),
@@ -336,13 +360,93 @@ const VariablePanel = (props) => {
       dIndex:null,
       scale:1,
       colorScale: 'lifeExp',
+      fixedScale: null,
       scale3D: 1000
     },
-  }
-
-  const CountyVariables = {
+    
+    "HEADER:testing":{},
+    "7 Day Testing Positivity Rate %": {
+      variableName:"7 Day Testing Positivity Rate %",
+      numerator: 'testing_wk_pos',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: null,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      fixedScale: 'testing',
+      colorScale: 'testing',
+      scale3D: 10000000
+    },
+    "7 Day Testing Capacity": {
+      variableName:"7 Day Testing Capacity",
+      numerator: 'testing_tcap',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: null,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      fixedScale: 'testingCap',
+      colorScale: 'testingCap',
+      scale3D: 3000
+    }, 
+    "7 Day Confirmed Cases per Testing %":{
+      variableName:"7 Day Confirmed Cases per Testing %",
+      numerator: 'testing_ccpt',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: null,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      fixedScale: 'testing',
+      colorScale: 'testing',
+      scale3D: 10000000
+    },
+    "HEADER:cdc vaccination":{},
+    "Vaccinations Administered per 100K Population": {
+        variableName:"Vaccinations Administered per 100K Population",
+        numerator: 'vaccinesAdmin',
+        nType: 'time-series',
+        nProperty: null,
+        denominator: 'properties',
+        dType: 'characteristic',
+        dProperty: 'population',
+        dRange:null,
+        dIndex:null,
+        scale:100000,
+        scale3D: 1000,
+        colorScale: 'vaccination',
+        fixedScale: null,
+    },
+    "Vaccinations Distributed per 100K Population": {
+        variableName:"Vaccinations Distributed per 100K Population",
+        numerator: 'vaccinesDist',
+        nType: 'time-series',
+        nProperty: null,
+        denominator: 'properties',
+        dType: 'characteristic',
+        dProperty: 'population',
+        dRange:null,
+        dIndex:null,
+        scale:100000,
+        scale3D: 1000,
+        colorScale: 'vaccination',
+        fixedScale: null,
+    },
     "HEADER:forecasting":{},
     "Forecasting (5-Day Severity Index)": {
+      variableName:"Forecasting (5-Day Severity Index)",
       numerator: 'predictions',
       nType: 'characteristic',
       nProperty: colLookup(cols, currentData, 'predictions', 'severity_index'),
@@ -359,392 +463,144 @@ const VariablePanel = (props) => {
     },
   }
 
-  const StateVariables = {
-    "HEADER:testing":{},
-    "7 Day Testing Positivity Rate %": {
-      numerator: 'testing_wk_pos',
-      nType: 'characteristic',
-      nProperty: null,
-      nRange: null,
-      denominator: 'properties',
-      dType: null,
-      dProperty: null,
-      dRange:null,
-      dIndex:null,
-      scale:1,
-      fixedScale: 'testing',
-      colorScale: 'testing',
-      scale3D: 10000000
-    },
-    "7 Day Testing Capacity": {
-      numerator: 'testing_tcap',
-      nType: 'characteristic',
-      nProperty: null,
-      nRange: null,
-      denominator: 'properties',
-      dType: null,
-      dProperty: null,
-      dRange:null,
-      dIndex:null,
-      scale:1,
-      fixedScale: 'testingCap',
-      colorScale: 'testingCap',
-      scale3D: 3000
-    }, 
-    "7 Day Confirmed Cases per Testing %":{
-      numerator: 'testing_ccpt',
-      nType: 'characteristic',
-      nProperty: null,
-      nRange: null,
-      denominator: 'properties',
-      dType: null,
-      dProperty: null,
-      dRange:null,
-      dIndex:null,
-      scale:1,
-      fixedScale: 'testing',
-      colorScale: 'testing',
-      scale3D: 10000000
-    },
-    "HEADER:cdc vaccination":{},
-    "Vaccinations Administered per 100K Population": {
-        numerator: 'vaccinesAdmin',
-        nType: 'time-series',
-        nProperty: null,
-        denominator: 'properties',
-        dType: 'characteristic',
-        dProperty: 'population',
-        dRange:null,
-        dIndex:null,
-        scale:100000,
-        scale3D: 1000,
-        colorScale: 'vaccination',
-    },
-    "Vaccinations Distributed per 100K Population": {
-        numerator: 'vaccinesDist',
-        nType: 'time-series',
-        nProperty: null,
-        denominator: 'properties',
-        dType: 'characteristic',
-        dProperty: 'population',
-        dRange:null,
-        dIndex:null,
-        scale:100000,
-        scale3D: 1000,
-        colorScale: 'vaccination',
-    },
-  }
+  // mobility variable overlays
 
-  const OneP3AVariables = {
-    "HEADER:mobility":{},
-    "Dex": {
-        numerator: 'dex',
-        nType: 'time-series',
-        nProperty: null,
-        denominator: 'properties',
-        dType: null,
-        dProperty: null,
-        dRange:null,
-        dIndex:null,
-        scale:1,
-        scale3D: 1000
-    },
-    "Dex Adjusted": {
-        numerator: 'dex_a',
-        nType: 'time-series',
-        nProperty: null,
-        denominator: 'properties',
-        dType: null,
-        dProperty: null,
-        dRange:null,
-        dIndex:null,
-        scale:1,
-        scale3D: 1000
-    },
-  }
+  // const OneP3AVariables = {
+  //   "HEADER:mobility":{},
+  //   "Dex": {
+  //       numerator: 'dex',
+  //       nType: 'time-series',
+  //       nProperty: null,
+  //       denominator: 'properties',
+  //       dType: null,
+  //       dProperty: null,
+  //       dRange:null,
+  //       dIndex:null,
+  //       scale:1,
+  //       scale3D: 1000
+  //   },
+  //   "Dex Adjusted": {
+  //       numerator: 'dex_a',
+  //       nType: 'time-series',
+  //       nProperty: null,
+  //       denominator: 'properties',
+  //       dType: null,
+  //       dProperty: null,
+  //       dRange:null,
+  //       dIndex:null,
+  //       scale:1,
+  //       scale3D: 1000
+  //   },
+  // }
 
-  const CDCVariables = {
-    "HEADER:cases":{},
-    "7-Day Confirmed Count": {
-        numerator: 'cases',
-        nType: 'time-series',
-        nProperty: null,
-        nRange:1,
-        denominator: 'properties',
-        dType: null,
-        dProperty: null,
-        dRange:null,
-        dIndex:null,
-        scale:1,
-        scale3D: 100
-    },
-    "7-Day Confirmed Count per 100K Population": {
-        numerator: 'cases',
-        nType: 'time-series',
-        nProperty: null,
-        nRange:1,
-        denominator: 'properties',
-        dType: 'characteristic',
-        dProperty: 'population',
-        dRange:null,
-        dIndex:null,
-        scale:100000,
-        scale3D: 1000
-    },
-    "7-Day Confirmed Count per Licensed Bed": {
-        numerator: 'cases',
-        nType: 'time-series',
-        nProperty: null,
-        nRange:1,
-        denominator: 'properties',
-        dType: 'characteristic',
-        dProperty: 'beds',
-        dRange:null,
-        dIndex:null,
-        scale:1,
-        scale3D: 100000
-    },
-    "HEADER:deaths":{},
-    "7-Day Death Count":{
-      numerator: 'deaths',
-      nType: 'time-series',
-      nProperty: null,
-      nRange:1,
-      denominator: 'properties',
-      dType: null,
-      dProperty: null,
-      dRange:null,
-      dIndex:null,
-      scale:1,
-      scale3D: 10000
-    }, 
-    "7-Day Death Count per 100K Population":{
-      numerator: 'deaths',
-      nType: 'time-series',
-      nProperty: null,
-      nRange:1,
-      denominator: 'properties',
-      dType: 'characteristic',
-      dProperty: 'population',
-      dRange:null,
-      dRange:null,
-      dIndex:null,
-      scale:100000,
-      scale3D: 15000
-    },
-    "7-Day Death Count / Confirmed Count":{
-      numerator: 'deaths',
-      nType: 'time-series',
-      nProperty: null,
-      nRange:1,
-      denominator: 'cases',
-      dType: 'time-series',
-      dProperty: null,
-      dRange:1,
-      scale:1
+  // useEffect(() => {
+  //   if (urlParams.var) handleVariable({event: { target: { 
+  //     value: legacyVariableOrder[urlParams.src||'county_usfacts.geojson'][urlParams.var]
+  //     }}})
+  // },[])
 
-    },
-    "HEADER:testing":{},
-    "7 Day County Testing Positivity Rate %": {
-      numerator: 'testing_wk_pos',
-      nType: 'characteristic',
-      nProperty: null,
-      nRange: null,
-      denominator: 'properties',
-      dType: null,
-      dProperty: null,
-      dRange:null,
-      dIndex:null,
-      scale:1,
-      fixedScale: 'testing',
-      colorScale: 'testing',
-      scale3D: 1000000
-    },
-    "7 Day County Testing Capacity": {
-      numerator: 'testing',
-      nType: 'characteristic',
-      nProperty: null,
-      nRange: null,
-      denominator: 'properties',
-      dType: 'characteristic',
-      dProperty: 'population',
-      dRange:null,
-      dIndex:null,
-      scale:100000,
-      scale3D: 1000,
-      fixedScale: 'testingCap',
-      colorScale: 'testingCap',
-      scale3D: 300
-    }, 
-    "7 Day County Confirmed Cases per Testing %":{
-      numerator: 'testing_ccpt',
-      nType: 'characteristic',
-      nProperty: null,
-      nRange: null,
-      denominator: 'properties',
-      dType: null,
-      dProperty: null,
-      dRange:null,
-      dIndex:null,
-      scale:1,
-      fixedScale: 'testing',
-      colorScale: 'testing',
-      scale3D: 10000000
-    },
-    "HEADER:community health":{},
-    "Uninsured % (Community Health Factor)":{
-      numerator: 'chr_health_factors',
-      nType: 'characteristic',
-      nProperty: colLookup(cols, currentData, 'chr_health_factors', 'UnInPrc'),
-      nRange: null,
-      denominator: 'properties',
-      dType: null,
-      dProperty: null,
-      dRange:null,
-      dIndex:null,
-      scale:1,
-      colorScale: 'uninsured',
-      scale3D: 15000
+  // useEffect(() => {
+  //   if (mapParams.overlay === "mobility-county" && storedMobilityData === {}) {
+  //     getGzipAndCentroids(
+  //       `${process.env.PUBLIC_URL}/gz/county_lex_2020-11-28.csv.gz`,
+  //       `${process.env.PUBLIC_URL}/csv/county_centroids.csv`
+  //     )
+  //     console.log('loaded mobility data')
+  //   }
+  // },[mapParams.overlay])
 
-    },
-    "Over 65 Years % (Community Health Context)":{
-      numerator: 'chr_health_context',
-      nType: 'characteristic',
-      nProperty: colLookup(cols, currentData, 'chr_health_context', 'Over65YearsPrc'),
-      nRange: null,
-      denominator: 'properties',
-      dType: null,
-      dProperty: null,
-      dRange:null,
-      dIndex:null,
-      scale:1,
-      colorScale: 'over65',
-      scale3D: 15000
-    },
-    "Life expectancy (Length and Quality of Life)":{
-      numerator: 'chr_life',
-      nType: 'characteristic',
-      nProperty: colLookup(cols, currentData, 'chr_life', 'LfExpRt'),
-      nRange: null,
-      denominator: 'properties',
-      dType: null,
-      dProperty: null,
-      dRange:null,
-      dIndex:null,
-      scale:1,
-      colorScale: 'lifeExp',
-      scale3D: 1000
-    },
-  }
-
-  useEffect(() => {
-    if (urlParams.var) handleVariable({event: { target: { 
-      value: legacyVariableOrder[urlParams.src||'county_usfacts.geojson'][urlParams.var]
-      }}})
-  },[])
-
-  useEffect(() => {
-    if (mapParams.overlay === "mobility-county" && storedMobilityData === {}) {
-      getGzipAndCentroids(
-        `${process.env.PUBLIC_URL}/gz/county_lex_2020-11-28.csv.gz`,
-        `${process.env.PUBLIC_URL}/csv/county_centroids.csv`
-      )
-      console.log('loaded mobility data')
-    }
-  },[mapParams.overlay])
-
-  const handleVariable = (event) => {
-    let variable = event.target.value;
-    let tempParams = PresetVariables[variable] || CountyVariables[variable] || StateVariables[variable] || OneP3AVariables[variable] || CDCVariables[variable] || null;
+  // const handleVariable = (event) => {
+  //   let variable = event.target.value;
+  //   let tempParams = PresetVariables[variable] || CountyVariables[variable] || StateVariables[variable] || OneP3AVariables[variable] || CDCVariables[variable] || null;
     
-    // dispatch(variableChange({
-    //   variable,
-    //   mapParams: {
-    //     customScale: tempParams.colorScale || '', 
-    //     fixedScale: tempParams.fixedScale || null
-    //   },
-    //   variableParams: {
-    //     ...tempParams
-    //   }
-    // }))
+  //   // dispatch(variableChange({
+  //   //   variable,
+  //   //   mapParams: {
+  //   //     customScale: tempParams.colorScale || '', 
+  //   //     fixedScale: tempParams.fixedScale || null
+  //   //   },
+  //   //   variableParams: {
+  //   //     ...tempParams
+  //   //   }
+  //   // }))
 
-    // transitioning from a static characteristic (null time range)
-    // to a time-series data set 
-    if (dataParams.nType === 'characteristic' && tempParams.nType === 'time-series') tempParams.nRange = 7;
+  //   // transitioning from a static characteristic (null time range)
+  //   // to a time-series data set 
+  //   if (dataParams.nType === 'characteristic' && tempParams.nType === 'time-series') tempParams.nRange = 7;
 
-    // if time series over time series, coordinate index and range
-    if (tempParams.nType === 'time-series' && tempParams.dType === 'time-series') {
-      tempParams.dIndex = dataParams.nIndex;
-      tempParams.dRange = tempParams.nRange || dataParams.nRange;
-    }
+  //   // if time series over time series, coordinate index and range
+  //   if (tempParams.nType === 'time-series' && tempParams.dType === 'time-series') {
+  //     tempParams.dIndex = dataParams.nIndex;
+  //     tempParams.dRange = tempParams.nRange || dataParams.nRange;
+  //   }
 
 
-    dispatch(setVariableParams({...tempParams}))
-    dispatch(setVariableName(variable))
-    dispatch(setMapParams({customScale: tempParams.colorScale || '', fixedScale: tempParams.fixedScale || null}))
-  };
+  //   dispatch(setVariableParams({...tempParams}))
+  //   dispatch(setVariableName(variable))
+  //   dispatch(setMapParams({customScale: tempParams.colorScale || '', fixedScale: tempParams.fixedScale || null}))
+  // };
 
-  const handleZVariable = (event) => {
-    let variable = event.target.value;
-    let tempParams = PresetVariables[variable] || CountyVariables[variable] || StateVariables[variable] || OneP3AVariables[variable] || CDCVariables[variable] || null;
+  // const handleZVariable = (event) => {
+  //   let variable = event.target.value;
+  //   let tempParams = PresetVariables[variable] || CountyVariables[variable] || StateVariables[variable] || OneP3AVariables[variable] || CDCVariables[variable] || null;
     
-    // transitioning from a static characteristic (null time range)
-    if (dataParams.zAxisParams?.nType === 'characteristic' && tempParams.nType === 'time-series') tempParams.nRange = 7;
+  //   // transitioning from a static characteristic (null time range)
+  //   if (dataParams.zAxisParams?.nType === 'characteristic' && tempParams.nType === 'time-series') tempParams.nRange = 7;
     
-    // to a time-series data set 
+  //   // to a time-series data set 
 
-    // if time series over time series, coordinate index and range
-    if (tempParams.nType === 'time-series' && tempParams.dType === 'time-series') {
-      tempParams.dIndex = dataParams.nIndex;
-      tempParams.dRange = tempParams.nRange || dataParams.nRange;
-    }
+  //   // if time series over time series, coordinate index and range
+  //   if (tempParams.nType === 'time-series' && tempParams.dType === 'time-series') {
+  //     tempParams.dIndex = dataParams.nIndex;
+  //     tempParams.dRange = tempParams.nRange || dataParams.nRange;
+  //   }
     
-    dispatch(variableChangeZ(variable, tempParams))
-  };
+  //   dispatch(variableChangeZ(variable, tempParams))
+  // };
 
-  const handleDataSource = (event) => {
-    let newDataSet = event.target.value
-    if ((newDataSet.includes("state") && CountyVariables.hasOwnProperty(currentVariable))||(newDataSet.includes("county") && StateVariables.hasOwnProperty(currentVariable))) {
+  // const handleDataSource = (event) => {
+  //   let newDataSet = event.target.value
+  //   if ((newDataSet.includes("state") && CountyVariables.hasOwnProperty(currentVariable))||(newDataSet.includes("county") && StateVariables.hasOwnProperty(currentVariable))) {
 
-      // dispatch(resetVariable({
-      //   mapParams: {
-      //     customScale: '', 
-      //     fixedScale: null
-      //   },
-      //   variableParams: {
-      //     ...PresetVariables["Confirmed Count per 100K Population"]
-      //   },
-      //   variable: "Confirmed Count per 100K Population",
-      //   notification: `${dataPresets[newDataSet].plainName} data do not have ${currentVariable}. The Atlas will default to Confirmed Cases Per 100k People.`
-      // }))
+  //     // dispatch(resetVariable({
+  //     //   mapParams: {
+  //     //     customScale: '', 
+  //     //     fixedScale: null
+  //     //   },
+  //     //   variableParams: {
+  //     //     ...PresetVariables["Confirmed Count per 100K Population"]
+  //     //   },
+  //     //   variable: "Confirmed Count per 100K Population",
+  //     //   notification: `${dataPresets[newDataSet].plainName} data do not have ${currentVariable}. The Atlas will default to Confirmed Cases Per 100k People.`
+  //     // }))
 
-      dispatch(setMapParams({customScale: '', fixedScale: null}))
-      dispatch(setVariableParams({...PresetVariables["Confirmed Count per 100K Population"]}))
-      dispatch(setVariableName("Confirmed Count per 100K Population"))
-      dispatch(setNotification(`${dataPresets[newDataSet].plainName} data do not have ${currentVariable}. The Atlas will default to Confirmed Cases Per 100k People.`))  
+  //     dispatch(setMapParams({customScale: '', fixedScale: null}))
+  //     dispatch(setVariableParams({...PresetVariables["Confirmed Count per 100K Population"]}))
+  //     dispatch(setVariableName("Confirmed Count per 100K Population"))
+  //     dispatch(setNotification(`${dataPresets[newDataSet].plainName} data do not have ${currentVariable}. The Atlas will default to Confirmed Cases Per 100k People.`))  
 
-      setTimeout(() => {dispatch(setCurrentData(newDataSet))}, 250);
-      setTimeout(() => {dispatch(setNotification(null))},10000);
-    } else if (newDataSet.includes("cdc")) {
-      dispatch(setVariableParams({...CDCVariables["7-Day Confirmed Count per 100K Population"]}))
-      dispatch(setVariableName("7-Day Confirmed Count per 100K Population"))
-      dispatch(setNotification(`CDC County Data is aggregated to 7-Day rolling averages. The Atlas will default to 7-Day rolling average Confirmed Cases Per 100k People.`))  
-      setTimeout(() => {dispatch(setCurrentData(newDataSet))}, 250);
-      setTimeout(() => {dispatch(setNotification(null))},10000);
-    } else if (currentData.includes('cdc')) {
-      dispatch(setMapParams({customScale: '', fixedScale: null}))
-      dispatch(setVariableParams({...PresetVariables["Confirmed Count per 100K Population"]}))
-      dispatch(setVariableName("Confirmed Count per 100K Population"))
-      dispatch(setNotification(`Changing to ${dataPresets[newDataSet].plainName} data. CDC County Data is aggregated to 7-Day rolling averages. The Atlas will default to Confirmed Cases Per 100k People.`))  
+  //     setTimeout(() => {dispatch(setCurrentData(newDataSet))}, 250);
+  //     setTimeout(() => {dispatch(setNotification(null))},10000);
+  //   } else if (newDataSet.includes("cdc")) {
+  //     dispatch(setVariableParams({...CDCVariables["7-Day Confirmed Count per 100K Population"]}))
+  //     dispatch(setVariableName("7-Day Confirmed Count per 100K Population"))
+  //     dispatch(setNotification(`CDC County Data is aggregated to 7-Day rolling averages. The Atlas will default to 7-Day rolling average Confirmed Cases Per 100k People.`))  
+  //     setTimeout(() => {dispatch(setCurrentData(newDataSet))}, 250);
+  //     setTimeout(() => {dispatch(setNotification(null))},10000);
+  //   } else if (currentData.includes('cdc')) {
+  //     dispatch(setMapParams({customScale: '', fixedScale: null}))
+  //     dispatch(setVariableParams({...PresetVariables["Confirmed Count per 100K Population"]}))
+  //     dispatch(setVariableName("Confirmed Count per 100K Population"))
+  //     dispatch(setNotification(`Changing to ${dataPresets[newDataSet].plainName} data. CDC County Data is aggregated to 7-Day rolling averages. The Atlas will default to Confirmed Cases Per 100k People.`))  
 
-      setTimeout(() => {dispatch(setCurrentData(newDataSet))}, 250);
-      setTimeout(() => {dispatch(setNotification(null))},10000);
-    }
+  //     setTimeout(() => {dispatch(setCurrentData(newDataSet))}, 250);
+  //     setTimeout(() => {dispatch(setNotification(null))},10000);
+  //   }
     
-      else {
-      dispatch(setCurrentData(newDataSet)); 
-    }
-  };
+  //     else {
+  //     dispatch(setCurrentData(newDataSet)); 
+  //   }
+  // };
 
 
   const handleMapType = (event, newValue) => {
@@ -757,6 +613,7 @@ const VariablePanel = (props) => {
             nBins: 4,
             bins: fixedScales[newValue],
             colorScale: colorScales[newValue]
+            
           }
         )
       )
@@ -765,7 +622,8 @@ const VariablePanel = (props) => {
         setMapParams(
           {
             nBins,
-            mapType: newValue
+            mapType: newValue,
+            binMode: newValue === 'hinge15_breaks' ? 'dynamic' : ''
           }
         )
       )
@@ -811,41 +669,128 @@ const VariablePanel = (props) => {
     setBivariateZ(prev => !prev )
   }
 
-  const [newVariable, setNewVariable] = useState("Confirmed Count per 100K Population")
-  const [currentGeography, setCurrentGeography] = useState('County')
-  const [currentDataset, setCurrentDataset] = useState('1point3acres')
+  const [newVariable, setNewVariable] = useState("Confirmed Count per 100K Population");
+  const [currentGeography, setCurrentGeography] = useState('County');
+  const [currentDataset, setCurrentDataset] = useState('1point3acres');
+  const [rangeSelectVal, setRangeSelectVal] = useState(7);
+
+  const datasetTree = {
+    'County': {
+      '1point3acres':'county_1p3a.geojson',
+      'New York Times':'county_nyt.geojson',
+      'USA Facts':'county_usfacts.geojson',
+      'CDC':'cdc.geojson',
+      'Yu Group at Berkeley':'county_usfacts.geojson',
+      'County Health Rankings':'county_usfacts.geojson',
+    }, 
+    'State': {
+      '1point3acres':'state_1p3a.geojson',
+      'New York Times':'state_nyt.geojson',
+      'CDC':'state_1p3a.geojson',
+      'County Health Rankings':'state_1p3a.geojson',
+    }
+  }
+  
 
   const handleNewVariable = (e) => {
     let tempGeography = currentGeography;
     let tempDataset = currentDataset;
-    // check if valid combination based on variable tree
-    if (!variableTree[e.target.value].hasOwnProperty(tempGeography)) {
-      tempGeography = Object.keys(variableTree[e.target.value])[0]
-      setCurrentGeography(tempGeography)
-    }
 
-    if (!variableTree[e.target.value][tempGeography].hasOwnProperty(tempDataset)) {
-      setCurrentDataset(Object.keys(variableTree[e.target.value][tempGeography])[0])
+    let resetDateRange = 
+    VariablePresets[e.target.value].nType === 'time-series' && 
+    (dataParams.nType === 'characteristic' || dataParams.variableName.indexOf("Testing") !== -1) && 
+    dataParams.nRange === null &&
+    VariablePresets[e.target.value].variableName.indexOf("Testing") === -1 && VariablePresets[e.target.value].nType !== 'characteristic';
+
+    let nIndex = resetDateRange ? 'nRange' : null;
+    
+    let dIndex = (VariablePresets[e.target.value].dType === 'time-series') ? 'dIndex' : null;
+    let dRange = (VariablePresets[e.target.value].dType === 'time-series') ? 'dRange' : null;
+    // check if valid combination based on variable tree
+    if (!variableTree[e.target.value].hasOwnProperty(tempGeography) || !variableTree[e.target.value][tempGeography].hasOwnProperty(tempDataset)) {
+      tempGeography = Object.keys(variableTree[e.target.value])[0]
+      tempDataset = Object.keys(variableTree[e.target.value][tempGeography])[0];
+
+      
+      dispatch(setParametersAndData({
+        params: {
+          ...VariablePresets[e.target.value],
+          [nIndex]: 7,
+          [dIndex]: dataParams.nIndex,
+          [dRange]: dataParams.nRange,
+        },
+        dataset: datasetTree[tempGeography][tempDataset],
+        mapParams: {
+          customScale: VariablePresets[e.target.value].colorScale || null
+        }
+      }))
+      setCurrentGeography(tempGeography)
+      setCurrentDataset(tempDataset)
+    } else {
+      dispatch(setVariableParams({
+        ...VariablePresets[e.target.value],
+        [nIndex]: 7,
+        [dIndex]: dataParams.nIndex,
+        [dRange]: dataParams.nRange,
+      }))
+
     }
     
     setNewVariable(e.target.value)
   }
 
   const handleGeography = (e) => {
-    
+    setCurrentGeography(e.target.value)
     if (!variableTree[newVariable][e.target.value].hasOwnProperty(currentDataset)) {
-      setCurrentDataset(Object.keys(variableTree[newVariable][e.target.value])[0])
+      let datasetWithGeography = Object.keys(variableTree[newVariable][e.target.value])[0]
+      setCurrentDataset(datasetWithGeography)
+      dispatch(setCurrentData(datasetTree[e.target.value][datasetWithGeography]))
+    } else {
+      dispatch(setCurrentData(datasetTree[e.target.value][currentDataset]))
     }
 
-    setCurrentGeography(e.target.value)
   }
 
   const handleDataset = (e) => {
     setCurrentDataset(e.target.value)
+    dispatch(setCurrentData(datasetTree[currentGeography][e.target.value]))
+  }
+
+  
+  const handleRangeButton = (event) => {
+    let val = event.target.value;
+
+    if (val === 'custom') { // if swapping over to a custom range, which will use a 2-part slider to scrub the range
+        if (dataParams.nType === "time-series" && dataParams.dType === "time-series") {
+            dispatch(setVariableParams({nRange: 30, dRange: 30, rangeType: 'custom'}))
+        } else if (dataParams.nType === "time-series") {
+            dispatch(setVariableParams({nRange: 30, rangeType: 'custom'}))
+        } else if (dataParams.dType === "time-series") {
+            dispatch(setVariableParams({dRange: 30, rangeType: 'custom'}))
+        } 
+    } else { // use the new value -- null for cumulative, 1 for daily, 7 for weekly
+        if (dataParams.nType === "time-series" && dataParams.dType === "time-series") {
+            dispatch(setVariableParams({nRange: val, dRange: val, rangeType: 'fixed'}))
+        } else if (dataParams.nType === "time-series") {
+            dispatch(setVariableParams({nRange: val, rangeType: 'fixed'}))
+        } else if (dataParams.dType === "time-series") {
+            dispatch(setVariableParams({dRange: val, rangeType: 'fixed'}))
+        }    
+    }
+    
+    setRangeSelectVal(val);
+  }
+
+  const handleSwitch = () => {
+    if (mapParams.binMode === 'dynamic') {
+        dispatch(setMapParams({binMode:''}))
+    } else {
+        dispatch(setMapParams({binMode:'dynamic'}))
+    }
   }
 
   const allGeographies = ['County', 'State']
-  const allDatasets = ['1point3acres', 'USA Facts', 'New York Times', 'CDC', 'Yu Group at Berkeley', 'County Health Rankings']
+  const allDatasets = ['1point3acres', 'USA Facts', 'New York Times', 'CDC', 'County Health Rankings'] //'Yu Group at Berkeley', 
 
   return (
     <VariablePanelContainer className={panelState.variables ? '' : 'hidden'} otherPanels={panelState.info} id="variablePanel">
@@ -868,6 +813,37 @@ const VariablePanel = (props) => {
           </Select>
         </StyledDropDown>
         <br/>
+        <DateSelectorContainer disabled={dataParams.nType === "characteristic"}>
+          <StyledDropDown id="dateSelector">
+              <InputLabel htmlFor="date-select">Date Range</InputLabel>
+              <Select  
+                  id="date-select"
+                  value={(dataParams.nRange === null || dataParams.rangeType === 'custom' || dataParams.variableName.indexOf('Testing') !== -1) ? 'x' : dataParams.nRange}
+                  onChange={handleRangeButton}
+                  displayEmpty
+                  inputProps={{ 'aria-label': 'Without label' }}
+              >
+                  <MenuItem value="x" disabled style={{display:'none'}}>
+                      {dataParams.rangeType === 'custom' && <span>Custom Range</span>}
+                      {(dataParams.nRange === null && dataParams.variableName.indexOf('Testing') === -1) && <span>Cumulative</span>}
+                      {dataParams.variableName.indexOf('Testing') !== -1 && <span>7-Day Average</span>}
+                  </MenuItem>
+                  <MenuItem value={null} key={'cumulative'} disabled={dataParams.variableName.indexOf('Testing') !== -1}>Cumulative</MenuItem>
+                  <MenuItem value={1} key={'daily'} disabled={dataParams.variableName.indexOf('Testing') !== -1}>Daily New</MenuItem>
+                  <MenuItem value={7} key={'7-day-ave'} disabled={dataParams.variableName.indexOf('Testing') !== -1}>7-Day Average</MenuItem>
+                  <MenuItem value={'custom'} key={'customRange'} disabled={dataParams.variableName.indexOf('Testing') !== -1}>Custom Range</MenuItem>
+              </Select>
+          </StyledDropDown>
+          <BinsContainer id="binModeSwitch" disabled={dataParams.variableName.indexOf('Testing') !== -1 || dataParams.nType === "characteristic"}>
+            <Switch
+                checked={mapParams.binMode === 'dynamic'}
+                onChange={handleSwitch}
+                name="bin chart switch"
+            />
+            <p>{mapParams.binMode === 'dynamic' ? 'Dynamic' : 'Fixed Bins'}<Tooltip id="BinModes"/></p>
+          </BinsContainer> 
+        </DateSelectorContainer> 
+        <br/>
         
         <StyledDropDown id="geographySelect">
           <InputLabel htmlFor="geographySelect">Geography</InputLabel>
@@ -886,8 +862,6 @@ const VariablePanel = (props) => {
             )}
           </Select>
         </StyledDropDown>
-        <br/>
-
         <StyledDropDown id="datasetSelect">
           <InputLabel htmlFor="datasetSelect">Data Source</InputLabel>
           <Select
@@ -980,7 +954,6 @@ const VariablePanel = (props) => {
             }
           </Select>
         </StyledDropDown> */}
-        <br/>
         <StyledDropDown component="Radio" id="mapType">
           <FormLabel component="legend">Map Type</FormLabel>
           <RadioGroup 

@@ -76,7 +76,7 @@ const TwoWeekLineChart = ( props ) => {
                     strokeWidth={2} 
                     isAnimationActive={false}
                     dot={
-                        <CustomizedDot color={lineColor(delta, props.data[0])} angle={calcAngle(delta, props.data[12])} />
+                        <CustomizedDot color={lineColor(delta, props.data[0])} angle={calcAngle(props.data[12] - props.data[10], props.data[12])} />
                         }
                 />
             </LineChart>

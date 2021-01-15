@@ -124,12 +124,11 @@ export const setCentroids = (data, name) => {
 }
 
 // stores valid dates in current data set
-export const setDates = (data, name) => {
+export const setDates = (data) => {
     return {
         type: 'SET_DATES',
         payload: {
-            data,
-            name
+            data
         }
     }
 }
@@ -159,14 +158,14 @@ export const setColumnNames = (data, name) => {
 }
 
 // sets the current date as text
-export const setDate = (date) => {
-    return {
-        type: 'SET_CURR_DATE',
-        payload: {
-            date
-        }
-    }
-}
+// export const setDate = (date) => {
+//     return {
+//         type: 'SET_CURR_DATE',
+//         payload: {
+//             date
+//         }
+//     }
+// }
 
 // sets the index of the date within the current dataset(s)
 export const setDateIndex = (index) => {
@@ -235,6 +234,16 @@ export const setVariableParams = ( params ) => {
             params
         }
     }
+}
+
+export const setParametersAndData = ( params ) => {
+    return {
+        type: 'SET_VARIABLE_PARAMS_AND_DATASET',
+        payload: {
+            params
+        }
+    }
+    
 }
 
 // change the Z axis variable for bi-variate 3D views

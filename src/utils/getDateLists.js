@@ -9,7 +9,7 @@ export const getDateLists = () => {
     }
 
     let todayDate = new Date()
-    let initialDate = new Date('01/30/2020')
+    let initialDate = new Date('01/21/2020')
     let dateList = []
     let isoDateList = []
     let usDateList = []

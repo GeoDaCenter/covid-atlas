@@ -5,14 +5,14 @@ var reducer = (state = INITIAL_STATE, action) => {
         case 'DATA_LOAD':
             // main new data loading reducer
             // I: Destructure payload (load) object
-            let { storeData, currentData, columnNames, 
+            let { storeData, currentData, columnNames, dateIndices,
                 storeGeojson, chartData, mapParams, 
-                dates, currDate, startDateIndex, variableParams} = action.payload.load;
+                dates, currDate, variableParams} = action.payload.load;
 
             // II: Create copies of existing state objects.
             // This is necessary to avoid mutating the state
             let [
-                    dataObj, colDataObj, geoDataObj, 
+                    dataObj, colDataObj, dateIndexObj, geoDataObj, 
                     mapParamsDataObj, datesDataObj, 
                     variableParamsDataObj, panelsDataObj
                 ] = [
@@ -20,6 +20,8 @@ var reducer = (state = INITIAL_STATE, action) => {
                     ...state.storedData
                 }, {
                     ...state.cols
+                }, {
+                    ...state.dateIndices
                 }, {
                     ...state.storedGeojson,
                 }, {
@@ -37,22 +39,20 @@ var reducer = (state = INITIAL_STATE, action) => {
 
                 dataObj[storeData.name] = storeData.data;
                 colDataObj[columnNames.name] = columnNames.data;
+                dateIndexObj[dateIndices.name] = dateIndices.data;
                 geoDataObj[storeGeojson.name] = storeGeojson.data;
-                datesDataObj[dates.name] = dates.data;
             return {
                 ...state,
                 storedData: dataObj,
                 cols: colDataObj,
+                dateIndices: dateIndexObj,
                 storedGeojson: geoDataObj,
                 mapParams: mapParamsDataObj,
-                dates: datesDataObj,
                 dataParams: variableParamsDataObj,
                 currentData,
                 selectionKeys: [],
                 selectionIndex: [],
                 chartData,
-                currDate,
-                startDateIndex,
                 sidebarData: {},
                 panelState: panelsDataObj
 
@@ -73,8 +73,6 @@ var reducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 dataParams: variableParamsExDataObj,
                 chartData: action.payload.load.chartData,
-                currDate: action.payload.load.currDate,
-                startDateIndex: action.payload.load.startDateIndex,
                 sidebarData: {},
                 selectionKeys: [],
                 selectionIndex: [],
@@ -161,13 +159,9 @@ var reducer = (state = INITIAL_STATE, action) => {
                 geodaProxy: action.payload.proxy
             }
         case 'SET_DATES':
-            let datesObj = {
-                ...state.dates
-            }
-            datesObj[action.payload.name] = action.payload.data
             return {
                 ...state,
-                dates: datesObj
+                dates: action.payload.data
             }
         case 'SET_DATA_FUNCTION':
             return {
@@ -220,16 +214,19 @@ var reducer = (state = INITIAL_STATE, action) => {
             let dateObj = {
                 ...state.dataParams
             }
-            if (action.payload.index+state.dataParams.nIndex > state.dates[state.currentData].length) {
-                dateObj.nIndex = state.startDateIndex;
-                dateObj.dIndex = state.startDateIndex;
+            let currIndices = state.dateIndices[state.currentData][state.dataParams.numerator]
+            let nextIndex = currIndices[currIndices.indexOf(state.dataParams.nIndex)+action.payload.index]
+
+            if (nextIndex === undefined) {
+                dateObj.nIndex = currIndices[0]
+                dateObj.dIndex = currIndices[0]
                 return {
                     ...state,
                     dataParams:dateObj
                 }
             } else {
-                dateObj.nIndex = dateObj.nIndex + action.payload.index;
-                dateObj.dIndex = dateObj.dIndex + action.payload.index;
+                dateObj.nIndex = nextIndex;
+                dateObj.dIndex = nextIndex;
                 return {
                     ...state,
                     dataParams:dateObj
@@ -267,6 +264,25 @@ var reducer = (state = INITIAL_STATE, action) => {
                     dataParams: paramObj 
                 }
             }
+        case 'SET_VARIABLE_PARAMS_AND_DATASET':
+            const { params, dataset, dataMapParams } = action.payload.params;
+
+            let dataAndParamsObj = {
+                ...state.dataParams,
+                ...params
+            };
+
+            let dataAndMapParamsObj = {
+                ...state.mapParams,
+                ...dataMapParams
+            }
+            
+            return {
+                ...state,
+                dataParams: dataAndParamsObj,
+                mapParams: dataAndMapParamsObj,
+                currentData: dataset
+            };
         case 'SET_Z_VARIABLE_PARAMS':
             let paramObjZ = {
                 ...state.dataParams,

@@ -155,7 +155,7 @@ const MainViewContainer  = styled(View)`
 
 const Map = () => { 
     
-    const { storedData, storedGeojson, currentData, storedLisaData,
+    const { storedData, storedGeojson, currentData, storedLisaData, dateIndices,
         storedCartogramData, panelState, dates, dataParams, mapParams,
         currentVariable, startDateIndex, urlParams } = useSelector(state => state);
 
@@ -513,10 +513,10 @@ const Map = () => {
                             dispatch(
                                 appendSelectionData({
                                     values: getDataForCharts(
-                                        {data: info.object}, 
+                                        [info.object], 
                                         'cases', 
-                                        startDateIndex, 
-                                        dates[currentData], 
+                                        dateIndices[currentData]['cases'], 
+                                        dates, 
                                         dataName
                                     ),
                                     name: dataName,
@@ -548,10 +548,10 @@ const Map = () => {
                         dispatch(
                             setSelectionData({
                                 values: getDataForCharts(
-                                    {data: info.object}, 
+                                    [info.object], 
                                     'cases', 
-                                    startDateIndex, 
-                                    dates[currentData], 
+                                    dateIndices[currentData]['cases'], 
+                                    dates, 
                                     dataName
                                 ),
                                 name: dataName,
