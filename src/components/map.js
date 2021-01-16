@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import {fromJS} from 'immutable';
 import {find, findIndex} from 'lodash';
 
 import DeckGL from '@deck.gl/react';
-import {View, MapView, _GlobeView as GlobeView, FlyToInterpolator} from '@deck.gl/core';
+import {MapView, FlyToInterpolator} from '@deck.gl/core';
 import { GeoJsonLayer, PolygonLayer, ScatterplotLayer, IconLayer, TextLayer } from '@deck.gl/layers';
 import {fitBounds} from '@math.gl/web-mercator';
 // import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 // import {IcoSphereGeometry} from '@luma.gl/engine';
 
-import MapboxGLMap, {NavigationControl, GeolocateControl, LinearInterpolator } from 'react-map-gl';
+import MapboxGLMap, {NavigationControl, GeolocateControl } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
 
 import { MapTooltipContent } from '../components';
-import { setDataSidebar, setMapLoaded, setPanelState, setSelectionData, appendSelectionData, removeSelectionData } from '../actions';
+import { setMapLoaded, setSelectionData, appendSelectionData, removeSelectionData } from '../actions';
 import { mapFn, dataFn, getVarId, getCSV, getCartogramCenter, getDataForCharts, getURLParams } from '../utils';
 import { colors, colorScales } from '../config';
 import MAP_STYLE from '../config/style.json';
@@ -30,17 +30,17 @@ const bounds = fitBounds({
     bounds: [[-130.14, 53.96],[-67.12, 19]]
 })
 
-const hawaiiBounds = fitBounds({
-    width: window.innerWidth*.15,
-    height: window.innerHeight*.12,
-    bounds: [[-161.13, 23.23],[-152.75, 17.67]]
-})
+// const hawaiiBounds = fitBounds({
+//     width: window.innerWidth*.15,
+//     height: window.innerHeight*.12,
+//     bounds: [[-161.13, 23.23],[-152.75, 17.67]]
+// })
 
-const alaskaBounds = fitBounds({
-    width: window.innerWidth*.15,
-    height: window.innerHeight*.12,
-    bounds: [[-167.75, 73.59],[-132.70, 50.09]]
-})
+// const alaskaBounds = fitBounds({
+//     width: window.innerWidth*.15,
+//     height: window.innerHeight*.12,
+//     bounds: [[-167.75, 73.59],[-132.70, 50.09]]
+// })
 
 const ICON_MAPPING = {
     hospital: {x: 0, y: 0, width: 128, height: 128},
@@ -149,10 +149,6 @@ const IndicatorBox = styled.div`
     z-index:5;
 `
 
-const MainViewContainer  = styled(View)`
-
-`
-
 const Map = () => { 
     
     const { storedData, storedGeojson, currentData, storedLisaData, dateIndices,
@@ -174,38 +170,38 @@ const Map = () => {
         pitch:0
     })
 
-    const [viewStates, setViewStates] = useState({
-        'main': {
-            latitude: +urlParams.lat || bounds.latitude,
-            longitude: +urlParams.lon || bounds.longitude,
-            zoom: +urlParams.z || bounds.zoom,
-            bearing:0,
-            pitch:0
-        },
-        'hawaiiMap': {
-            latitude: hawaiiBounds.latitude,
-            longitude: hawaiiBounds.longitude,
-            zoom: hawaiiBounds.zoom,
-            bearing:0,
-            pitch:0
-        },
-        'alaskaMap': {
-            latitude: alaskaBounds.latitude,
-            longitude: alaskaBounds.longitude,
-            zoom: alaskaBounds.zoom,
-            bearing:0,
-            pitch:0
-        }
-    });
+    // const [viewStates, setViewStates] = useState({
+    //     'main': {
+    //         latitude: +urlParams.lat || bounds.latitude,
+    //         longitude: +urlParams.lon || bounds.longitude,
+    //         zoom: +urlParams.z || bounds.zoom,
+    //         bearing:0,
+    //         pitch:0
+    //     },
+    //     'hawaiiMap': {
+    //         latitude: hawaiiBounds.latitude,
+    //         longitude: hawaiiBounds.longitude,
+    //         zoom: hawaiiBounds.zoom,
+    //         bearing:0,
+    //         pitch:0
+    //     },
+    //     'alaskaMap': {
+    //         latitude: alaskaBounds.latitude,
+    //         longitude: alaskaBounds.longitude,
+    //         zoom: alaskaBounds.zoom,
+    //         bearing:0,
+    //         pitch:0
+    //     }
+    // });
 
-    const onViewStateChange = useCallback(({viewId, viewState}) => {
-        if (viewId === 'main') {
-          setViewStates(currentViewStates => ({
-            ...currentViewStates,
-            main: viewState
-          }));
-        } 
-    }, []);
+    // const onViewStateChange = useCallback(({viewId, viewState}) => {
+    //     if (viewId === 'main') {
+    //       setViewStates(currentViewStates => ({
+    //         ...currentViewStates,
+    //         main: viewState
+    //       }));
+    //     } 
+    // }, []);
 
     const [cartogramData, setCartogramData] = useState([]);
     const [currVarId, setCurrVarId] = useState(null);
@@ -217,7 +213,7 @@ const Map = () => {
     const [choroplethInteractive, setChoroplethInteractive] = useState(true);
     const [boxSelect, setBoxSelect] = useState(false);
     const [boxSelectDims, setBoxSelectDims] = useState({});
-    const [resetSelect, setResetSelect] = useState(null);
+    // const [resetSelect, setResetSelect] = useState(null);
     // const [mobilityData, setMobilityData] = useState([]);
 
     const dispatch = useDispatch();
@@ -261,7 +257,7 @@ const Map = () => {
 
     useEffect(() => {
         setCurrVarId(getVarId(currentData, dataParams))
-    }, [dataParams, mapParams])
+    }, [dataParams, mapParams, currentData])
 
 
     useEffect(() => {
@@ -786,7 +782,7 @@ const Map = () => {
         //   })
     ]
 
-    const viewGlobe = new GlobeView({id: 'globe', controller: false, resolution:1});
+    // const viewGlobe = new GlobeView({id: 'globe', controller: false, resolution:1});
     const view = new MapView({repeat: true});
 
     // const views = [
@@ -795,7 +791,7 @@ const Map = () => {
     //     new MapView({id: 'alaskaMap', x: '14%', y: '86%', width: '15%', height: '12%', controller: false})
     // ]
 
-    const [insetMap, setInsetMap] = useState(false)
+    // const [insetMap, setInsetMap] = useState(false)
     
     // try {
         
@@ -941,7 +937,7 @@ const Map = () => {
                     height={boxSelectDims.height}>
                 </IndicatorBox>
             }
-            <svg height="0" width="0">
+            {/* <svg height="0" width="0">
             <defs>
                 <clipPath id="window">
                     {!insetMap && <rect y="0" x="0" width={window.innerWidth} height={window.innerHeight}/>}
@@ -949,7 +945,7 @@ const Map = () => {
                     <rect y={window.innerHeight*.8} x={window.innerWidth*.3} width={window.innerWidth*.7} height={window.innerHeight*.2}/>
                 </clipPath>
             </defs>
-            </svg>
+            </svg> */}
             <DeckGL
                 layers={Layers}
                 ref={deckRef}
@@ -987,11 +983,10 @@ const Map = () => {
                         
                     <MapGeocoder 
                         mapRef={mapRef}
-                        id="geocoder"
+                        id="mapGeocoder"
                         onViewportChange={viewState  => setViewState(viewState)}
                         mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
-                        position="top-right"
-                        id="mapGeocoder"
+                        position="top-right"                        
                         placeholder="Search by Location"
                         clearAndBlurOnEsc={true}
                         style={{position: 'fixed', top:'5px', right:'5px'}}

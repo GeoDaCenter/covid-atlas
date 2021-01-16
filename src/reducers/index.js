@@ -7,14 +7,13 @@ var reducer = (state = INITIAL_STATE, action) => {
             // I: Destructure payload (load) object
             let { storeData, currentData, columnNames, dateIndices,
                 storeGeojson, chartData, mapParams, 
-                dates, currDate, variableParams} = action.payload.load;
+                variableParams} = action.payload.load;
 
             // II: Create copies of existing state objects.
             // This is necessary to avoid mutating the state
             let [
                     dataObj, colDataObj, dateIndexObj, geoDataObj, 
-                    mapParamsDataObj, datesDataObj, 
-                    variableParamsDataObj, panelsDataObj
+                    mapParamsDataObj, variableParamsDataObj, panelsDataObj
                 ] = [
                     {
                     ...state.storedData
@@ -27,8 +26,6 @@ var reducer = (state = INITIAL_STATE, action) => {
                 }, {
                     ...state.mapParams,
                     ...mapParams
-                }, {
-                    ...state.dates
                 }, {
                     ...state.dataParams,
                     ...variableParams

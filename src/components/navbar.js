@@ -10,7 +10,7 @@ const NavBar = () => {
     return (
         <div className="navbar">
             <div className="nav-logo">
-              <img src={`${process.env.PUBLIC_URL}/favicon/android-icon-192x192.png`} style={{height: '30px', paddingRight: '5px'}} /><a href="index.html">US COVID ATLAS </a>
+              <img src={`${process.env.PUBLIC_URL}/favicon/android-icon-192x192.png`} style={{height: '30px', paddingRight: '5px'}} alt="US Covid Atlas Logo" /><a href="index.html">US COVID ATLAS </a>
             </div>
           <NavItems> 
             <li><a href="data.html">DATA</a></li>

@@ -3,15 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
 import Slider from '@material-ui/core/Slider';
 import Button from '@material-ui/core/Button';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
 import styled from 'styled-components';
-import { setVariableParams, incrementDate, setMapParams } from '../actions';
-import Switch from '@material-ui/core/Switch';
-import { StyledDropDownNoLabel, BinsContainer } from '../styled_components';
-import { Tooltip } from '../components';
-// import { getParseCSV, getJson, mergeData, colIndex, getDataForBins } from './utils';
+import { setVariableParams, incrementDate } from '../actions';
 
 const SliderContainer = styled.div`
     color: white;
@@ -197,12 +190,9 @@ const DateSlider = () => {
     const dataParams = useSelector(state => state.dataParams);
     const dateIndices = useSelector(state => state.dateIndices);
     const dates = useSelector(state => state.dates);
-    const startDateIndex = useSelector(state => state.startDateIndex);
-    const mapParams = useSelector(state => state.mapParams);
     const currentVariable = useSelector(state => state.currentVariable);
     
     const [timerId, setTimerId] = useState(null);
-    const [customRange, setCustomRange] = useState(false);
     
     const handleChange = (event, newValue) => {
 
@@ -259,9 +249,11 @@ const DateSlider = () => {
         return (
             <SliderContainer>
                 <Grid container spacing={2} style={{display:'flex', padding: '0 0 10px 0'}}>
-                        <DateSelectorContainer item xs={12}>
-                            <DateTitle>{dataParams.nType !== 'characteristic' ? formatDate(`${dates[dataParams.nIndex]}`) : 'Characteristic Data'}</DateTitle>
-                        </DateSelectorContainer>               
+                        {dataParams.rangeType !== 'custom' && 
+                            <DateSelectorContainer item xs={12}>
+                                <DateTitle>{dataParams.nType !== 'characteristic' ? formatDate(`${dates[dataParams.nIndex]}`) : 'Characteristic Data'}</DateTitle>
+                            </DateSelectorContainer>
+                        } 
                     
                     {dataParams.nType !== 'characteristic' && <PlayPauseContainer item xs={1}>
                         <PlayPauseButton id="playPause" onClick={() => handlePlayPause(timerId, 1, 100)}>
@@ -330,8 +322,8 @@ const DateSlider = () => {
                             step={null}
                         />}
                     </Grid>
-                    {(!customRange && dataParams.nType !== 'characteristic') && <InitialDate>{dates[0]}</InitialDate>}
-                    {(!customRange && dataParams.nType !== 'characteristic') && <EndDate>{dates.slice(-1,)[0]}</EndDate>}
+                    {(dataParams.rangeType !== 'custom' && dataParams.nType !== 'characteristic') && <InitialDate>{dates[0]}</InitialDate>}
+                    {(dataParams.rangeType !== 'custom' && dataParams.nType !== 'characteristic') && <EndDate>{dates.slice(-1,)[0]}</EndDate>}
                 </Grid>
             </SliderContainer>
         );

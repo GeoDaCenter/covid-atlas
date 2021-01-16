@@ -1,8 +1,6 @@
 // branchless variant
 // const dataFn = (numeratorData, numeratorProperty, index, range, denominatorData, denominatorProperty, denominatorIndex, denominatorRange, scale)  => {
 
-import { min } from "lodash";
-
 //     return (
 //       (
 //         (

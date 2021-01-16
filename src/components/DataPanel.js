@@ -2,8 +2,6 @@
 // and displays it in the right side panel.
 
 import React, {useState} from 'react';
-import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
 import { useSelector, useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
@@ -16,7 +14,7 @@ import TwoWeekChart from './twoWeekLineChart';
 import { setPanelState } from '../actions';
 import {dataFn, colLookup} from '../utils';
 import { colors } from '../config';
-import { compact, expand, report, verticalGrip} from '../config/svg';
+import { report } from '../config/svg';
 
 // Styled components CSS
 const DataPanelContainer = styled.div`
@@ -227,28 +225,28 @@ const ExpandSelect = styled(FormControl)`
   }
 
 `
-const ResizeButton = styled.button`
-    position:absolute;
-    left:5px;
-    bottom:50%;
-    background:none;
-    outline:none;
-    border:none;
-    transform: translateY(-50%);
-    cursor:grab;
-    width:10px;
-    padding:0;
-    margin:0;
-    height:20px;
-    svg {
-      width:15px;
-      height:30px;
-      fill:white;
-    }
-    @media (max-width:1024px) {
-      display:none;
-    }
-`
+// const ResizeButton = styled.button`
+//     position:absolute;
+//     left:5px;
+//     bottom:50%;
+//     background:none;
+//     outline:none;
+//     border:none;
+//     transform: translateY(-50%);
+//     cursor:grab;
+//     width:10px;
+//     padding:0;
+//     margin:0;
+//     height:20px;
+//     svg {
+//       width:15px;
+//       height:30px;
+//       fill:white;
+//     }
+//     @media (max-width:1024px) {
+//       display:none;
+//     }
+// `
 
 const DataPanel = () => {
 
@@ -273,7 +271,7 @@ const DataPanel = () => {
     'testing_ccpt', 'testing_tcap', 'testing_wk_pos', 'testing', 'vaccinesAdmin']
   const [ properties, cases, deaths, predictions,
     chr_health_factors, chr_life, chr_health_context,
-    testing_ccpt, testing_tcap, testing_wk_pos, testing, vaccinesAdmin
+    testing, vaccinesAdmin
   ] = datasetList.map(dataset => {
     if (storedData[currentData] === undefined) {
       return false 
@@ -283,9 +281,9 @@ const DataPanel = () => {
   });
 
   const [expanded, setExpanded] = useState(true)
-  const [width, setWidth] = useState(250);
-  const [colCount, setColCount] = useState(1);
-  const [currXPos, setCurrXPos] = useState(false);
+  // const [width, setWidth] = useState(250);
+  // const [colCount, setColCount] = useState(1);
+  // const [currXPos, setCurrXPos] = useState(false);
 
   // helper for predictions data
   const parsePredictedDate = (list) => `${list.slice(-2,)[0]}/${list.slice(-1,)[0]}`
@@ -293,44 +291,44 @@ const DataPanel = () => {
   // handles panel open/close
   const handleOpenClose = () => panelState.info ? dispatch(setPanelState({info:false})) : dispatch(setPanelState({info:true}))
   
-  const listener = (e) => {
-    setWidth(prevWidth => {
-      if ((prevWidth - (window.innerWidth-e.screenX) < 25) && (prevWidth - (window.innerWidth-e.screenX) > -25)){
-        return prevWidth;
-      } else if ((window.innerWidth-e.screenX) < 300) {
-        setColCount(1);
-        return 300;
-      } else {
-        setColCount(Math.floor((window.innerWidth-e.screenX)/300));
-        return window.innerWidth-e.screenX
-      }
-    })
-  }
+  // const listener = (e) => {
+  //   setWidth(prevWidth => {
+  //     if ((prevWidth - (window.innerWidth-e.screenX) < 25) && (prevWidth - (window.innerWidth-e.screenX) > -25)){
+  //       return prevWidth;
+  //     } else if ((window.innerWidth-e.screenX) < 300) {
+  //       setColCount(1);
+  //       return 300;
+  //     } else {
+  //       setColCount(Math.floor((window.innerWidth-e.screenX)/300));
+  //       return window.innerWidth-e.screenX
+  //     }
+  //   })
+  // }
 
-  const touchListener = (e) => {
-      setWidth(prev => (e?.targetTouches[0]?.clientX-currXPos) || prev)
-  }
+  // const touchListener = (e) => {
+  //     setWidth(prev => (e?.targetTouches[0]?.clientX-currXPos) || prev)
+  // }
 
-  const removeListener = () => {
-      window.removeEventListener('mousemove', listener)
-      window.removeEventListener('mouseup', removeListener)
-  }
+  // const removeListener = () => {
+  //     window.removeEventListener('mousemove', listener)
+  //     window.removeEventListener('mouseup', removeListener)
+  // }
 
-  const removeTouchListener = () => {
-      window.removeEventListener('touchmove', touchListener);
-      window.removeEventListener('touchend', removeTouchListener);
-  }
+  // const removeTouchListener = () => {
+  //     window.removeEventListener('touchmove', touchListener);
+  //     window.removeEventListener('touchend', removeTouchListener);
+  // }
 
-  const handleDown = () => {
-      window.addEventListener('mousemove', listener)
-      window.addEventListener('mouseup', removeListener)
-  }
+  // const handleDown = () => {
+  //     window.addEventListener('mousemove', listener)
+  //     window.addEventListener('mouseup', removeListener)
+  // }
 
-  const handleTouch = (e) => {
-      setCurrXPos(+e.target.parentNode.parentNode.parentNode.style.left.slice(0,-2))
-      window.addEventListener('touchmove', touchListener)
-      window.addEventListener('touchend', removeTouchListener)
-  }
+  // const handleTouch = (e) => {
+  //     setCurrXPos(+e.target.parentNode.parentNode.parentNode.style.left.slice(0,-2))
+  //     window.addEventListener('touchmove', touchListener)
+  //     window.addEventListener('touchend', removeTouchListener)
+  // }
 
   // DRY issue -- refactor these functions
 

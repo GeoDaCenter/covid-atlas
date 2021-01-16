@@ -3,7 +3,7 @@ import dataFn from './dataFunction';
 const getDataForBins = (tableData, dataParams) => {
 
     const { numerator, nProperty, nIndex, denominator, dType, dIndex} = dataParams;
-    if (tableData[0][denominator] == undefined) return;
+    if (tableData[0][denominator] === undefined) return;
     // declare empty array for return variables
     let rtn = [];
 

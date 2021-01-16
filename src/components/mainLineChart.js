@@ -48,23 +48,23 @@ const ChartTitle = styled.h3`
     color:white;
 `
 
-const LegendList = styled.ul`
-    list-style:none;
-    margin-block-start: 0;
-    margin-block-end: 0;
-    padding-inline-start: 0;
-    text-align:center;
-`
+// const LegendList = styled.ul`
+//     list-style:none;
+//     margin-block-start: 0;
+//     margin-block-end: 0;
+//     padding-inline-start: 0;
+//     text-align:center;
+// `
 
-const LegendItem = styled.li`
-    color: ${props => props.color};
-    font-family:'Lato', sans-serif;
-    line-height:1.5;
-    text-decoration: ${props => props.active ? 'underline' : 'none'};
-    display:inline;
-    margin-right:10px;
+// const LegendItem = styled.li`
+//     color: ${props => props.color};
+//     font-family:'Lato', sans-serif;
+//     line-height:1.5;
+//     text-decoration: ${props => props.active ? 'underline' : 'none'};
+//     display:inline;
+//     margin-right:10px;
 
-`
+// `
 
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -81,7 +81,7 @@ const CustomTick = props => {
 };
 
 
-const stripLeadingZero = ( str ) => str[0] !== '0' ? str : str.slice(1,);
+// const stripLeadingZero = ( str ) => str[0] !== '0' ? str : str.slice(1,);
 
 // const getStartDate = (range, index, data) => {
 //     if (range === null) {
@@ -191,7 +191,6 @@ const MainLineChart = () => {
     const currentVariable = useSelector(state => state.currentVariable);
     const currentData = useSelector(state => state.currentData);
     const dateIndices = useSelector(state => state.dateIndices);
-    const startDateIndex = useSelector(state => state.startDateIndex);
     const selectionKeys = useSelector(state => state.selectionKeys);
 
     

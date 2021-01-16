@@ -1,11 +1,10 @@
 // this components houses the slider, legend, and bottom dock chart
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import styled from 'styled-components';
 
 import { Legend } from '../components';
-import { setPanelState } from '../actions';
 import { colors } from '../config';
 
 // helper function to get dock offset
@@ -61,8 +60,6 @@ const BottomDrawer = styled.div`
 `
 
 const BottomPanel = () => {
-
-    const dispatch = useDispatch();
 
     const panelState = useSelector(state => state.panelState);
 
