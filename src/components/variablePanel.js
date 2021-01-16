@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import InputLabel from '@material-ui/core/InputLabel';
@@ -14,12 +14,11 @@ import Switch from '@material-ui/core/Switch';
 
 import styled from 'styled-components';
 
-import { colLookup, getArrayCSV, getGzipData } from '../utils';
+import { colLookup } from '../utils'; //getGzipData, getArrayCSV
 import Tooltip from './tooltip';
-import { StyledDropDown, StyledDropDownNoLabel, BinsContainer } from '../styled_components';
-import { setVariableParams, setVariableName, setMapParams, setCurrentData, setPanelState, setNotification, 
-  storeMobilityData, variableChangeZ, setParametersAndData } from '../actions';
-import { fixedScales, colorScales, dataPresets, legacyVariableOrder, colors } from '../config';
+import { StyledDropDown, BinsContainer } from '../styled_components';
+import { setVariableParams, setMapParams, setCurrentData, setPanelState, setParametersAndData } from '../actions'; //variableChangeZ, setNotification, storeMobilityData
+import { fixedScales, colorScales, colors } from '../config';
 import { settings } from '../config/svg';
 import { variableTree } from '../config/variableTree'
 
@@ -209,19 +208,19 @@ const ListSubheader = styled(MenuItem)`
 
 const VariablePanel = (props) => {
 
-  const getGzipAndCentroids = async (gzipUrl, centroidsUrl) => {
-    Promise.all([
-        getGzipData(gzipUrl),
-        getArrayCSV(centroidsUrl)
-      ]).then(
-        values => dispatch(storeMobilityData({centroids: values[1], flows: values[0]}))
-    )
-  } 
+  // const getGzipAndCentroids = async (gzipUrl, centroidsUrl) => {
+  //   Promise.all([
+  //       getGzipData(gzipUrl),
+  //       getArrayCSV(centroidsUrl)
+  //     ]).then(
+  //       values => dispatch(storeMobilityData({centroids: values[1], flows: values[0]}))
+  //   )
+  // } 
 
   const dispatch = useDispatch();    
 
-  const { cols, currentData, currentVariable, currentZVariable, dataParams,
-    mapParams, panelState, urlParams, storedMobilityData } = useSelector(state => state);
+  const { cols, currentData,  dataParams, mapParams, panelState, urlParams } = useSelector(state => state); 
+  // currentVariable, currentZVariable, storedMobilityData
   const [bivariateZ, setBivariateZ] = useState(false);
 
   const VariablePresets = {
@@ -665,14 +664,13 @@ const VariablePanel = (props) => {
     }
   }
 
-  const handleZSwitch = () => {
-    setBivariateZ(prev => !prev )
-  }
+  // const handleZSwitch = () => {
+  //   setBivariateZ(prev => !prev )
+  // }
 
   const [newVariable, setNewVariable] = useState("Confirmed Count per 100K Population");
   const [currentGeography, setCurrentGeography] = useState('County');
   const [currentDataset, setCurrentDataset] = useState('1point3acres');
-  const [rangeSelectVal, setRangeSelectVal] = useState(7);
 
   const datasetTree = {
     'County': {
@@ -777,8 +775,6 @@ const VariablePanel = (props) => {
             dispatch(setVariableParams({dRange: val, rangeType: 'fixed'}))
         }    
     }
-    
-    setRangeSelectVal(val);
   }
 
   const handleSwitch = () => {
@@ -1111,7 +1107,7 @@ const VariablePanel = (props) => {
         </p>
         <div className="poweredByGeoda">
             <a href="https://geodacenter.github.io" target="_blank" rel="noopener noreferrer">
-              <img src={`${process.env.PUBLIC_URL}/assets/img/geoda-logo.png`} />
+              <img src={`${process.env.PUBLIC_URL}/assets/img/geoda-logo.png`} alt="Geoda Logo"/>
               POWERED BY GEODA
             </a>
         </div> 

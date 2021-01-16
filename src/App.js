@@ -7,7 +7,7 @@ import * as jsgeoda from 'jsgeoda';
 // second row: data parsing for specific outputs
 // third row: data accessing
 import { 
-  getParseCSV, mergeData, getColumns, findDates, loadJson,
+  getParseCSV, mergeData, getColumns, loadJson,
   getDataForBins, getDataForCharts, getDataForLisa, getDateLists,
   getLisaValues, getVarId, getCartogramValues, getDateIndices } from './utils';
 
@@ -17,7 +17,7 @@ import {
 // third row: map and variable parameters
 import { 
   dataLoad, dataLoadExisting, storeLisaValues, storeCartogramData, setDates,
-  setCentroids, setMapParams, setNewBins, setUrlParams, setPanelState } from './actions';
+  setMapParams, setUrlParams, setPanelState } from './actions';
 
 import { Map, NavBar, VariablePanel, BottomPanel,  TopPanel, Preloader,
   DataPanel, MainLineChart, Scaleable, Draggable, InfoBox,
@@ -89,8 +89,7 @@ function App() {
   // dispatches to the store, we need checks to make sure side effects
   // are OK to trigger. Issues arise with missing data, columns, etc.
   const {storedData, storedGeojson, storedLisaData, storedCartogramData,
-    currentData, cols, dates, mapParams, dataParams, dateIndices,
-    startDateIndex, mapLoaded } = useSelector(state => state);
+    currentData, mapParams, dataParams, dateIndices, mapLoaded } = useSelector(state => state);
   
   // gda_proxy is the WebGeoda proxy class. Generally, having a non-serializable
   // data in the state is poor for performance, but the App component state only
@@ -284,6 +283,8 @@ function App() {
         dataLoadExisting({
           variableParams: {
             nIndex: lastIndex || dataParams.nIndex,
+            dIndex: dataParams.dType === 'time-series' ? lastIndex : dataParams.dType,
+            dRange: dataParams.dType === 'time-series' ? dataParams.nRange : dataParams.dRange,
             binIndex: lastIndex || dataParams.nIndex,
           },
           chartData: getDataForCharts(storedData[currentData],'cases', dateIndices[currentData]['cases'], dateLists.isoDateList)

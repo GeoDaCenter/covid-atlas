@@ -152,9 +152,6 @@ const getDateRange = ({startDate, endDate}) => {
             n++
         }
     }
-
-    console.log(dateArray)
-
     return dateArray;
 }
 
@@ -208,7 +205,6 @@ const MainLineChart = () => {
     }
 
     const chartSetDate = (e) => {
-        console.log(e)
         if (e?.activeTooltipIndex !== undefined) {
             if (dateIndices[currentData][dataParams.numerator].indexOf(e.activeTooltipIndex) !== -1) {
                 handleChange(e.activeTooltipIndex)

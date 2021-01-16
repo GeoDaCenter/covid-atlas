@@ -851,72 +851,76 @@ const Map = () => {
     }
 
     const handleBoxSelect = (e) => {
-        if (e.type === 'mousedown') {
-            setBoxSelectDims({
-                x:e.pageX,
-                y:e.pageY,
-                ox:e.pageX,
-                oy:e.pageY,
-                width:0,
-                height:0
-            });
-            window.addEventListener('touchmove', touchListener);
-            window.addEventListener('touchend', removeListeners);
-            window.addEventListener('mousemove', listener);
-            window.addEventListener('mouseup', removeListeners);
-        } else {
-
-            const {x, y, width, height } = boxSelectDims;
-
-            let layerIds = ['choropleth'];
-
-            let features = deckRef.current.pickObjects(
-                    {
-                        x, y: y-50, width, height, layerIds
+        try {
+            if (e.type === 'mousedown') {
+                setBoxSelectDims({
+                    x:e.pageX,
+                    y:e.pageY,
+                    ox:e.pageX,
+                    oy:e.pageY,
+                    width:0,
+                    height:0
+                });
+                window.addEventListener('touchmove', touchListener);
+                window.addEventListener('touchend', removeListeners);
+                window.addEventListener('mousemove', listener);
+                window.addEventListener('mouseup', removeListeners);
+            } else {
+    
+                const {x, y, width, height } = boxSelectDims;
+    
+                let layerIds = ['choropleth'];
+    
+                let features = deckRef.current.pickObjects(
+                        {
+                            x, y: y-50, width, height, layerIds
+                        }
+                    )
+    
+                let GeoidList = [];
+                for (let i=0; i<features.length; i++) {
+                    GeoidList.push(features[i].object.properties.GEOID)
+                    let dataName = features[i]?.object?.properties?.state_abbr !== undefined ? `${features[i].object?.properties?.NAME}, ${features[i]?.object?.properties?.state_abbr}` : `${features[i].object?.properties?.NAME}`
+                    
+                    if (i===0){
+                        dispatch(
+                            setSelectionData({
+                                values: getDataForCharts(
+                                    [features[i].object], 
+                                    'cases', 
+                                    dateIndices[currentData]['cases'], 
+                                    dates, 
+                                    dataName
+                                ),
+                                name: dataName,
+                                index: findIndex(storedData[currentData], o => o.properties.GEOID === features[i].object.properties.GEOID)
+                            })
+                        );
+                    } else {
+                        dispatch(
+                            appendSelectionData({
+                                values: getDataForCharts(
+                                    [features[i].object], 
+                                    'cases', 
+                                    dateIndices[currentData]['cases'], 
+                                    dates, 
+                                    dataName
+                                ),
+                                name: dataName,
+                                index: findIndex(storedData[currentData], o => o.properties.GEOID === features[i].object.properties.GEOID)
+                            })
+                        );
                     }
-                )
-
-            let GeoidList = [];
-            for (let i=0; i<features.length; i++) {
-                GeoidList.push(features[i].object.properties.GEOID)
-                let dataName = features[i]?.object?.properties?.state_abbr !== undefined ? `${features[i].object?.properties?.NAME}, ${features[i]?.object?.properties?.state_abbr}` : `${features[i].object?.properties?.NAME}`
-                
-                if (i===0){
-                    dispatch(
-                        setSelectionData({
-                            values: getDataForCharts(
-                                {data: features[i].object}, 
-                                'cases', 
-                                startDateIndex, 
-                                dates[currentData], 
-                                dataName
-                            ),
-                            name: dataName,
-                            index: findIndex(storedData[currentData], o => o.properties.GEOID === features[i].object.properties.GEOID)
-                        })
-                    );
-                } else {
-                    dispatch(
-                        appendSelectionData({
-                            values: getDataForCharts(
-                                {data: features[i].object}, 
-                                'cases', 
-                                startDateIndex, 
-                                dates[currentData], 
-                                dataName
-                            ),
-                            name: dataName,
-                            index: findIndex(storedData[currentData], o => o.properties.GEOID === features[i].object.properties.GEOID)
-                        })
-                    );
                 }
+                setHighlightGeog(GeoidList); 
+                window.localStorage.setItem('SHARED_GEOID', GeoidList);
+                window.localStorage.setItem('SHARED_VIEW', JSON.stringify(mapRef.current.props.viewState));
+                setBoxSelectDims({});
+                removeListeners();
+                setBoxSelect(false)
             }
-            setHighlightGeog(GeoidList); 
-            window.localStorage.setItem('SHARED_GEOID', GeoidList);
-            window.localStorage.setItem('SHARED_VIEW', JSON.stringify(mapRef.current.props.viewState));
-            setBoxSelectDims({});
-            removeListeners();
-            setBoxSelect(false)
+        } catch {
+            console.log('bad selection')
         }
     }
 

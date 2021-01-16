@@ -230,7 +230,7 @@ export const dataPresets = {
         joinCols: ['GEOID', ['FIPS','fips','countyFIPS']], 
         tableNames: ['cases', 'deaths', 'chr_health_context', 'chr_life', 'chr_health_factors', 'testing', 'testing_wk_pos', 'testing_tcap', 'testing_ccpt','vaccinesAdmin', 'vaccinesDist'],
         accumulate: [],
-        dateList: {'covid_confirmed_nyt_state': 'isoDateList', 'chr_health_context_state': 'isoDateList'}
+        dateList: {'covid_confirmed_nyt_state': 'isoDateList', 'covid_deaths_nyt_state': 'isoDateList'}
     },
     'global_jhu.geojson': {
         plainName: 'John Hopkins University (Global)',
