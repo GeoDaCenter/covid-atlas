@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import InputLabel from '@material-ui/core/InputLabel';
@@ -667,11 +667,7 @@ const VariablePanel = (props) => {
   // const handleZSwitch = () => {
   //   setBivariateZ(prev => !prev )
   // }
-
-  const [newVariable, setNewVariable] = useState("Confirmed Count per 100K Population");
-  const [currentGeography, setCurrentGeography] = useState('County');
-  const [currentDataset, setCurrentDataset] = useState('1point3acres');
-
+  
   const datasetTree = {
     'County': {
       '1point3acres':'county_1p3a.geojson',
@@ -688,6 +684,57 @@ const VariablePanel = (props) => {
       'County Health Rankings':'state_1p3a.geojson',
     }
   }
+
+  const urlParamsTree = {
+    'county_usfacts.geojson': {
+      name: 'USA Facts',
+      geography: 'County'
+    },
+    'county_1p3a.geojson': {
+      name: '1point3acres',
+      geography: 'County'
+    },
+    'county_nyt.geojson': {
+      name: 'New York Times',
+      geography: 'County'
+    },
+    'state_1p3a.geojson': {
+      name: '1point3acres',
+      geography: 'State'
+    },
+    'state_usafacts.geojson': {
+      name: 'USA Facts',
+      geography: 'State'
+    }, 
+    'state_nyt.geojson': {
+      name: 'New York Times',
+      geography: 'State'
+    },
+    'global_jhu.geojson': {
+      name: 'John Hopkins University',
+      geography: 'Global'
+    },
+    'cdc.geojson': {
+      name: 'CDC',
+      geography: 'County'
+    }
+  }
+
+  const [newVariable, setNewVariable] = useState("Confirmed Count per 100K Population");
+  const [currentGeography, setCurrentGeography] = useState('County');
+  const [currentDataset, setCurrentDataset] = useState('1point3acres');
+
+  useEffect(() => {
+    if (newVariable !== dataParams.variableName) {
+      setNewVariable(dataParams.variableName)
+      setCurrentGeography(urlParamsTree[currentData]['geography'])
+      if (dataParams.variableName.indexOf('Vaccin') !== -1 || (dataParams.variableName.indexOf('Test') !== -1 && currentData.indexOf('state') === -1)) {
+        setCurrentDataset('CDC')
+      } else {
+        setCurrentDataset(urlParamsTree[currentData]['name'])
+      }
+    }
+  }, [urlParams])
   
 
   const handleNewVariable = (e) => {

@@ -16,14 +16,14 @@ import {
 // second row: data and metadata handling 
 // third row: map and variable parameters
 import { 
-  dataLoad, dataLoadExisting, storeLisaValues, storeCartogramData, setDates,
+  dataLoad, dataLoadExisting, storeLisaValues, storeCartogramData, setDates, setNotification,
   setMapParams, setUrlParams, setPanelState } from './actions';
 
 import { Map, NavBar, VariablePanel, BottomPanel,  TopPanel, Preloader,
   DataPanel, MainLineChart, Scaleable, Draggable, InfoBox,
   NotificationBox, Popover } from './components';  
 
-import { colorScales, fixedScales, dataPresets, variablePresets } from './config';
+import { colorScales, fixedScales, dataPresets, variablePresets, colors } from './config';
 
 // Main function, App. This function does 2 things:
 // 1: App manages the majority of the side effects when the state changes.
@@ -233,7 +233,18 @@ function App() {
         setUrlParams(paramsDict, variablePresets)
       );
     } else if (paramsDict['v'] === '1') {
-      console.log('oopswrong version')
+      dispatch(setNotification(`
+          <h2>Welcome to the Atlas v2!</h2>
+          <p>
+          The share link you have entered is for an earlier release of the US Covid Atlas. 
+          Explore the new version here, or continue using your current share link by click below.
+          <a href="./vintage/map.html${window.location.search}" target="_blank" rel="noopener noreferrer" style="color:${colors.yellow}; text-align:center;">
+            <h3 style="text-align:center">
+              US Covid Atlas v1
+            </h3>  
+          </a>
+          </p>
+        `))
     }
 
     if (window.innerWidth <= 1024) {

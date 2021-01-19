@@ -50,7 +50,7 @@ const NotificationBox = () => {
     return (
         notification && 
         <Notification>
-            {notification}
+            <div dangerouslySetInnerHTML={{__html: notification}}></div>
             <CloseTutorial onClick={() => dispatch(setNotification(null))}>×</CloseTutorial>
         </Notification>
     )

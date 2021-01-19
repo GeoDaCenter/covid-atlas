@@ -420,7 +420,7 @@ const Map = () => {
         const shareData = {
             title: 'The US Covid Atlas',
             text: 'Near Real-Time Exploration of the COVID-19 Pandemic.',
-            url: `${window.location.href}${getURLParams(params)}`,
+            url: `${window.location.href.split('?')[0]}${getURLParams(params)}`,
         }
 
         try {
