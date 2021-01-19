@@ -415,7 +415,7 @@ const Map = () => {
 
     const mapRef = useRef();
     const deckRef = useRef();
-    
+
     const handleShare = async (params) => {
         const shareData = {
             title: 'The US Covid Atlas',
@@ -609,7 +609,7 @@ const Map = () => {
             id: 'hospital-layer',
             data: hospitalData,
             pickable:true,
-            visible: mapParams.resource.includes('hospital'),
+            visible: mapParams.resource?.includes('hospital'),
             iconAtlas: `${process.env.PUBLIC_URL}/assets/img/icon_atlas.png`,
             iconMapping: ICON_MAPPING,
             getIcon: d => 'hospital',
@@ -620,7 +620,7 @@ const Map = () => {
             sizeMaxPixels:24,
             updateTriggers: {
                 data: hospitalData,
-                visible: mapParams
+                visible: mapParams.resource
             },
             onHover: handleMapHover,
         }),
@@ -628,7 +628,7 @@ const Map = () => {
             id: 'clinics-layer',
             data: clinicData,
             pickable:true,
-            visible: mapParams.resource.includes('clinic'),
+            visible: mapParams.resource?.includes('clinic'),
             iconAtlas: `${process.env.PUBLIC_URL}/assets/img/icon_atlas.png`,
             iconMapping: ICON_MAPPING,
             getIcon: d => 'clinic',
@@ -836,7 +836,7 @@ const Map = () => {
     const touchListener = (e) => {
         // setX(e?.targetTouches[0]?.clientX-15)
         // setY(e?.targetTouches[0]?.clientY-15)
-        console.log(e)
+        // console.log(e)
     }
 
     const removeListeners = () => {
@@ -1020,7 +1020,7 @@ const Map = () => {
                         <NavInlineButton
                             title="Share this Map"
                             shareNotification={shared}
-                            onClick={() => handleShare({URLmapParams:mapParams, URLcurrentData:currentData, URLcurrentVariable:currentVariable, URLviewState: mapRef.current.props.viewState})}
+                            onClick={() => handleShare({mapParams, dataParams, currentData, coords: mapRef.current.props.viewState, lastDateIndex: dateIndices[currentData][dataParams.numerator]})}
                         >
                             <svg x="0px" y="0px" viewBox="0 0 100 100">
                                 <path d="M22.5,65c4.043,0,7.706-1.607,10.403-4.208l29.722,14.861C62.551,76.259,62.5,76.873,62.5,77.5c0,8.284,6.716,15,15,15   s15-6.716,15-15c0-8.284-6.716-15-15-15c-4.043,0-7.706,1.608-10.403,4.209L37.375,51.847C37.449,51.241,37.5,50.627,37.5,50   c0-0.627-0.051-1.241-0.125-1.847l29.722-14.861c2.698,2.601,6.36,4.209,10.403,4.209c8.284,0,15-6.716,15-15   c0-8.284-6.716-15-15-15s-15,6.716-15,15c0,0.627,0.051,1.241,0.125,1.848L32.903,39.208C30.206,36.607,26.543,35,22.5,35   c-8.284,0-15,6.716-15,15C7.5,58.284,14.216,65,22.5,65z">

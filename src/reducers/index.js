@@ -385,15 +385,43 @@ var reducer = (state = INITIAL_STATE, action) => {
                 notification: action.payload.info
             }
         case 'SET_URL_PARAMS':
+            const { urlParams, presets } = action.payload;
+
+            let preset = urlParams.var ? presets[urlParams.var.replace(/_/g, ' ')] : {};
+
             let urlMapParamsObj = {
                 ...state.mapParams,
-                ...action.payload.load.mapParams
+                binMode: urlParams.dbin ? 'dynamic' : '',
+                mapType: urlParams.mthd || state.mapParams.mapType,
+                overlay: urlParams.ovr ||  state.mapParams.overlay,
+                resource: urlParams.res || state.mapParams.resource,
+                vizType: urlParams.viz || state.mapParams.vizType
+            };
+
+            let urlDataParamsObj = {
+                ...state.dataParams,
+                ...preset,
+                nIndex: urlParams.date || state.dataParams.nIndex,
+                nRange: urlParams.hasOwnProperty('range') ? urlParams.range === 'null' ? null : urlParams.range : state.dataParams.nRange,
+                nProperty: urlParams.prop || state.dataParams.nProperty
+            };
+            
+            let urlCoordObj = {
+                lat: urlParams.lat || '',
+                lon: urlParams.lon || '',
+                z: urlParams.z || ''
             }
+
+            let urlParamsSource = urlParams.src ? 
+                `${urlParams.src}.geojson` : 
+                state.currentData 
+
             return {
                 ...state,
-                currentData: action.payload.load.currentData,
-                urlParams: action.payload.load.paramsDict,
-                mapParams: urlMapParamsObj
+                currentData: urlParamsSource,
+                urlParams: urlCoordObj,
+                mapParams: urlMapParamsObj,
+                dataParams: urlDataParamsObj
             }
         default:
             return state;

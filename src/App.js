@@ -23,8 +23,7 @@ import { Map, NavBar, VariablePanel, BottomPanel,  TopPanel, Preloader,
   DataPanel, MainLineChart, Scaleable, Draggable, InfoBox,
   NotificationBox, Popover } from './components';  
 
-import { colorScales, fixedScales, dataPresets, 
-  legacyOverlayOrder, legacyResourceOrder, legacySourceOrder } from './config';
+import { colorScales, fixedScales, dataPresets, variablePresets } from './config';
 
 // Main function, App. This function does 2 things:
 // 1: App manages the majority of the side effects when the state changes.
@@ -190,7 +189,7 @@ function App() {
     ) { return };
 
     if (gda_proxy !== null && storedData.hasOwnProperty(currentData) && mapParams.mapType !== "lisa"){
-      if (dataParams.fixedScale === null) {
+      if (dataParams.fixedScale === null || mapParams.mapType !== 'natural_breaks') {
         let nb = gda_proxy.custom_breaks(
           currentData, 
           mapParams.mapType, 
@@ -227,18 +226,15 @@ function App() {
     const urlParams = new URLSearchParams(queryString);
     for (const [key, value] of urlParams ) { paramsDict[key] = value; }
 
-    dispatch(
-      setUrlParams({
-        currentData: paramsDict['src'] ? legacySourceOrder[decodeURI(paramsDict['src'])] : 'county_1p3a.geojson',
-        paramsDict,
-        mapParams: {
-          vizType: paramsDict['cartogram'] ? 'cartogram' : paramsDict['3d'] ? '3D' : '2D',
-          mapType: paramsDict['mthd'] ? decodeURI(paramsDict['mthd']) : 'natural_breaks',
-          overlay: paramsDict['ovr'] !== undefined ? legacyOverlayOrder[paramsDict['ovr']] : '',
-          resource: paramsDict['res'] !== undefined ? legacyResourceOrder[paramsDict['res']] : ''
-        }
-      })
-    );
+    if (!paramsDict.hasOwnProperty('v')) {
+      // do nothing, most of the time
+    } else if (paramsDict['v'] === '2') {
+      dispatch(
+        setUrlParams(paramsDict, variablePresets)
+      );
+    } else if (paramsDict['v'] === '1') {
+      console.log('oopswrong version')
+    }
 
     if (window.innerWidth <= 1024) {
       dispatch(setPanelState({
@@ -339,7 +335,7 @@ function App() {
         )
       }
     }
-  }, [dataParams, mapParams])
+  }, [dataParams.numerator, dataParams.nProperty, dataParams.nRange, dataParams.denominator, dataParams.dProperty, dataParams.nIndex, dataParams.dIndex, mapParams.binMode, dataParams.variableName, mapParams.mapType])
 
   // Trigger on parameter change for metric values
   // Gets bins and sets map parameters
@@ -411,7 +407,8 @@ function App() {
       <NavBar />
       <header className="App-header" style={{position:'fixed', left: '20vw', top:'100px', zIndex:10}}>
         {/* <button onClick={() => console.log(getDataForBins( storedData[currentData], {...dataParams, nIndex: null} ))}>data for bins</button> */}
-        {/* <button onClick={() => console.log(dataParams)}>data params</button> */}
+        {/* <button onClick={() => console.log(dataParams)}>data params</button>
+        <button onClick={() => console.log(mapParams)}>map params</button> */}
       </header>
       <div id="mainContainer">
         <Map />

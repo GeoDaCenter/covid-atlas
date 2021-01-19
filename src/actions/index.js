@@ -345,11 +345,12 @@ export const setNotification = ( info ) => {
     }
 }
 
-export const setUrlParams = ( load ) => {
+export const setUrlParams = ( urlParams, presets ) => {
     return {
         type: 'SET_URL_PARAMS',
         payload: {
-            load
+            urlParams,
+            presets
         }
     }
 }
