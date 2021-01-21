@@ -1,3 +1,5 @@
+# This Repo is now archived. Please see [the main US Covid Atlas Repo](https://github.com/GeoDaCenter/covid) for more information.
+
 # README
 
 The U.S. COVID-19 Atlas provides county-level visualizations and analytics to reveal a more detailed pandemic landscape with local hotspots of surging COVID cases that are missed by state-level data. 
